@@ -7,13 +7,13 @@ extends Control
 ## - Marcas del jugador por turno (Pa / Pr / Ft): el juego no las valida. Click izquierdo las cicla; 1/2/3 las ponen, 0 borra.
 ## - Luz: mouse sobre una sala + rueda (o L) para subir o bajar. Muestra la capacidad usada y libre.
 ## - Nunca muestra el tiempo real de la sala ni anomalías.
-## Coordenadas en 640x360 (la interfaz se escala sola).
+## Coordenadas en 960x540 (la interfaz se escala sola, x2 a 1920x1080).
 
 signal luz_pedida(sala: String, nivel: int)
 signal mensaje(texto: String)
 
 const MARCAS := ["", "Pa", "Pr", "Ft"]
-const AREA := Rect2(40, 34, 560, 212)
+const AREA := Rect2(60, 80, 840, 290)
 
 const COLOR_HOY := Color(0.52, 0.54, 0.58, 0.92)
 const COLOR_ANTES := Color(0.2, 0.2, 0.22, 0.88)
@@ -29,8 +29,8 @@ var nombres: Dictionary = {}
 var hover := ""
 var desplazamiento := Vector2.ZERO   # cuánto se movió el mapa (arrastre o WASD)
 
-const VELOCIDAD_TECLAS := 220.0      # px por segundo (en coordenadas de 640x360)
-const LIMITE := Vector2(320, 180)    # hasta dónde se puede alejar el mapa
+const VELOCIDAD_TECLAS := 330.0      # px por segundo (en coordenadas de 960x540)
+const LIMITE := Vector2(480, 270)    # hasta dónde se puede alejar el mapa
 const UMBRAL_CLICK := 4.0            # menos movimiento que esto = click (marca), no arrastre
 
 var _arrastrando := false
@@ -205,8 +205,8 @@ func ciclar_marca(sala: String) -> void:
 func _draw() -> void:
 	var fuente := ThemeDB.fallback_font
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.62))
-	draw_string(fuente, Vector2(40, 24), "MAPA", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.9, 0.9, 0.92))
-	draw_string(fuente, Vector2(78, 24), "Turno %d" % Estado.turno, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.6, 0.6, 0.64))
+	draw_string(fuente, Vector2(60, 66), "MAPA", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.9, 0.9, 0.92))
+	draw_string(fuente, Vector2(124, 66), "Turno %d" % Estado.turno, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.6, 0.6, 0.64))
 
 	# Todo lo de la nave se dibuja corrido según el desplazamiento; el pie queda fijo.
 	draw_set_transform(desplazamiento)
@@ -225,12 +225,12 @@ func _draw() -> void:
 		var borde := Color(1, 1, 1, 0.95) if c == hover else Color(0.08, 0.08, 0.09)
 		draw_rect(r, borde, false, 1.0)
 		var texto_c := Color(0.08, 0.08, 0.1) if hoy else Color(0.55, 0.55, 0.58)
-		draw_string(fuente, r.position + Vector2(4, 10), nombres.get(c, c), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 8, 8, texto_c)
+		draw_string(fuente, r.position + Vector2(6, 16), nombres.get(c, c), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 12, 16, texto_c)
 		# Luz: tres cuadritos abajo a la izquierda (× = no llega a ese nivel).
 		var nivel := int(Estado.luz[c])
 		var maximo := Estado.luz_maxima(c)
 		for n in range(1, 4):
-			var q := Rect2(r.position + Vector2(4 + (n - 1) * 8, r.size.y - 9), Vector2(6, 5))
+			var q := Rect2(r.position + Vector2(6 + (n - 1) * 12, r.size.y - 13), Vector2(9, 7))
 			if n <= maximo:
 				draw_rect(q, COLOR_LUZ_ON if n <= nivel else COLOR_LUZ_OFF)
 			else:
@@ -238,25 +238,25 @@ func _draw() -> void:
 		# Marca del jugador (arriba a la derecha).
 		var marca: String = Estado.marcas.get(c, "")
 		if marca != "":
-			var caja := Rect2(r.end.x - 19, r.position.y + 3, 16, 10)
+			var caja := Rect2(r.end.x - 30, r.position.y + 4, 26, 16)
 			draw_rect(caja, Color(0.05, 0.08, 0.12, 0.9))
 			draw_rect(caja, COLOR_MARCA, false, 1.0)
-			draw_string(fuente, caja.position + Vector2(0, 8), marca, HORIZONTAL_ALIGNMENT_CENTER, caja.size.x, 8, COLOR_MARCA)
+			draw_string(fuente, caja.position + Vector2(0, 13), marca, HORIZONTAL_ALIGNMENT_CENTER, caja.size.x, 16, COLOR_MARCA)
 
 	# Dónde estoy.
 	if personaje:
 		var p := _origen + personaje.position / Medidas.TILE * _escala
-		draw_rect(Rect2(p - Vector2(2, 2), Vector2(4, 4)), Color.WHITE)
+		draw_rect(Rect2(p - Vector2(3, 3), Vector2(6, 6)), Color.WHITE)
 
 	draw_set_transform(Vector2.ZERO)
 	# Pie: capacidad y controles.
 	var usada := Estado.capacidad_usada()
 	var total := Estado.cfg("capacidad_luz")
-	draw_string(fuente, Vector2(40, 258), "Capacidad de luz: %d / %d   (libre %d)" % [usada, total, total - usada], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, COLOR_LUZ_ON)
+	draw_string(fuente, Vector2(60, 390), "Capacidad de luz: %d / %d   (libre %d)" % [usada, total, total - usada], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_LUZ_ON)
 	var ayuda := "Sala bajo el mouse: rueda / L luz · click o 1/2/3 marcar · 0 borrar   |   Arrastrar o WASD mover · Tab cerrar"
-	draw_string(fuente, Vector2(40, 270), ayuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.6, 0.6, 0.64))
+	draw_string(fuente, Vector2(60, 410), ayuda, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.6, 0.6, 0.64))
 	if hover != "":
 		var info := "%s · luz %s" % [nombres.get(hover, hover), Estado.NOMBRES_LUZ[int(Estado.luz[hover])].to_lower()]
 		if not Estado.visitadas_turno.has(hover):
 			info += " · no entraste en este turno"
-		draw_string(fuente, Vector2(40, 281), info, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.85, 0.9, 1.0))
+		draw_string(fuente, Vector2(60, 430), info, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.85, 0.9, 1.0))

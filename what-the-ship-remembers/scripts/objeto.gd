@@ -91,4 +91,4 @@ func _draw() -> void:
 	draw_rect(rect, c.darkened(0.5), false, E)
 	if mostrar_id:
 		var texto := "NORA" if es_consola else ids[0]
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(0, -2 * E), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, int(8 * E), Color.YELLOW)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(0, -2 * E), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.YELLOW)

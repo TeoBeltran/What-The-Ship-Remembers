@@ -21,7 +21,7 @@ const ANCHO_PUERTA := TILE * 2
 const CELDA := TILE / 2
 
 ## Resolución en la que está pensada la interfaz (se escala sola a la resolución real).
-const UI_BASE := Vector2(640, 360)
+const UI_BASE := Vector2(960, 540)
 
 
 ## Convierte una posición/tamaño en tiles a píxeles.

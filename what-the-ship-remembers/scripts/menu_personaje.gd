@@ -3,7 +3,7 @@ extends Control
 ## Tres pestañas: Anotaciones (hechos, agrupados por turno), Conversaciones (lo que dijo NORA,
 ## para releer y comparar) e Inventario.
 ## ←/→ (A/D) o 1/2/3 cambian de pestaña · ↑/↓ (W/S) o la ruedita desplazan · click en las pestañas.
-## La interfaz está a 640x360 (se escala con el CanvasLayer).
+## La interfaz está a 960x540 (se escala con el CanvasLayer).
 
 const PESTANAS := ["Anotaciones", "Conversaciones", "Inventario"]
 const C_TITULO := "#e0e0e0"
@@ -19,7 +19,7 @@ var _texto: RichTextLabel
 
 func _ready() -> void:
 	position = Vector2(0, 0)
-	size = Vector2(640, 360)
+	size = Vector2(960, 540)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = false
 	var fondo := ColorRect.new()
@@ -28,14 +28,9 @@ func _ready() -> void:
 	fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(fondo)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(40, 28)
-	panel.size = Vector2(560, 300)
-	var estilo := StyleBoxFlat.new()
-	estilo.bg_color = Color(0.05, 0.05, 0.07, 0.96)
-	estilo.border_color = Color(0.6, 0.6, 0.65)
-	estilo.set_border_width_all(1)
-	estilo.set_content_margin_all(10)
-	panel.add_theme_stylebox_override("panel", estilo)
+	panel.position = Vector2(60, 42)
+	panel.size = Vector2(840, 450)
+	panel.add_theme_stylebox_override("panel", TemaUI.marco("marco_dialogo", TemaUI.C_BORDE, 18))
 	add_child(panel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
@@ -48,7 +43,7 @@ func _ready() -> void:
 		b.text = "%d  %s" % [i + 1, PESTANAS[i]]
 		b.toggle_mode = true
 		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_size_override("font_size", 11)
+		b.add_theme_font_size_override("font_size", 16)
 		b.pressed.connect(func(): elegir(i))
 		fila.add_child(b)
 		_botones.append(b)
@@ -56,15 +51,17 @@ func _ready() -> void:
 	_texto.bbcode_enabled = true
 	_texto.scroll_active = true
 	_texto.scroll_following = false
-	_texto.custom_minimum_size = Vector2(540, 236)
+	_texto.custom_minimum_size = Vector2(800, 340)
+	_texto.add_theme_font_override("normal_font", TemaUI.fuente)
+	_texto.add_theme_font_override("bold_font", TemaUI.fuente)
 	_texto.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_texto.add_theme_font_size_override("normal_font_size", 11)
-	_texto.add_theme_font_size_override("bold_font_size", 11)
+	_texto.add_theme_font_size_override("normal_font_size", 16)
+	_texto.add_theme_font_size_override("bold_font_size", 16)
 	_texto.focus_mode = Control.FOCUS_NONE
 	v.add_child(_texto)
 	var pie := Label.new()
 	pie.text = "←/→ o 1/2/3 pestaña · ↑/↓ o ruedita desplazar · Q / Esc cerrar"
-	pie.add_theme_font_size_override("font_size", 8)
+	pie.add_theme_font_size_override("font_size", 16)
 	pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
 	pie.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(pie)
@@ -108,7 +105,7 @@ func cambiar_pestana(paso: int) -> void:
 
 func desplazar(paso: int) -> void:
 	var barra := _texto.get_v_scroll_bar()
-	barra.value += paso * 14
+	barra.value += paso * 20
 
 
 # ------------------------------------------------------------

@@ -3,6 +3,8 @@ extends CanvasLayer
 ## avisos, indicación para interactuar, fundido a negro entre turnos y menú de pausa (Esc).
 ## Paso 6: panel de luz (L) para repartir la capacidad entre las salas (atajo; también se hace desde el mapa).
 ## Paso 7: barra de energía y mapa con Tab (scripts/mapa.gd).
+## Prueba de arte de UI: interfaz a 960x540 (x2), fuente pixel y marcos (scripts/tema_ui.gd),
+##         texto letra por letra, onda animada cuando habla NORA, barra de energía a rayas con batería.
 ## Paso 8: menú de NORA (opciones en lista), voz de NORA "de otro tiempo" (hablante NORA_OTRA)
 ##         y menú del personaje con Q (scripts/menu_personaje.gd).
 
@@ -20,7 +22,8 @@ const VOCES := {
 	"NORA": {"nombre": Color(0.45, 0.85, 0.95), "texto": Color(0.72, 0.88, 0.92), "borde": Color(0.35, 0.6, 0.68)},
 	"NORA_OTRA": {"nombre": Color(0.8, 0.97, 1.0), "texto": Color(1.0, 1.0, 1.0), "borde": Color(0.75, 0.92, 0.98)},
 }
-const CAJA_ABAJO := 330.0  # la caja de diálogo crece hacia arriba desde acá
+const CAJA_ABAJO := 498.0  # la caja de diálogo crece hacia arriba desde acá
+const LETRAS_POR_SEGUNDO := 55.0  # texto letra por letra (E lo completa de una)
 const NOMBRE_AUDIO := {"estatica": "estática de radio", "chisporroteo": "chisporroteo eléctrico"}
 
 var estado: Label
@@ -39,7 +42,10 @@ var negro_texto: Label
 var mapa: Control
 var menu_personaje: Control
 var barra_energia: Control
-var _estilo_caja: StyleBoxFlat
+var _estilos_caja: Dictionary = {}  # hablante -> StyleBoxTexture
+var onda: Control  # ondita animada al lado del nombre cuando habla NORA
+var _escribiendo := false
+var _letras := 0.0
 
 var _cola: Array = []          # líneas pendientes {hablante, texto}
 var _tiempo_mensaje := 0.0
@@ -49,7 +55,8 @@ var _seleccion := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	# La interfaz está pensada a 640x360 y se agranda a la resolución real (1920x1080 → x3).
+	TemaUI.preparar()
+	# La interfaz está pensada a 960x540 y se agranda a la resolución real (1920x1080 → x2).
 	var escala: float = get_viewport().get_visible_rect().size.y / Medidas.UI_BASE.y
 	scale = Vector2(escala, escala)
 	# El mapa va primero: los mensajes y el estado se dibujan por encima.
@@ -57,26 +64,30 @@ func _ready() -> void:
 	add_child(mapa)
 	menu_personaje = preload("res://scripts/menu_personaje.gd").new()
 	add_child(menu_personaje)
-	estado = _label(Vector2(8, 4), 12)
+	estado = _label(Vector2(12, 6), 16)
 	_crear_barra_energia()
-	mensaje = _label(Vector2(8, 284), 12)
+	mensaje = _label(Vector2(12, 426), 16)
 	mensaje.size.x = 624
 	mensaje.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	indicacion = _label(Vector2(8, 302), 11)
+	indicacion = _label(Vector2(12, 453), 16)
 	indicacion.size.x = 624
 	indicacion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	indicacion.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
-	depuracion = _label(Vector2(8, 340), 10)
+	depuracion = _label(Vector2(12, 510), 16)
 	depuracion.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	avisos = VBoxContainer.new()
-	avisos.position = Vector2(440, 24)
-	avisos.size = Vector2(192, 100)
+	avisos.position = Vector2(660, 36)
+	avisos.size = Vector2(288, 150)
 	avisos.alignment = BoxContainer.ALIGNMENT_BEGIN
 	add_child(avisos)
 	_crear_caja()
 	_crear_panel_luz()
 	_crear_negro()
 	_crear_menu()
+	# El tema (botones, fuente) para todo lo que cuelga de la interfaz.
+	for c in get_children():
+		if c is Control:
+			c.theme = TemaUI.tema
 
 
 func _label(pos: Vector2, tam: int) -> Label:
@@ -90,6 +101,13 @@ func _label(pos: Vector2, tam: int) -> Label:
 func _process(delta: float) -> void:
 	if caja.visible:
 		_acomodar_caja()
+		if _escribiendo:
+			_letras += LETRAS_POR_SEGUNDO * delta
+			caja_texto.visible_characters = int(_letras)
+			if caja_texto.visible_characters >= caja_texto.get_total_character_count():
+				_completar_texto()
+		if onda.visible:
+			onda.queue_redraw()
 	if _tiempo_mensaje > 0:
 		_tiempo_mensaje -= delta
 		if _tiempo_mensaje <= 0:
@@ -109,7 +127,7 @@ func mostrar_mensaje(texto: String) -> void:
 func aviso(texto: String, color := Color(0.95, 0.9, 0.6)) -> void:
 	var l := Label.new()
 	l.text = texto
-	l.add_theme_font_size_override("font_size", 10)
+	l.add_theme_font_size_override("font_size", 16)
 	l.add_theme_color_override("font_color", color)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	avisos.add_child(l)
@@ -120,7 +138,7 @@ func aviso(texto: String, color := Color(0.95, 0.9, 0.6)) -> void:
 
 
 func aviso_audio(id: String) -> void:
-	aviso("♪ " + NOMBRE_AUDIO.get(id, id), Color(0.7, 0.85, 1.0))
+	aviso("Sonido: " + NOMBRE_AUDIO.get(id, id), Color(0.7, 0.85, 1.0))
 
 
 # ============================================================
@@ -129,23 +147,30 @@ func aviso_audio(id: String) -> void:
 
 func _crear_caja() -> void:
 	caja = PanelContainer.new()
-	caja.position = Vector2(40, 250)
-	caja.size = Vector2(560, 80)
-	_estilo_caja = StyleBoxFlat.new()
-	_estilo_caja.bg_color = Color(0.05, 0.05, 0.07, 0.92)
-	_estilo_caja.border_color = Color(0.6, 0.6, 0.65)
-	_estilo_caja.set_border_width_all(1)
-	_estilo_caja.set_content_margin_all(8)
-	caja.add_theme_stylebox_override("panel", _estilo_caja)
+	caja.position = Vector2(60, 375)
+	caja.size = Vector2(840, 120)
+	# Un marco por voz: el personaje con el marco de esquinas; NORA con el de esquinas redondeadas.
+	for h in VOCES:
+		_estilos_caja[h] = TemaUI.marco("marco_dialogo" if h == "PERSONAJE" else "marco_nora", VOCES[h]["borde"])
+	caja.add_theme_stylebox_override("panel", _estilos_caja["PERSONAJE"])
 	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
 	caja.add_child(v)
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 8)
+	v.add_child(fila)
 	caja_hablante = Label.new()
-	caja_hablante.add_theme_font_size_override("font_size", 10)
-	v.add_child(caja_hablante)
+	caja_hablante.add_theme_font_size_override("font_size", 16)
+	fila.add_child(caja_hablante)
+	onda = Control.new()
+	onda.custom_minimum_size = Vector2(44, 12)
+	onda.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	onda.draw.connect(_dibujar_onda)
+	fila.add_child(onda)
 	caja_texto = Label.new()
-	caja_texto.add_theme_font_size_override("font_size", 12)
+	caja_texto.add_theme_font_size_override("font_size", 16)
 	caja_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	caja_texto.custom_minimum_size = Vector2(540, 0)
+	caja_texto.custom_minimum_size = Vector2(810, 0)
 	v.add_child(caja_texto)
 	caja_opciones = BoxContainer.new()  # horizontal (Sí / No) o vertical (menú de NORA)
 	caja_opciones.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -153,7 +178,7 @@ func _crear_caja() -> void:
 	v.add_child(caja_opciones)
 	caja_pie = Label.new()
 	caja_pie.text = "E / Espacio / click para seguir"
-	caja_pie.add_theme_font_size_override("font_size", 8)
+	caja_pie.add_theme_font_size_override("font_size", 16)
 	caja_pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
 	caja_pie.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(caja_pie)
@@ -164,8 +189,8 @@ func _crear_caja() -> void:
 ## La caja queda apoyada abajo y crece hacia arriba según el contenido (se llama cada cuadro mientras se ve).
 func _acomodar_caja() -> void:
 	var alto := caja.get_combined_minimum_size().y
-	caja.size = Vector2(560, alto)
-	caja.position = Vector2(40, CAJA_ABAJO - alto)
+	caja.size = Vector2(840, alto)
+	caja.position = Vector2(60, CAJA_ABAJO - alto)
 
 
 func dialogo_activo() -> bool:
@@ -190,15 +215,43 @@ func _siguiente() -> void:
 	var voz: Dictionary = VOCES.get(h, VOCES["PERSONAJE"])
 	caja_hablante.add_theme_color_override("font_color", voz["nombre"])
 	caja_texto.add_theme_color_override("font_color", voz["texto"])
-	_estilo_caja.border_color = voz["borde"]
+	caja.add_theme_stylebox_override("panel", _estilos_caja.get(h, _estilos_caja["PERSONAJE"]))
+	onda.visible = h.begins_with("NORA")
+	onda.modulate = voz["nombre"]
 	caja_texto.text = l["texto"]
+	# Letra por letra (el alto de la caja ya es el del texto completo: no salta).
+	caja_texto.visible_characters = 0
+	_letras = 0.0
+	_escribiendo = true
 	caja.visible = true
 	_acomodar_caja()
 
 
 func avanzar_dialogo() -> void:
+	if _escribiendo:
+		_completar_texto()
+		return
 	if caja.visible and not _pregunta:
 		_siguiente()
+
+
+func _completar_texto() -> void:
+	_escribiendo = false
+	caja_texto.visible_characters = -1
+
+
+## Onda de NORA: barritas que se mueven mientras escribe y quedan casi quietas después.
+func _dibujar_onda() -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	var n := 11
+	for i in n:
+		var alto := 1.0
+		if _escribiendo:
+			alto = 1.0 + absf(sin(t * 9.0 + i * 1.7) * cos(t * 4.3 + i * 0.6)) * 5.0
+		else:
+			alto = 1.0 + absf(sin(t * 1.5 + i * 0.8)) * 1.0
+		var h := roundf(alto) * 2.0
+		onda.draw_rect(Rect2(i * 4, 6 - h / 2.0, 2, h), Color.WHITE)
 
 
 # ---------------- preguntas con opciones ----------------
@@ -220,17 +273,17 @@ func preguntar(linea: Dictionary, opciones: Array, vertical := false) -> void:
 		fila.add_theme_constant_override("separation", 4)
 		var marca := Label.new()
 		marca.text = ">"
-		marca.custom_minimum_size = Vector2(8, 0)
-		marca.add_theme_font_size_override("font_size", 11)
+		marca.custom_minimum_size = Vector2(12, 0)
+		marca.add_theme_font_size_override("font_size", 16)
 		marca.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		fila.add_child(marca)
 		var b := Button.new()
 		b.text = opciones[i]
 		b.focus_mode = Control.FOCUS_NONE
-		b.custom_minimum_size = Vector2(110, 0)
-		b.add_theme_font_size_override("font_size", 11)
+		b.custom_minimum_size = Vector2(165, 0)
+		b.add_theme_font_size_override("font_size", 16)
 		if vertical:
-			b.flat = true
+			TemaUI.boton_plano(b)
 			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func(): _elegir(i))
 		b.mouse_entered.connect(func(): _seleccion = i; _marcar())
@@ -238,6 +291,7 @@ func preguntar(linea: Dictionary, opciones: Array, vertical := false) -> void:
 		caja_opciones.add_child(fila)
 	_cola.append(linea)
 	_siguiente()
+	_completar_texto()  # las preguntas aparecen enteras
 	_pregunta = true
 	_seleccion = 0
 	caja_opciones.visible = true
@@ -280,14 +334,14 @@ func _elegir(i: int) -> void:
 func _crear_negro() -> void:
 	negro = ColorRect.new()
 	negro.color = Color.BLACK
-	negro.size = Vector2(640, 360)
+	negro.size = Vector2(960, 540)
 	negro.modulate.a = 0.0
 	negro.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	negro_texto = Label.new()
-	negro_texto.size = Vector2(640, 360)
+	negro_texto.size = Vector2(960, 540)
 	negro_texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	negro_texto.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	negro_texto.add_theme_font_size_override("font_size", 16)
+	negro_texto.add_theme_font_size_override("font_size", TemaUI.TAM_GRANDE)
 	negro.add_child(negro_texto)
 	add_child(negro)
 
@@ -307,16 +361,11 @@ func fundido(a: float, texto := "", duracion := 0.8) -> Tween:
 func _crear_menu() -> void:
 	menu = ColorRect.new()
 	menu.color = Color(0, 0, 0, 0.7)
-	menu.size = Vector2(640, 360)
+	menu.size = Vector2(960, 540)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(220, 80)
-	panel.size = Vector2(200, 200)
-	var estilo := StyleBoxFlat.new()
-	estilo.bg_color = Color(0.08, 0.08, 0.1)
-	estilo.border_color = Color(0.6, 0.6, 0.65)
-	estilo.set_border_width_all(1)
-	estilo.set_content_margin_all(12)
-	panel.add_theme_stylebox_override("panel", estilo)
+	panel.position = Vector2(330, 120)
+	panel.size = Vector2(300, 0)
+	panel.add_theme_stylebox_override("panel", TemaUI.marco("marco_dialogo", TemaUI.C_BORDE, 18))
 	menu.add_child(panel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
@@ -330,7 +379,7 @@ func _crear_menu() -> void:
 			["Opciones", func(): mostrar_mensaje("Opciones: próximamente.")], ["Salir", func(): get_tree().quit()]]:
 		var b := Button.new()
 		b.text = par[0]
-		b.add_theme_font_size_override("font_size", 12)
+		b.add_theme_font_size_override("font_size", 16)
 		b.pressed.connect(par[1])
 		v.add_child(b)
 	menu.visible = false
@@ -373,29 +422,24 @@ var _luz_sel := 0
 
 func _crear_panel_luz() -> void:
 	panel_luz = PanelContainer.new()
-	panel_luz.position = Vector2(420, 40)
-	var estilo := StyleBoxFlat.new()
-	estilo.bg_color = Color(0.05, 0.05, 0.07, 0.94)
-	estilo.border_color = Color(0.6, 0.6, 0.65)
-	estilo.set_border_width_all(1)
-	estilo.set_content_margin_all(8)
-	panel_luz.add_theme_stylebox_override("panel", estilo)
+	panel_luz.position = Vector2(630, 60)
+	panel_luz.add_theme_stylebox_override("panel", TemaUI.marco("marco_dialogo"))
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	panel_luz.add_child(v)
 	var titulo := Label.new()
 	titulo.text = "LUZ DE LA NAVE"
-	titulo.add_theme_font_size_override("font_size", 11)
+	titulo.add_theme_font_size_override("font_size", 16)
 	v.add_child(titulo)
 	_luz_filas = VBoxContainer.new()
 	_luz_filas.add_theme_constant_override("separation", 3)
 	v.add_child(_luz_filas)
 	_luz_capacidad = Label.new()
-	_luz_capacidad.add_theme_font_size_override("font_size", 10)
+	_luz_capacidad.add_theme_font_size_override("font_size", 16)
 	v.add_child(_luz_capacidad)
 	var pie := Label.new()
 	pie.text = "↑/↓ sala · ←/→ luz · L cerrar"
-	pie.add_theme_font_size_override("font_size", 8)
+	pie.add_theme_font_size_override("font_size", 16)
 	pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
 	v.add_child(pie)
 	panel_luz.visible = false
@@ -451,28 +495,22 @@ func refrescar_luz() -> void:
 		fila.add_theme_constant_override("separation", 4)
 		var marca := Label.new()
 		marca.text = ">" if i == _luz_sel else ""
-		marca.custom_minimum_size = Vector2(8, 0)
-		marca.add_theme_font_size_override("font_size", 10)
+		marca.custom_minimum_size = Vector2(12, 0)
+		marca.add_theme_font_size_override("font_size", 16)
 		fila.add_child(marca)
 		var nombre := Label.new()
 		nombre.text = _luz_nombres.get(s, s)
-		nombre.custom_minimum_size = Vector2(92, 0)
-		nombre.add_theme_font_size_override("font_size", 10)
+		nombre.custom_minimum_size = Vector2(138, 0)
+		nombre.add_theme_font_size_override("font_size", 16)
 		if s == Estado.sala_actual:
 			nombre.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
 		fila.add_child(nombre)
 		for n in range(1, 4):
 			var c := ColorRect.new()
-			c.custom_minimum_size = Vector2(10, 8)
+			c.custom_minimum_size = Vector2(15, 12)
 			c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			c.color = COLOR_LUZ_ON if n <= nivel else (COLOR_LUZ_OFF if n <= maximo else COLOR_LUZ_NO)
-			if n > maximo:
-				var x := Label.new()  # tachado: esa sala no llega a este nivel
-				x.text = "×"
-				x.add_theme_font_size_override("font_size", 8)
-				x.add_theme_color_override("font_color", Color(0.4, 0.4, 0.42))
-				x.position = Vector2(2, -3)
-				c.add_child(x)
+			# n > maximo: cuadrito casi negro = esa sala no llega a ese nivel
 			var sala_c := s
 			var nivel_c := n
 			c.gui_input.connect(func(ev):
@@ -483,7 +521,7 @@ func refrescar_luz() -> void:
 			fila.add_child(c)
 		var texto := Label.new()
 		texto.text = Estado.NOMBRES_LUZ[nivel]
-		texto.add_theme_font_size_override("font_size", 9)
+		texto.add_theme_font_size_override("font_size", 16)
 		texto.add_theme_color_override("font_color", Color(0.7, 0.7, 0.72))
 		fila.add_child(texto)
 		_luz_filas.add_child(fila)
@@ -497,20 +535,22 @@ func refrescar_luz() -> void:
 # ============================================================
 # Un segmento por punto de energía del turno, debajo del texto de estado.
 
+## Ícono de batería + un segmento inclinado por punto de energía (como la barra a rayas del pack de HUD).
 func _crear_barra_energia() -> void:
 	barra_energia = Control.new()
-	barra_energia.position = Vector2(8, 20)
-	barra_energia.size = Vector2(150, 5)
+	barra_energia.position = Vector2(12, 30)
+	barra_energia.size = Vector2(240, 10)
 	barra_energia.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(barra_energia)
+	var bateria: Texture2D = load("res://arte/ui/icono_bateria.png")
+	var seg: Texture2D = load("res://arte/ui/segmento_energia.png")
 	barra_energia.draw.connect(func():
 		var maximo := maxi(Estado.cfg("energia_por_turno"), 1)
-		var ancho := barra_energia.size.x / maximo
+		var poca := Estado.energia <= 3
+		var color := Color(0.95, 0.55, 0.35) if poca else Color(0.45, 0.85, 0.95)
+		barra_energia.draw_texture(bateria, Vector2(0, 1), color)
 		for i in maximo:
 			var lleno := i < Estado.energia
-			var c := Color(0.45, 0.85, 0.95) if lleno else Color(0.18, 0.2, 0.22)
-			if lleno and Estado.energia <= 3:
-				c = Color(0.95, 0.55, 0.35)  # poca energía
-			barra_energia.draw_rect(Rect2(i * ancho, 0, ancho - 1, barra_energia.size.y), c))
+			barra_energia.draw_texture(seg, Vector2(16 + i * 5, 1), color if lleno else Color(0.2, 0.23, 0.26)))
 	Estado.energia_cambiada.connect(func(_e): barra_energia.queue_redraw())
 	Estado.turno_empezado.connect(func(_t): barra_energia.queue_redraw())
