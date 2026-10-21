@@ -17,6 +17,7 @@ const COLOR_MANCHA := Color(0.3, 0.3, 0.31)
 const COLOR_MANCHA_OSCURA := Color(0.24, 0.23, 0.22)
 const COLOR_OXIDO := Color(0.45, 0.28, 0.17)
 const COLOR_OXIDO_CLARO := Color(0.55, 0.36, 0.2)
+const COLOR_MUEBLE := Color(0.31, 0.3, 0.29)  # muebles: iguales en todos los tiempos
 
 var manchas: Array = []  # [Rect2, Color]
 
@@ -55,11 +56,46 @@ func _ready() -> void:
 	for p in puertas():
 		p.ubicar(tamano(), PARED)
 	_crear_paredes()
+	_crear_muebles()
 	_crear_objetos()
 	_crear_niebla()
 	actualizar_tiempo()
 	Estado.turno_empezado.connect(func(_t): actualizar_tiempo())
 	Estado.sala_cambiada.connect(func(_s): _niebla.queue_redraw())
+
+
+# ---------------- muebles (fijos en todos los tiempos) ----------------
+
+func _muebles() -> Array:
+	return Estado.muebles.filter(func(m): return m["sala"] == codigo)
+
+
+func _rect_mueble(m: Dictionary) -> Rect2:
+	var p: Array = m["pos"]
+	return Rect2(p[0] * TILE, p[1] * TILE, p[2] * TILE, p[3] * TILE)
+
+
+## Colisión de los muebles sólidos (se rodean caminando).
+func _crear_muebles() -> void:
+	var cuerpo := StaticBody2D.new()
+	add_child(cuerpo)
+	for r in rects_solidos(false):
+		var forma := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = r.size
+		forma.shape = rect
+		forma.position = r.get_center()
+		cuerpo.add_child(forma)
+
+
+## Rectángulos de los muebles sólidos (en la sala, o en coordenadas de la nave si global = true).
+func rects_solidos(global := true) -> Array:
+	var lista := []
+	for m in _muebles():
+		if m.get("solido", false):
+			var r := _rect_mueble(m)
+			lista.append(Rect2(r.position + (position if global else Vector2.ZERO), r.size))
+	return lista
 
 
 # ---------------- objetos (paso 4) ----------------
@@ -188,3 +224,18 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2(PARED, PARED), s - Vector2(PARED, PARED) * 2), COLOR_PISO)
 	for m in manchas:
 		draw_rect(m[0], m[1])
+	# Muebles fijos (hoja muebles): están en todos los tiempos; en el futuro pueden estar caídos o rotos.
+	var futuro := Estado.tiempo_de(codigo) == "futuro"
+	for m in _muebles():
+		var r := _rect_mueble(m)
+		var estado = m.get("en_futuro") if futuro else null
+		var c := COLOR_MUEBLE.darkened(0.2) if estado else COLOR_MUEBLE
+		draw_rect(r, c)
+		draw_rect(r, c.darkened(0.45), false, 1.0)
+		match estado:
+			"caído":  # silla volcada: patas hacia un costado
+				draw_line(r.position + Vector2(2, 2), r.end - Vector2(2, 2), c.darkened(0.6), 2.0)
+				draw_line(r.position + Vector2(2, r.size.y - 4), r.end - Vector2(2, 4), c.darkened(0.6), 1.0)
+			"roto":  # grieta
+				var x := r.position.x + r.size.x * 0.45
+				draw_polyline(PackedVector2Array([Vector2(x, r.position.y), Vector2(x + 4, r.get_center().y), Vector2(x - 2, r.end.y)]), c.darkened(0.7), 2.0)

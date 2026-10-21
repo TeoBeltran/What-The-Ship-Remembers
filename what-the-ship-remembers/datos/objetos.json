@@ -36,7 +36,9 @@
       2,
       1
     ],
-    "nombre": "Panel eléctrico"
+    "nombre": "Panel eléctrico",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N1": {
     "sala": "MAN",
@@ -62,7 +64,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N2": {
     "sala": "MAN",
@@ -72,10 +76,15 @@
     "turno_min": 1,
     "luz_min": 1,
     "costo": 0,
-    "forzada": false,
+    "forzada": true,
     "texto_al_entrar": null,
-    "tipo_cond": null,
-    "condiciones": [],
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_N1",
+        "campo": "usado"
+      }
+    ],
     "disparadores": [
       {
         "tipo": 1,
@@ -88,7 +97,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N3": {
     "sala": "MAN",
@@ -98,10 +109,15 @@
     "turno_min": 1,
     "luz_min": 1,
     "costo": 0,
-    "forzada": false,
+    "forzada": true,
     "texto_al_entrar": null,
-    "tipo_cond": null,
-    "condiciones": [],
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_N2",
+        "campo": "usado"
+      }
+    ],
     "disparadores": [
       {
         "tipo": 1,
@@ -114,7 +130,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N4": {
     "sala": "MAN",
@@ -124,10 +142,15 @@
     "turno_min": 1,
     "luz_min": 1,
     "costo": 0,
-    "forzada": false,
+    "forzada": true,
     "texto_al_entrar": null,
-    "tipo_cond": null,
-    "condiciones": [],
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_N3",
+        "campo": "usado"
+      }
+    ],
     "disparadores": [
       {
         "tipo": 1,
@@ -140,7 +163,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N5": {
     "sala": "MAN",
@@ -171,7 +196,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N6": {
     "sala": "MAN",
@@ -202,7 +229,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N8": {
     "sala": "MAN",
@@ -233,7 +262,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N9": {
     "sala": "MAN",
@@ -264,7 +295,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N10": {
     "sala": "MAN",
@@ -299,7 +332,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N11": {
     "sala": "MAN",
@@ -325,7 +360,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N12": {
     "sala": "MAN",
@@ -356,7 +393,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "MAN_N13": {
     "sala": "MAN",
@@ -387,7 +426,9 @@
       4,
       1
     ],
-    "nombre": "Consola de NORA"
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_A": {
     "sala": "COM",
@@ -413,7 +454,9 @@
       1,
       1
     ],
-    "nombre": "Taza de café"
+    "nombre": "Taza de café",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_B": {
     "sala": "COM",
@@ -443,7 +486,9 @@
       3,
       1
     ],
-    "nombre": "Consola de radio"
+    "nombre": "Consola de radio",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_C": {
     "sala": "COM",
@@ -473,7 +518,9 @@
       3,
       1
     ],
-    "nombre": "Panel de herramientas"
+    "nombre": "Panel de herramientas",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_D": {
     "sala": "COM",
@@ -503,7 +550,9 @@
       1,
       2
     ],
-    "nombre": "Lista de turnos"
+    "nombre": "Lista de turnos",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_E": {
     "sala": "COM",
@@ -537,7 +586,9 @@
       3,
       1
     ],
-    "nombre": "Radio"
+    "nombre": "Radio",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_F": {
     "sala": "COM",
@@ -567,7 +618,9 @@
       1,
       2
     ],
-    "nombre": "Plano de evacuación"
+    "nombre": "Plano de evacuación",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_G": {
     "sala": "COM",
@@ -593,7 +646,9 @@
       2,
       1
     ],
-    "nombre": "Hojas de protocolo"
+    "nombre": "Hojas de protocolo",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_H": {
     "sala": "COM",
@@ -623,7 +678,9 @@
       2,
       1
     ],
-    "nombre": "Registro de transmisiones"
+    "nombre": "Registro de transmisiones",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_I": {
     "sala": "COM",
@@ -653,7 +710,9 @@
       3,
       1
     ],
-    "nombre": "Consola de radio"
+    "nombre": "Consola de radio",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_J": {
     "sala": "COM",
@@ -679,7 +738,9 @@
       3,
       1
     ],
-    "nombre": "Panel de herramientas"
+    "nombre": "Panel de herramientas",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_K": {
     "sala": "COM",
@@ -705,7 +766,9 @@
       1,
       2
     ],
-    "nombre": "Plano de evacuación"
+    "nombre": "Plano de evacuación",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_L": {
     "sala": "COM",
@@ -744,22 +807,24 @@
       1,
       1
     ],
-    "nombre": "Nota en la radio"
+    "nombre": "Nota en la radio",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_M": {
     "sala": "COM",
     "letra": "M",
-    "descripcion": "Tijera sobre la mesa (se observa, nunca se agarra)",
+    "descripcion": "Tijera sobre la mesa (el personaje ya tiene la del futuro en el bolsillo)",
     "tiempo": "pasado",
     "turno_min": 1,
     "luz_min": 2,
     "costo": 0,
-    "forzada": true,
+    "forzada": false,
     "texto_al_entrar": null,
     "tipo_cond": "Y",
     "condiciones": [
       {
-        "objeto": "COM_J",
+        "objeto": "COM_O",
         "campo": "usado"
       }
     ],
@@ -767,6 +832,14 @@
       {
         "tipo": 1,
         "param": "T_COM_M"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_M"
+      },
+      {
+        "tipo": 5,
+        "param": "COM_S"
       }
     ],
     "pos": [
@@ -775,14 +848,16 @@
       1,
       1
     ],
-    "nombre": "Tijera"
+    "nombre": "Tijera",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_N": {
     "sala": "COM",
     "letra": "N",
-    "descripcion": "Tijera sobre la mesa",
+    "descripcion": "Tijera sobre la mesa (la otra está en el bolsillo)",
     "tiempo": "presente",
-    "turno_min": 1,
+    "turno_min": 10,
     "luz_min": 1,
     "costo": 0,
     "forzada": false,
@@ -790,7 +865,7 @@
     "tipo_cond": "Y",
     "condiciones": [
       {
-        "objeto": "COM_M",
+        "objeto": "COM_O",
         "campo": "usado"
       }
     ],
@@ -801,25 +876,22 @@
       1,
       1
     ],
-    "nombre": "Tijera"
+    "nombre": "Tijera",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_O": {
     "sala": "COM",
     "letra": "O",
     "descripcion": "Tijera sobre la mesa, con polvo",
     "tiempo": "futuro",
-    "turno_min": 1,
+    "turno_min": 7,
     "luz_min": 1,
     "costo": 0,
     "forzada": true,
     "texto_al_entrar": null,
-    "tipo_cond": "Y",
-    "condiciones": [
-      {
-        "objeto": "COM_M",
-        "campo": "usado"
-      }
-    ],
+    "tipo_cond": null,
+    "condiciones": [],
     "disparadores": [
       {
         "tipo": 1,
@@ -844,7 +916,9 @@
       1,
       1
     ],
-    "nombre": "Tijera"
+    "nombre": "Tijera",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_P": {
     "sala": "COM",
@@ -870,7 +944,9 @@
       1,
       1
     ],
-    "nombre": "Hoja rota"
+    "nombre": "Hoja rota",
+    "turno_max": null,
+    "oculto": false
   },
   "COM_Q": {
     "sala": "COM",
@@ -900,7 +976,9 @@
       1,
       2
     ],
-    "nombre": "Puerta de la sala común"
+    "nombre": "Puerta de la sala común",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_A": {
     "sala": "SCO",
@@ -930,7 +1008,9 @@
       8,
       2
     ],
-    "nombre": "Mesa larga"
+    "nombre": "Mesa larga",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_B": {
     "sala": "SCO",
@@ -956,7 +1036,9 @@
       1,
       2
     ],
-    "nombre": "Dispensador de agua"
+    "nombre": "Dispensador de agua",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_C": {
     "sala": "SCO",
@@ -986,7 +1068,9 @@
       4,
       1
     ],
-    "nombre": "Pizarra de turnos"
+    "nombre": "Pizarra de turnos",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_D": {
     "sala": "SCO",
@@ -1016,7 +1100,9 @@
       1,
       1
     ],
-    "nombre": "Taza con mi nombre"
+    "nombre": "Taza con mi nombre",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_E": {
     "sala": "SCO",
@@ -1046,7 +1132,9 @@
       2,
       1
     ],
-    "nombre": "Calendario"
+    "nombre": "Calendario",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_F": {
     "sala": "SCO",
@@ -1072,7 +1160,9 @@
       2,
       1
     ],
-    "nombre": "Foto de la tripulación"
+    "nombre": "Foto de la tripulación",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_G": {
     "sala": "SCO",
@@ -1102,7 +1192,9 @@
       2,
       1
     ],
-    "nombre": "Partida de cartas"
+    "nombre": "Partida de cartas",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_H": {
     "sala": "SCO",
@@ -1132,7 +1224,9 @@
       1,
       1
     ],
-    "nombre": "Silla volcada"
+    "nombre": "Silla volcada",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_I": {
     "sala": "SCO",
@@ -1158,7 +1252,9 @@
       1,
       1
     ],
-    "nombre": "Taza con mi nombre"
+    "nombre": "Taza con mi nombre",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_J": {
     "sala": "SCO",
@@ -1193,7 +1289,9 @@
       1,
       1
     ],
-    "nombre": "Taza sobre la mesa"
+    "nombre": "Taza sobre la mesa",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_K": {
     "sala": "SCO",
@@ -1223,7 +1321,9 @@
       4,
       1
     ],
-    "nombre": "Pizarra de turnos"
+    "nombre": "Pizarra de turnos",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_L": {
     "sala": "SCO",
@@ -1253,7 +1353,9 @@
       1,
       1
     ],
-    "nombre": "Reloj de pared"
+    "nombre": "Reloj de pared",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_M": {
     "sala": "SCO",
@@ -1279,7 +1381,9 @@
       1,
       1
     ],
-    "nombre": "Chaqueta"
+    "nombre": "Chaqueta",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_N": {
     "sala": "SCO",
@@ -1305,7 +1409,9 @@
       8,
       2
     ],
-    "nombre": "Mesa partida"
+    "nombre": "Mesa partida",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_O": {
     "sala": "SCO",
@@ -1340,7 +1446,9 @@
       1,
       1
     ],
-    "nombre": "Taza rota"
+    "nombre": "Taza rota",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_P": {
     "sala": "SCO",
@@ -1366,7 +1474,9 @@
       2,
       1
     ],
-    "nombre": "Calendario caído"
+    "nombre": "Calendario caído",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_Q": {
     "sala": "SCO",
@@ -1392,7 +1502,9 @@
       1,
       2
     ],
-    "nombre": "Dispensador de agua"
+    "nombre": "Dispensador de agua",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_R": {
     "sala": "SCO",
@@ -1413,12 +1525,14 @@
     ],
     "disparadores": [],
     "pos": [
-      3,
+      2,
       8,
       1,
       1
     ],
-    "nombre": "Silla"
+    "nombre": "Silla",
+    "turno_max": null,
+    "oculto": false
   },
   "SCO_S": {
     "sala": "SCO",
@@ -1444,7 +1558,9 @@
       1,
       2
     ],
-    "nombre": "Puertas hacia el resto de la nave"
+    "nombre": "Puertas hacia el resto de la nave",
+    "turno_max": null,
+    "oculto": false
   },
   "PTA_A": {
     "sala": "PTA",
@@ -1474,7 +1590,9 @@
       2,
       1
     ],
-    "nombre": "Puerta"
+    "nombre": "Puerta",
+    "turno_max": null,
+    "oculto": false
   },
   "PTA_B": {
     "sala": "PTA",
@@ -1500,7 +1618,9 @@
       1,
       1
     ],
-    "nombre": "Soporte de placa"
+    "nombre": "Soporte de placa",
+    "turno_max": null,
+    "oculto": false
   },
   "PTA_C": {
     "sala": "PTA",
@@ -1530,7 +1650,9 @@
       2,
       1
     ],
-    "nombre": "Puerta"
+    "nombre": "Puerta",
+    "turno_max": null,
+    "oculto": false
   },
   "PTA_D": {
     "sala": "PTA",
@@ -1556,7 +1678,9 @@
       2,
       1
     ],
-    "nombre": "Puerta"
+    "nombre": "Puerta",
+    "turno_max": null,
+    "oculto": false
   },
   "PTA_E": {
     "sala": "PTA",
@@ -1582,6 +1706,73 @@
       2,
       1
     ],
-    "nombre": "Polvo junto a la puerta"
+    "nombre": "Polvo junto a la puerta",
+    "turno_max": null,
+    "oculto": false
+  },
+  "COM_R": {
+    "sala": "COM",
+    "letra": "R",
+    "descripcion": "Lugar vacío en la mesa donde el personaje cree que dejó la tijera",
+    "tiempo": "presente",
+    "turno_min": 6,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_R"
+      }
+    ],
+    "pos": [
+      10,
+      7,
+      1,
+      1
+    ],
+    "nombre": "Mesa",
+    "turno_max": 6,
+    "oculto": true
+  },
+  "COM_S": {
+    "sala": "COM",
+    "letra": "S",
+    "descripcion": "Diálogo obligatorio del presente: la tijera está en la mesa y en el bolsillo",
+    "tiempo": "presente",
+    "turno_min": 10,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_O",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_S"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_S"
+      }
+    ],
+    "pos": [
+      10,
+      7,
+      1,
+      1
+    ],
+    "nombre": "Tijera",
+    "turno_max": null,
+    "oculto": true
   }
 }

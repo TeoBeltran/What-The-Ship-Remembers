@@ -36,8 +36,8 @@ func _ready() -> void:
 
 func _recorrido() -> void:
 	# T1 · tutorial, todo en presente. NORA (N1 es forzada), arreglo del panel, comunicaciones.
-	chequear(e.obj["MAN_N1"]["usado"], "N1 (despertar) se dispara sola al empezar")
-	usar("MAN_N2"); usar("MAN_N3"); usar("MAN_N4")
+	chequear(e.obj["MAN_N1"]["usado"] and e.obj["MAN_N2"]["usado"] and e.obj["MAN_N3"]["usado"] and e.obj["MAN_N4"]["usado"],
+		"T1: las conversaciones N1 a N4 con NORA son obligatorias y en cadena")
 	chequear(e.obj["MAN_A"]["activo"], "el panel MAN_A aparece después de hablar de la oscuridad (N4)")
 	usar("MAN_A")
 	chequear(e.luz_maxima("COM") == 3, "con el arreglo, comunicaciones puede llegar a luz máxima")
@@ -66,6 +66,7 @@ func _recorrido() -> void:
 	chequear(not e.set_luz("SCO", 3), "la sala común no puede pasar de luz media en el Alfa")
 	ir("COM"); ir("SCO")
 	usar("SCO_G"); usar("SCO_H"); usar("SCO_S")
+	chequear(e.costo_mover("COM") == 0, "volver de la sala común a comunicaciones no cuesta energía")
 
 	# T4 · sala común en pasado: la taza.
 	turno()
@@ -88,6 +89,7 @@ func _recorrido() -> void:
 	turno()
 	usar("MAN_N13"); usar("MAN_N11")
 	ir("COM")
+	chequear(e.obj["COM_R"]["usado"], "T6: al entrar a comunicaciones (presente) sale solo «Pensé que había dejado la tijera acá»")
 	usar("COM_G")
 	ir("SCO")
 	usar("SCO_O")
@@ -97,39 +99,42 @@ func _recorrido() -> void:
 	turno()
 	ir("COM")
 	chequear(e.se_ve("COM_P"), "la hoja que rompí en el presente está en el futuro (COM_P)")
+	chequear(e.inventario.has("tijera"), "T7 (primer futuro): la tijera está en la mesa y se guarda sola en el bolsillo")
+	chequear(e.obj["COM_O"]["desdibujado"], "la tijera del futuro ya no se dibuja")
 	usar("COM_L"); usar("COM_J")
-	chequear(e.obj["COM_M"]["activo"], "el panel oxidado activa la tijera del pasado (COM_M)")
-	chequear(not e.obj["COM_O"]["activo"], "la tijera del futuro todavía NO aparece en T7")
 	ir("PTA")
 	usar("PTA_C")
 	chequear(e.energia == 2, "T7 es el turno más cargado: quedan 2 de 15 (doc 06, chequeos)")
 
-	# T8 · todo en presente.
+	# T8 · comunicaciones otra vez en futuro: la tijera ya no está.
 	turno()
 	usar("MAN_N8")
-	chequear(not e.se_ve("COM_N"), "en T8 la tijera todavía no está en el presente")
-	ir("COM"); ir("SCO")
+	ir("COM")
+	chequear(e.tiempo_de("COM") == "futuro" and not e.se_ve("COM_O"), "T8 (futuro otra vez): la tijera ya no está porque la agarré")
+	ir("SCO")
 	usar("SCO_K")
 
-	# T9 · comunicaciones en pasado: aparece la tijera.
+	# T9 · comunicaciones en pasado: la tijera está otra vez. Investigarla es opcional (acá NO se investiga).
 	turno()
 	ir("COM")
-	chequear(e.obj["COM_M"]["usado"], "al entrar, la tijera del pasado se observa sola (forzada)")
-	chequear(e.obj["COM_N"]["activo"] and e.obj["COM_O"]["activo"], "verla activa la tijera del presente y la del futuro")
+	chequear(e.se_ve("COM_M") and not e.obj["COM_M"]["usado"], "T9 (pasado): la tijera está en la mesa y no sale ningún diálogo solo")
 	usar("COM_B")
 
-	# T10 · comunicaciones en presente, sala de la puerta en futuro.
+	# T10 · comunicaciones en presente: la tijera en la mesa y en el bolsillo.
 	turno()
 	ir("COM")
-	chequear(e.se_ve("COM_N") and not e.se_puede_usar("COM_N"), "la tijera del presente está en la mesa y es solo visual")
+	chequear(e.obj["COM_S"]["usado"] and e.se_ve("COM_N") and e.inventario.has("tijera"),
+		"T10 (presente): como no la investigó en el pasado, sale solo «acá está la tijera… pero la tengo en el bolsillo»")
+	chequear(not e.se_puede_usar("COM_N"), "la tijera del presente queda a la vista pero no se puede usar")
 	ir("PTA")
 	usar("PTA_D"); usar("PTA_E")
+	chequear(e.costo_mover("COM") == 0, "volver de la sala de la puerta a comunicaciones no cuesta energía")
 
-	# T11 · comunicaciones en futuro: agarrar la tijera.
+	# T11 · comunicaciones en futuro: la tijera sigue sin estar.
 	turno()
 	ir("COM")
-	chequear(e.inventario.has("tijera"), "la tijera del futuro se guarda sola en el bolsillo")
-	chequear(e.obj["COM_O"]["desdibujado"], "la tijera del futuro ya no se dibuja")
+	chequear(not e.se_ve("COM_O"), "T11 (futuro): la tijera no vuelve a aparecer en el futuro")
+	chequear(e.costo_mover("MAN") == 0, "volver de comunicaciones a mando no cuesta energía")
 
 	# T12 · la paradoja.
 	turno()
@@ -137,6 +142,31 @@ func _recorrido() -> void:
 	chequear(e.se_ve("COM_N") and e.inventario.has("tijera"), "PARADOJA: una tijera en la mesa y otra en el bolsillo")
 	_log("")
 	_log(">>> Acá va el cierre del Alfa (cinemática y diálogos, paso 9).")
+	_rama_tijera_en_el_pasado()
+
+
+## Otra partida: si en el T9 se investiga la tijera del pasado, en el T10 no sale el diálogo obligatorio.
+func _rama_tijera_en_el_pasado() -> void:
+	_log("")
+	_log("=== RAMA ALTERNATIVA: investigar la tijera en el pasado (T9) ===")
+	var principal = e
+	e = preload("res://scripts/estado.gd").new()
+	add_child(e)
+	e.nueva_partida()
+	while e.turno < 7:
+		e.empezar_turno()
+	ir("COM")
+	chequear(e.inventario.has("tijera"), "T7: la agarro en el futuro")
+	e.empezar_turno(); e.empezar_turno()  # T9
+	ir("COM")
+	usar("COM_M")
+	chequear(e.se_ve("COM_M") and not e.se_puede_usar("COM_M") and e.inventario.count("tijera") == 1,
+		"T9: la investiga (confusión), no se la lleva y queda a la vista sin poder usarse")
+	e.empezar_turno()  # T10
+	ir("COM")
+	chequear(e.se_ve("COM_N") and not e.obj["COM_S"]["usado"], "T10: la tijera está en la mesa pero NO sale el diálogo obligatorio")
+	e.queue_free()
+	e = principal
 
 
 # ------------------------------------------------------------
@@ -188,7 +218,7 @@ func _log(texto: String) -> void:
 func _resumen() -> void:
 	_log("")
 	if fallas.is_empty():
-		_log("SIMULACIÓN OK: T1–T12 sin fallas. La taza, la nota y la tijera aparecen cuando corresponde.")
+		_log("SIMULACIÓN OK: T1–T12 sin fallas. La taza, la nota y la tijera aparecen cuando corresponde (y la rama alternativa de la tijera).")
 	else:
 		_log("SIMULACIÓN CON %d FALLAS:" % fallas.size())
 		for f in fallas:

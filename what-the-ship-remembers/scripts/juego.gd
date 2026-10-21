@@ -2,6 +2,8 @@ extends Node2D
 ## Escena principal: la nave continua, el personaje, la cámara y la interfaz.
 ## Paso 3: movimiento (flechas/WASD o click derecho), cobro al entrar a otra sala, zoom.
 ## Paso 4: objetos e interacción (E, o click derecho sobre un objeto), textos, avisos.
+## Paso 5: interacciones forzadas como cinemática (camina solo hasta el objeto y recién ahí habla),
+##         descansar hablando con NORA (cuando no tiene nada nuevo) y fin de turno al quedarse sin energía.
 ##
 ## Controles: E interactuar · ruedita / I / O zoom · Esc menú
 ## Depuración (provisoria): F1 info e IDs · F2 abrir sala común · F3 recargar energía
@@ -14,6 +16,10 @@ const ALCANCE := 14.0  # px alrededor de un objeto para poder interactuar
 var depuracion := false
 var _zoom_i := 1
 var _pendiente = null  # objeto al que se va caminando para interactuar (click derecho)
+var _cinematica := ""  # id de la interacción forzada hacia la que camina solo
+var _fin_turno := false  # durante el texto y el fundido a negro entre turnos
+var _alfa_terminado := false
+var _ultima_pos := Vector2.ZERO  # última posición dentro de la sala actual (para volver si no puede pasar)
 
 @onready var nave: Node2D = $Nave
 @onready var personaje: CharacterBody2D = $Personaje
@@ -30,33 +36,128 @@ func _ready() -> void:
 	Estado.item_agregado.connect(func(id): ui.aviso("Guardado: " + str(Estado.items.get(id, {}).get("nombre", id))))
 	Estado.audio_reproducido.connect(ui.aviso_audio)
 	nave.aviso.connect(ui.mostrar_mensaje)
+	ui.respuesta.connect(_on_respuesta)
+	Estado.forzadas_automaticas = false  # las forzadas se hacen como cinemática (ver _physics_process)
 	Estado.nueva_partida()
 
 
 ## Cada turno empieza en el centro de la sala de mando.
 func _empezar_turno() -> void:
 	personaje.detener()
+	personaje.cinematica = false
 	_pendiente = null
+	_cinematica = ""
 	personaje.position = nave.centro_de("MAN")
+	_ultima_pos = personaje.position
 	camara.position = personaje.position
 	camara.reset_smoothing()
 	_actualizar_hud()
 
 
 func _physics_process(_delta: float) -> void:
-	personaje.bloqueado = ui.dialogo_activo()
+	personaje.bloqueado = ui.dialogo_activo() or _fin_turno
 	# ¿Entró a otra sala? (en los pasillos no se cambia de sala)
 	var sala: String = nave.sala_en(personaje.position)
 	if sala != "" and sala != Estado.sala_actual:
 		if not Estado.mover_a(sala):
 			personaje.detener()
-			personaje.position = nave.centro_de(Estado.sala_actual)
+			personaje.position = _ultima_pos
+	elif sala == Estado.sala_actual:
+		_ultima_pos = personaje.position
 	# Llegó caminando al objeto que se clickeó.
 	if _pendiente != null and personaje.ruta.is_empty():
 		var obj = _pendiente
 		_pendiente = null
 		if obj.rect_global().grow(ALCANCE + 4).has_point(personaje.position):
 			_interactuar_con(obj)
+	if ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _alfa_terminado:
+		return
+	# Cinemática en curso: cuando llega (o se traba), recién ahí se dispara la interacción forzada.
+	if _cinematica != "":
+		if personaje.ruta.is_empty():
+			_terminar_cinematica()
+		return
+	var forzada := Estado.siguiente_forzada()
+	if forzada != "":
+		_empezar_cinematica(forzada)
+	elif Estado.energia <= 0:
+		_terminar_turno(Estado.textos.get("SIS_SIN_ENERGIA", []))
+
+
+# ============================================================
+# Cinemáticas (interacciones forzadas) y fin de turno
+# ============================================================
+
+func _nodo_de(id: String):
+	for n in nave.salas[Estado.objetos[id]["sala"]].objetos_nodos:
+		if n.ids.has(id):
+			return n
+	return null
+
+
+func _empezar_cinematica(id: String) -> void:
+	_cinematica = id
+	_pendiente = null
+	personaje.cinematica = true
+	var n = _nodo_de(id)
+	if n == null:
+		personaje.detener()
+		return
+	var r: Rect2 = n.rect_global()
+	if r.grow(ALCANCE).has_point(personaje.position):
+		personaje.detener()  # ya está al lado
+	else:
+		personaje.seguir(_camino_a_objeto(r), r, ALCANCE - 3)
+
+
+## Camino hasta el lugar libre más cercano al objeto y, al final, derecho hacia el objeto
+## (así llega aunque esté sobre una mesa o entre sillas). El personaje se frena apenas lo alcanza.
+func _camino_a_objeto(r: Rect2) -> PackedVector2Array:
+	var ruta: PackedVector2Array = nave.camino_a_rect(personaje.position, r)
+	ruta.append(r.get_center())
+	return ruta
+
+
+func _terminar_cinematica() -> void:
+	var id := _cinematica
+	_cinematica = ""
+	personaje.cinematica = false
+	personaje.detener()
+	if not Estado.interactuar(id):
+		push_warning("No se pudo hacer la forzada %s: %s" % [id, Estado.motivo_no_usable(id)])
+		Estado.obj[id]["usado"] = true  # para no quedar en un bucle
+
+
+## Texto (opcional) → negro → turno siguiente en la sala de mando. En el último turno, fin del Alfa.
+func _terminar_turno(lineas: Array) -> void:
+	_fin_turno = true
+	_pendiente = null
+	personaje.detener()
+	if not lineas.is_empty():
+		ui.mostrar_lineas(lineas)
+		await ui.dialogo_terminado
+	if Estado.es_ultimo_turno():
+		_alfa_terminado = true
+		await ui.fundido(1.0, "Fin del Alfa\n\n(el cierre del turno 12 llega en el paso 9)\nEsc para salir", 1.2).finished
+		_fin_turno = false
+		return
+	await ui.fundido(1.0, "Turno %d" % (Estado.turno + 1)).finished
+	await get_tree().create_timer(0.6).timeout
+	Estado.empezar_turno()
+	await ui.fundido(0.0, "Turno %d" % Estado.turno).finished
+	_fin_turno = false
+
+
+## NORA sin nada nuevo: pregunta si querés descansar (terminar el turno).
+func _preguntar_descanso() -> void:
+	var lineas: Array = Estado.textos.get("SIS_DESCANSAR_PREGUNTA", [])
+	var linea: Dictionary = lineas[-1] if not lineas.is_empty() else {"hablante": "NORA", "texto": "¿Desea descansar?"}
+	ui.preguntar(linea, ["Sí, descansar", "Todavía no"])
+
+
+func _on_respuesta(indice: int) -> void:
+	if indice == 0:
+		_terminar_turno(Estado.textos.get("SIS_DESCANSAR_SI", []))
 
 
 func _process(_delta: float) -> void:
@@ -69,6 +170,8 @@ func _process(_delta: float) -> void:
 # ============================================================
 
 ## Objeto visible más cercano al alcance del personaje (en la sala actual).
+## Prefiere los que todavía tienen algo para hacer (NORA siempre: conversación o descansar),
+## así un objeto ya usado no tapa a otro que está al lado.
 func objeto_cercano():
 	var mejor = null
 	var mejor_d := INF
@@ -78,6 +181,8 @@ func objeto_cercano():
 		var r: Rect2 = obj.rect_global()
 		if r.grow(ALCANCE).has_point(personaje.position):
 			var d := r.get_center().distance_to(personaje.position)
+			if not (obj.es_consola or obj.id_usable() != "" or obj.id_visible_pendiente() != ""):
+				d += 1000.0  # ya no hay nada para hacer: solo si no hay otro
 			if d < mejor_d:
 				mejor = obj
 				mejor_d = d
@@ -89,6 +194,9 @@ func _interactuar_con(obj) -> void:
 	if id != "":
 		Estado.interactuar(id)
 		return
+	if obj.es_consola:
+		_preguntar_descanso()
+		return
 	var pendiente: String = obj.id_visible_pendiente()
 	if pendiente == "":
 		ui.mostrar_mensaje("No hay nada más para hacer acá." if not obj.es_consola else "NORA no tiene nada nuevo para decir.")
@@ -97,7 +205,7 @@ func _interactuar_con(obj) -> void:
 
 
 func _actualizar_indicacion() -> void:
-	if ui.dialogo_activo() or ui.menu_abierto():
+	if ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _cinematica != "":
 		ui.indicacion.text = ""
 		return
 	var obj = objeto_cercano()
@@ -108,6 +216,8 @@ func _actualizar_indicacion() -> void:
 	if id != "":
 		var costo: int = Estado.costo_interaccion(id)
 		ui.indicacion.text = ("E: hablar con NORA" if obj.es_consola else "E: investigar " + obj.nombre()) + ("" if costo == 0 else " (%d)" % costo)
+	elif obj.es_consola:
+		ui.indicacion.text = "E: hablar con NORA"
 	elif obj.id_visible_pendiente() != "":
 		var costo: int = Estado.costo_interaccion(obj.id_visible_pendiente())
 		ui.indicacion.text = "E: investigar %s (%d) — no alcanza la energía" % [obj.nombre(), costo]
@@ -169,13 +279,27 @@ func _unhandled_input(event: InputEvent) -> void:
 			ui.abrir_menu()
 		get_viewport().set_input_as_handled()
 		return
-	if ui.menu_abierto():
+	if ui.menu_abierto() or _alfa_terminado:
+		return
+	# Pregunta con opciones: ←/→ (o A/D, W/S) eligen, E / Enter / Espacio confirman; el click lo manejan los botones.
+	if ui.pregunta_activa():
+		if event is InputEventKey and event.pressed and not event.echo:
+			match event.keycode:
+				KEY_LEFT, KEY_A, KEY_UP, KEY_W:
+					ui.mover_seleccion(-1)
+				KEY_RIGHT, KEY_D, KEY_DOWN, KEY_S:
+					ui.mover_seleccion(1)
+				KEY_E, KEY_ENTER, KEY_SPACE:
+					ui.confirmar_pregunta()
 		return
 	# Diálogo abierto: E / Espacio / Enter / click lo avanzan
 	if ui.dialogo_activo():
 		if (event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_E, KEY_SPACE, KEY_ENTER]) \
 				or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 			ui.avanzar_dialogo()
+		return
+	# Durante una cinemática o el cambio de turno no se controla al personaje.
+	if _cinematica != "" or _fin_turno:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
@@ -187,8 +311,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					_interactuar_con(obj)
 					return
 				_pendiente = obj
-				var destino: Vector2 = punto if obj == null else obj.rect_global().get_center()
-				personaje.seguir(nave.camino(personaje.position, destino))
+				if obj == null:
+					personaje.seguir(nave.camino(personaje.position, punto))
+				else:
+					personaje.seguir(_camino_a_objeto(obj.rect_global()), obj.rect_global(), ALCANCE - 3)
 			MOUSE_BUTTON_WHEEL_UP:
 				_zoom(1)
 			MOUSE_BUTTON_WHEEL_DOWN:

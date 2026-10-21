@@ -174,13 +174,6 @@
       "texto": "Un reporte en cola: «Día 112 de misión. Sin novedades.»"
     }
   ],
-  "T_COM_C": [
-    {
-      "orden": 1,
-      "hablante": "PERSONAJE",
-      "texto": "Todo ordenado. Menos la tijera, que no está."
-    }
-  ],
   "T_COM_D": [
     {
       "orden": 1,
@@ -242,18 +235,6 @@
       "orden": 1,
       "hablante": "PERSONAJE",
       "texto": "Una nota pegada en la radio: 7.41. Es mi letra. No recuerdo haber escrito esto."
-    }
-  ],
-  "T_COM_M": [
-    {
-      "orden": 1,
-      "hablante": "PERSONAJE",
-      "texto": "Una tijera sobre la mesa."
-    },
-    {
-      "orden": 2,
-      "hablante": "PERSONAJE",
-      "texto": "¿Esto ya estaba acá? No lo recuerdo."
     }
   ],
   "T_COM_O": [
@@ -434,6 +415,80 @@
       "orden": 1,
       "hablante": "PERSONAJE",
       "texto": "Polvo acumulado contra la puerta. Nadie la tocó en mucho tiempo."
+    }
+  ],
+  "T_COM_C": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Todo ordenado. Menos la tijera, que no está en su lugar."
+    }
+  ],
+  "T_COM_R": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Pensé que había dejado la tijera acá."
+    }
+  ],
+  "SIS_SIN_ENERGIA": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Me quedé sin energía. Tengo que volver."
+    }
+  ],
+  "SIS_DESCANSAR_PREGUNTA": [
+    {
+      "orden": 1,
+      "hablante": "NORA",
+      "texto": "No tengo nada nuevo para informarle. ¿Desea descansar?"
+    }
+  ],
+  "SIS_DESCANSAR_SI": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Voy a descansar un rato."
+    }
+  ],
+  "T_COM_M": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿La tijera?"
+    },
+    {
+      "orden": 2,
+      "hablante": "PERSONAJE",
+      "texto": "¿Cómo puede estar acá, si la acabo de agarrar?"
+    },
+    {
+      "orden": 3,
+      "hablante": "PERSONAJE",
+      "texto": "Me toco el bolsillo. La tengo acá. Hay dos."
+    }
+  ],
+  "T_COM_S": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Qué raro… acá está la tijera."
+    },
+    {
+      "orden": 2,
+      "hablante": "PERSONAJE",
+      "texto": "Pero si yo la había agarrado."
+    },
+    {
+      "orden": 3,
+      "hablante": "PERSONAJE",
+      "texto": "Me toco el bolsillo. Está acá."
+    },
+    {
+      "orden": 4,
+      "hablante": "PERSONAJE",
+      "texto": "¿Cómo puede ser?"
     }
   ]
 }

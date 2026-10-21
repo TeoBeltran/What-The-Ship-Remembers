@@ -1,0 +1,206 @@
+[
+  {
+    "sala": "MAN",
+    "nombre": "Puesto de mando",
+    "pos": [
+      7,
+      1,
+      6,
+      2
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "COM",
+    "nombre": "Puesto de radio",
+    "pos": [
+      1,
+      1,
+      7,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "roto"
+  },
+  {
+    "sala": "COM",
+    "nombre": "Panel de herramientas",
+    "pos": [
+      13,
+      1,
+      3,
+      1
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "COM",
+    "nombre": "Mesa",
+    "pos": [
+      6,
+      6,
+      6,
+      2
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "COM",
+    "nombre": "Mesita",
+    "pos": [
+      3,
+      8,
+      2,
+      1
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Mesa larga",
+    "pos": [
+      7,
+      5,
+      8,
+      2
+    ],
+    "solido": true,
+    "en_futuro": "roto"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      8,
+      4,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      11,
+      4,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      14,
+      4,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      8,
+      7,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      10,
+      7,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      12,
+      7,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      14,
+      7,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Silla",
+    "pos": [
+      15,
+      5,
+      1,
+      1
+    ],
+    "solido": true,
+    "en_futuro": "caído"
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Ganchos de tazas",
+    "pos": [
+      1,
+      1,
+      3,
+      1
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Pizarra de turnos",
+    "pos": [
+      10,
+      1,
+      4,
+      1
+    ],
+    "solido": true,
+    "en_futuro": null
+  },
+  {
+    "sala": "SCO",
+    "nombre": "Dispensador de agua",
+    "pos": [
+      19,
+      1,
+      1,
+      2
+    ],
+    "solido": true,
+    "en_futuro": null
+  }
+]

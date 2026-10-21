@@ -3,6 +3,8 @@ extends Node2D
 ## Se dibuja si el núcleo dice que se ve (activo, en su tiempo, no desdibujado y con luz suficiente).
 ## Los objetos que ocupan el mismo lugar (por ejemplo, la tijera en los tres tiempos) tienen el mismo color.
 ## La consola de NORA es un solo objeto que agrupa todas las conversaciones (MAN_N1…N13).
+## Los objetos "ocultos" (columna oculto) no se dibujan ni se pueden elegir: solo marcan el lugar
+## al que camina una cinemática forzada.
 
 const TILE := 16
 
@@ -34,7 +36,7 @@ func _ready() -> void:
 ## Id que se usaría al interactuar ahora ("" = ninguno). En la consola, la primera conversación disponible.
 func id_usable() -> String:
 	for id in ids:
-		if Estado.se_puede_usar(id):
+		if not _oculto(id) and Estado.se_puede_usar(id):
 			return id
 	return ""
 
@@ -42,7 +44,7 @@ func id_usable() -> String:
 ## Id para explicar por qué no se puede usar (el primero que se ve y no está usado).
 func id_visible_pendiente() -> String:
 	for id in ids:
-		if Estado.se_ve(id) and not Estado.obj[id]["usado"] and not Estado.es_solo_visual(id):
+		if not _oculto(id) and Estado.se_ve(id) and not Estado.obj[id]["usado"] and not Estado.es_solo_visual(id):
 			return id
 	return ""
 
@@ -64,9 +66,13 @@ func se_ve() -> bool:
 	if es_consola:
 		return Estado.sala_actual == "MAN" or Estado.visitadas.has("MAN")  # la consola siempre está
 	for id in ids:
-		if Estado.se_ve(id):
+		if not _oculto(id) and Estado.se_ve(id):
 			return true
 	return false
+
+
+func _oculto(id: String) -> bool:
+	return bool(Estado.objetos[id].get("oculto", false))
 
 
 func rect_global() -> Rect2:

@@ -31,6 +31,11 @@ var items: Dictionary = {}
 var audios: Dictionary = {}
 var eventos: Dictionary = {}
 var config: Dictionary = {}
+var muebles: Array = []               # fijos en todos los tiempos (solo se dibujan)
+
+## true: las interacciones forzadas se usan solas apenas se ven (simulación).
+## false: el juego las pide con siguiente_forzada() y las hace como cinemática (camina hasta el objeto).
+var forzadas_automaticas := true
 
 # ---------- estado de la partida ----------
 var turno: int = 0
@@ -66,6 +71,7 @@ func cargar_datos() -> void:
 	audios = _leer("audios")
 	eventos = _leer("eventos")
 	config = _leer("config")
+	muebles = _leer("muebles")
 
 
 func _leer(nombre: String):
@@ -118,6 +124,10 @@ func empezar_turno() -> void:
 	procesar_forzadas()
 
 
+func es_ultimo_turno() -> bool:
+	return turno >= cfg("turnos_alfa")
+
+
 func tiempo_de(sala: String) -> String:
 	if not guion.has(str(turno)):
 		return "presente"  # antes de empezar la partida
@@ -168,9 +178,11 @@ func _cumple_condiciones(o: Dictionary) -> bool:
 # Visibilidad e interacción
 # ============================================================
 
-## Existe en este momento: activo, de la sala, y la sala está en su tiempo.
+## Existe en este momento: activo, la sala está en su tiempo y no pasó su último turno (turnoMax).
 func existe(id: String) -> bool:
 	var o: Dictionary = objetos[id]
+	if o.get("turno_max") != null and turno > int(o["turno_max"]):
+		return false
 	return obj[id]["activo"] and o["tiempo"] == tiempo_de(o["sala"])
 
 
@@ -268,8 +280,18 @@ func _evento(id: String) -> void:
 	evento_especial.emit(id)
 
 
-## Usa solas las interacciones forzadas visibles en la sala actual.
+## Primera interacción forzada pendiente en la sala actual ("" = ninguna). La usa el juego para las cinemáticas.
+func siguiente_forzada() -> String:
+	for id in objetos_visibles(sala_actual):
+		if objetos[id]["forzada"] and not obj[id]["usado"]:
+			return id
+	return ""
+
+
+## Usa solas las interacciones forzadas visibles en la sala actual (solo en modo automático).
 func procesar_forzadas() -> void:
+	if not forzadas_automaticas:
+		return
 	var hubo := true
 	while hubo:
 		hubo = false
@@ -296,10 +318,14 @@ func conectadas(a: String, b: String) -> bool:
 	return false
 
 
-## Costo de moverse: 0 a mando; si no, 3 (o 2 si la sala de ORIGEN está a luz máxima).
+## Costo de moverse: 0 a mando o si es la vuelta de una conexión con vuelta_gratis;
+## si no, 3 (o 2 si la sala de ORIGEN está a luz máxima).
 func costo_mover(destino: String) -> int:
 	if destino == SALA_INICIO:
 		return cfg("costo_volver_a_mando")
+	for c in conexiones:
+		if c[0] == destino and c[1] == sala_actual and c.size() > 2 and c[2]:
+			return 0
 	if int(luz[sala_actual]) == 3:
 		return cfg("costo_cruzar_desde_luz_max")
 	return cfg("costo_cruzar_puerta")

@@ -7,6 +7,9 @@ const TAMANO := Vector2(10, 14)
 
 var ruta := PackedVector2Array()
 var bloqueado := false  # por ejemplo, mientras hay un diálogo abierto
+var cinematica := false  # camina solo siguiendo la ruta; las teclas no lo mueven
+var objetivo := Rect2()     # si se va hacia un objeto: se frena apenas queda a distancia de interactuar
+var alcance_objetivo := 0.0
 var _trabado := 0.0  # tiempo sin avanzar siguiendo una ruta (por ejemplo, contra una barrera)
 
 
@@ -23,8 +26,10 @@ func _ready() -> void:
 	add_child(forma)
 
 
-func seguir(nueva_ruta: PackedVector2Array) -> void:
+func seguir(nueva_ruta: PackedVector2Array, hacia := Rect2(), alcance := 0.0) -> void:
 	ruta = nueva_ruta
+	objetivo = hacia
+	alcance_objetivo = alcance
 	_trabado = 0.0
 	queue_redraw()
 
@@ -39,14 +44,18 @@ func _physics_process(delta: float) -> void:
 	if bloqueado:
 		velocity = Vector2.ZERO
 		return
-	var dir := Vector2(
-		_tecla(KEY_D, KEY_RIGHT) - _tecla(KEY_A, KEY_LEFT),
-		_tecla(KEY_S, KEY_DOWN) - _tecla(KEY_W, KEY_UP))
+	var dir := Vector2.ZERO
+	if not cinematica:
+		dir = Vector2(
+			_tecla(KEY_D, KEY_RIGHT) - _tecla(KEY_A, KEY_LEFT),
+			_tecla(KEY_S, KEY_DOWN) - _tecla(KEY_W, KEY_UP))
 	if dir != Vector2.ZERO:
 		if not ruta.is_empty():
 			detener()
 		velocity = dir.normalized() * VELOCIDAD
 	elif not ruta.is_empty():
+		if alcance_objetivo > 0 and objetivo.grow(alcance_objetivo).has_point(position):
+			ruta.clear()  # ya llegó al objeto
 		while not ruta.is_empty() and position.distance_to(ruta[0]) < 2.0:
 			ruta.remove_at(0)
 		if ruta.is_empty():
@@ -60,7 +69,7 @@ func _physics_process(delta: float) -> void:
 	# Si sigue una ruta y no avanza (barrera cerrada), la abandona.
 	if not ruta.is_empty():
 		_trabado = _trabado + delta if position.distance_to(antes) < VELOCIDAD * delta * 0.25 else 0.0
-		if _trabado > 0.3:
+		if _trabado > (0.12 if ruta.size() == 1 else 0.3):
 			detener()
 	queue_redraw()
 

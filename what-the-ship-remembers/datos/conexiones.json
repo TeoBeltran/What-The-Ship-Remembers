@@ -1,14 +1,17 @@
 [
   [
     "MAN",
-    "COM"
+    "COM",
+    true
   ],
   [
     "COM",
-    "PTA"
+    "PTA",
+    true
   ],
   [
     "COM",
-    "SCO"
+    "SCO",
+    true
   ]
 ]

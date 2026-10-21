@@ -1,8 +1,9 @@
 extends CanvasLayer
-## Interfaz en greybox (pasos 3 y 4): estado arriba, caja de diálogo, avisos, indicación para
-## interactuar y menú de pausa (Esc, por ahora solo visual).
+## Interfaz en greybox (pasos 3 a 5): estado arriba, caja de diálogo (con preguntas de opciones),
+## avisos, indicación para interactuar, fundido a negro entre turnos y menú de pausa (Esc).
 
 signal dialogo_terminado
+signal respuesta(indice: int)
 
 const NOMBRE_HABLANTE := {"PERSONAJE": "Yo", "NORA": "NORA"}
 const NOMBRE_AUDIO := {"estatica": "estática de radio", "chisporroteo": "chisporroteo eléctrico"}
@@ -16,9 +17,15 @@ var caja: PanelContainer
 var caja_hablante: Label
 var caja_texto: Label
 var menu: Control
+var caja_pie: Label
+var caja_opciones: HBoxContainer
+var negro: ColorRect
+var negro_texto: Label
 
 var _cola: Array = []          # líneas pendientes {hablante, texto}
 var _tiempo_mensaje := 0.0
+var _pregunta := false
+var _seleccion := 0
 
 
 func _ready() -> void:
@@ -39,6 +46,7 @@ func _ready() -> void:
 	avisos.alignment = BoxContainer.ALIGNMENT_BEGIN
 	add_child(avisos)
 	_crear_caja()
+	_crear_negro()
 	_crear_menu()
 
 
@@ -108,12 +116,17 @@ func _crear_caja() -> void:
 	caja_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja_texto.custom_minimum_size = Vector2(540, 0)
 	v.add_child(caja_texto)
-	var pie := Label.new()
-	pie.text = "E / Espacio / click para seguir"
-	pie.add_theme_font_size_override("font_size", 8)
-	pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
-	pie.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	v.add_child(pie)
+	caja_opciones = HBoxContainer.new()
+	caja_opciones.add_theme_constant_override("separation", 40)
+	caja_opciones.alignment = BoxContainer.ALIGNMENT_CENTER
+	caja_opciones.visible = false
+	v.add_child(caja_opciones)
+	caja_pie = Label.new()
+	caja_pie.text = "E / Espacio / click para seguir"
+	caja_pie.add_theme_font_size_override("font_size", 8)
+	caja_pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
+	caja_pie.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	v.add_child(caja_pie)
 	caja.visible = false
 	add_child(caja)
 
@@ -144,8 +157,99 @@ func _siguiente() -> void:
 
 
 func avanzar_dialogo() -> void:
-	if caja.visible:
+	if caja.visible and not _pregunta:
 		_siguiente()
+
+
+# ---------------- preguntas con opciones ----------------
+
+## Muestra una línea con opciones (←/→ o A/D para elegir, E/Enter/Espacio o click para confirmar).
+## Emite respuesta(indice) al elegir.
+func preguntar(linea: Dictionary, opciones: Array) -> void:
+	_cola.clear()
+	for b in caja_opciones.get_children():
+		b.queue_free()
+	# Cada opción: una marca ">" de ancho fijo (solo se prende la elegida) + el botón. El texto nunca se mueve.
+	for i in opciones.size():
+		var fila := HBoxContainer.new()
+		fila.add_theme_constant_override("separation", 4)
+		var marca := Label.new()
+		marca.text = ">"
+		marca.custom_minimum_size = Vector2(8, 0)
+		marca.add_theme_font_size_override("font_size", 11)
+		marca.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		fila.add_child(marca)
+		var b := Button.new()
+		b.text = opciones[i]
+		b.focus_mode = Control.FOCUS_NONE
+		b.custom_minimum_size = Vector2(110, 0)
+		b.add_theme_font_size_override("font_size", 11)
+		b.pressed.connect(func(): _elegir(i))
+		b.mouse_entered.connect(func(): _seleccion = i; _marcar())
+		fila.add_child(b)
+		caja_opciones.add_child(fila)
+	_cola.append(linea)
+	_siguiente()
+	_pregunta = true
+	_seleccion = 0
+	caja_opciones.visible = true
+	caja_pie.text = "←/→ elegir · E / Enter confirmar"
+	_marcar.call_deferred()
+
+
+func pregunta_activa() -> bool:
+	return _pregunta
+
+
+func mover_seleccion(paso: int) -> void:
+	var n := caja_opciones.get_child_count()
+	_seleccion = posmod(_seleccion + paso, n)
+	_marcar()
+
+
+func confirmar_pregunta() -> void:
+	_elegir(_seleccion)
+
+
+func _marcar() -> void:
+	for i in caja_opciones.get_child_count():
+		var marca := caja_opciones.get_child(i).get_child(0) as Label
+		marca.modulate.a = 1.0 if i == _seleccion else 0.0
+
+
+func _elegir(i: int) -> void:
+	if not _pregunta:
+		return
+	_pregunta = false
+	caja_opciones.visible = false
+	caja_pie.text = "E / Espacio / click para seguir"
+	caja.visible = false
+	respuesta.emit(i)
+
+
+# ---------------- fundido a negro ----------------
+
+func _crear_negro() -> void:
+	negro = ColorRect.new()
+	negro.color = Color.BLACK
+	negro.size = Vector2(640, 360)
+	negro.modulate.a = 0.0
+	negro.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	negro_texto = Label.new()
+	negro_texto.size = Vector2(640, 360)
+	negro_texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	negro_texto.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	negro_texto.add_theme_font_size_override("font_size", 16)
+	negro.add_child(negro_texto)
+	add_child(negro)
+
+
+## Funde a negro (a = 1) o vuelve (a = 0). Devuelve el tween para esperarlo con await.
+func fundido(a: float, texto := "", duracion := 0.8) -> Tween:
+	negro_texto.text = texto
+	var t := create_tween()
+	t.tween_property(negro, "modulate:a", a, duracion)
+	return t
 
 
 # ============================================================

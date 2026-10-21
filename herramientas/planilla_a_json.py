@@ -20,8 +20,17 @@ CAMPOS_COND = {"Usado", "Activo"}
 # Cadena de la tijera: estos objetos y todo lo que los activa deben tener LuzM <= 2
 CADENA_TIJERA = ["COM_O"]
 # Objetos clave (⭐): deben poder usarse (o verse, si son forzados) dentro de los 12 turnos
-CLAVE = ["MAN_A", "MAN_N4", "MAN_N5", "COM_E", "COM_H", "COM_J", "COM_L", "COM_M", "COM_O",
+CLAVE = ["MAN_A", "MAN_N4", "MAN_N5", "COM_E", "COM_H", "COM_J", "COM_L", "COM_R", "COM_O", "COM_S",
          "COM_Q", "SCO_D", "SCO_J", "SCO_O", "PTA_A"]
+# Orden de la tijera (21/10/2026): T6 presente "pensé que la dejé acá" → T7 futuro se agarra →
+# T9 pasado está otra vez (investigarla es opcional) → T10 presente: diálogo obligatorio del bolsillo
+# (solo si no se investigó en el pasado).
+ORDEN_TIJERA = ["COM_R", "COM_O", "COM_S"]
+# Interacciones opcionales que la simulación del recorrido mínimo NO hace (investigar la tijera del pasado
+# cancela el diálogo obligatorio del presente).
+OPCIONALES_SIM = {"COM_M"}
+# Textos que usa el código directamente (no un objeto)
+TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI"]
 
 errores, avisos = [], []
 def err(m): errores.append(m)
@@ -143,9 +152,9 @@ def main():
                 err(f"conexiones fila {r['_fila']}: la sala '{x}' no existe")
         if a == b:
             err(f"conexiones fila {r['_fila']}: conecta una sala consigo misma")
-        conexiones.append([a, b])
+        conexiones.append([a, b, si_no(r.get("vuelta_gratis"))])
     for s in salas:
-        if not any(s in c for c in conexiones):
+        if not any(s in c[:2] for c in conexiones):
             err(f"conexiones: la sala {s} no está conectada con ninguna")
 
     # ---------- objetos ----------
@@ -201,19 +210,42 @@ def main():
             "tipo_cond": tipo if conds else None, "condiciones": conds, "disparadores": disps,
             "pos": [a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto")],
             "nombre": r.get("nombre"),
+            "turno_max": a_int(r["turnoMax"], donde, "turnoMax") if r.get("turnoMax") is not None else None,
+            "oculto": si_no(r.get("oculto")),
         }
+        o = objetos[oid]
+        if o["turno_max"] is not None and turno is not None and o["turno_max"] < turno:
+            err(f"{donde}: turnoMax ({o['turno_max']}) es menor que turnoM ({turno})")
+        if o["oculto"] and not o["forzada"]:
+            err(f"{donde}: es oculto pero no es forzada (nunca se podría usar)")
+
+    # ---------- muebles (fijos en todos los tiempos) ----------
+    muebles = []
+    for r in leer_hoja(wb, "muebles"):
+        donde = f"muebles fila {r['_fila']}"
+        if r["sala"] not in salas:
+            err(f"{donde}: sala '{r['sala']}' no existe"); continue
+        if not r.get("nombre"):
+            err(f"{donde}: falta el nombre")
+        en_futuro = r.get("en_futuro")
+        if en_futuro not in (None, "caído", "roto"):
+            err(f"{donde}: en_futuro tiene que ser caído, roto o vacío (vale {en_futuro!r})")
+        muebles.append({"sala": r["sala"], "nombre": r.get("nombre"),
+                        "pos": [a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto")],
+                        "solido": si_no(r.get("solido")), "en_futuro": en_futuro})
 
     # ---------- posiciones (tiles dentro de la sala) ----------
     TAM_SALAS = {"MAN": (20, 12), "COM": (18, 12), "SCO": (22, 12), "PTA": (10, 8)}  # escenas/salas/*.tscn
-    for oid, o in objetos.items():
+    cosas = [(f"objeto {oid}", o) for oid, o in objetos.items()] + [(f"mueble {m['nombre']}", m) for m in muebles]
+    for quien, o in cosas:
         x, y, w, h = o["pos"]
         if None in (x, y, w, h):
             continue
         if w < 1 or h < 1:
-            err(f"objeto {oid}: ancho y alto tienen que ser al menos 1")
+            err(f"{quien}: ancho y alto tienen que ser al menos 1")
         tam = TAM_SALAS.get(o["sala"])
         if tam and (x < 0 or y < 0 or x + w > tam[0] or y + h > tam[1]):
-            err(f"objeto {oid}: la posición ({x},{y},{w}x{h}) se sale de la sala {o['sala']} ({tam[0]}x{tam[1]} tiles)")
+            err(f"{quien}: la posición ({x},{y},{w}x{h}) se sale de la sala {o['sala']} ({tam[0]}x{tam[1]} tiles)")
 
     # ---------- referencias ----------
     usados = {"textos": set(), "anotaciones": set(), "items": set(), "audios": set(), "eventos": set()}
@@ -246,6 +278,10 @@ def main():
             err(f"objeto {oid}: es forzada pero no tiene disparadores")
         if o["turno_min"] is not None and not 1 <= o["turno_min"] <= n_turnos:
             aviso(f"objeto {oid}: turnoM {o['turno_min']} está fuera de los turnos del Alfa")
+    for tid in TEXTOS_SISTEMA:
+        if tid not in textos:
+            err(f"textos: falta '{tid}' (lo usa el código)")
+        usados["textos"].add(tid)
     for nombre, tabla in (("textos", textos), ("anotaciones", anotaciones), ("items", items),
                           ("audios", audios), ("eventos", eventos)):
         for k in tabla:
@@ -310,10 +346,12 @@ def main():
                 e = est[oid]
                 if o["sala"] not in abiertas or guion[t][o["sala"]] != o["tiempo"]:
                     continue
+                if o["turno_max"] is not None and t > o["turno_max"]:
+                    continue
                 if not e["activo"] or e["desdibujado"] or luz_sala(o["sala"]) < o["luz_min"]:
                     continue
                 primera_vista.setdefault(oid, t)
-                if e["usado"] or not o["disparadores"]:
+                if e["usado"] or not o["disparadores"] or oid in OPCIONALES_SIM:
                     continue
                 e["usado"] = True
                 primer_uso[oid] = t
@@ -335,16 +373,16 @@ def main():
     for oid, o in objetos.items():
         if oid not in primera_vista and (o["luz_min"] or 0) <= (salas[o["sala"]]["luz_max_alfa"] or 0):
             aviso(f"objeto {oid}: nunca llega a verse en el Alfa (tiempo {o['tiempo']}, condiciones o guion)")
-        elif oid in primera_vista and o["disparadores"] and oid not in primer_uso:
+        elif oid in primera_vista and o["disparadores"] and oid not in primer_uso and oid not in OPCIONALES_SIM:
             aviso(f"objeto {oid}: se ve pero nunca se puede usar")
-    # La tijera del futuro solo puede aparecer después de ver la del pasado, y en un turno posterior
-    if "COM_O" in primer_uso and "COM_M" in primer_uso and primer_uso["COM_O"] <= primer_uso["COM_M"]:
-        err(f"la tijera del futuro (COM_O, T{primer_uso['COM_O']}) aparece antes o junto con la del pasado (COM_M, T{primer_uso['COM_M']})")
-    if "COM_O" in primer_uso and primer_uso["COM_O"] >= n_turnos:
-        err("la tijera del futuro (COM_O) tiene que agarrarse antes del último turno")
+    # La tijera: cada paso en un turno posterior al anterior
+    pasos = [(oid, primer_uso.get(oid)) for oid in ORDEN_TIJERA]
+    for (a, ta), (b, tb) in zip(pasos, pasos[1:]):
+        if ta and tb and tb <= ta:
+            err(f"tijera: {b} (T{tb}) tiene que pasar después de {a} (T{ta})")
 
     return reporte({"uso": primer_uso, "vista": primera_vista, "objetos": objetos,
-                    "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config)})
+                    "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles)})
 
 
 def reporte(sim):
@@ -352,7 +390,7 @@ def reporte(sim):
     print("VALIDACIÓN DE LA PLANILLA DEL ALFA")
     print("=" * 60)
     if sim:
-        cad = ["SCO_D", "SCO_J", "SCO_O", "MAN_N4", "MAN_A", "COM_E", "COM_H", "COM_L", "COM_J", "COM_M", "COM_N", "COM_O"]
+        cad = ["SCO_D", "SCO_J", "SCO_O", "MAN_N4", "MAN_A", "COM_E", "COM_H", "COM_L", "COM_R", "COM_O", "COM_M", "COM_S"]
         print("\nRecorrido mínimo (simulación sin energía, en qué turno se puede usar/ver cada cosa):")
         for oid in cad:
             u = sim["uso"].get(oid)
@@ -368,11 +406,11 @@ def reporte(sim):
     if errores:
         print("\nNo se escribieron los JSON. Corregí los errores y volvé a correrlo.")
         return 1
-    objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config = sim["datos"]
+    objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles = sim["datos"]
     SALIDA.mkdir(parents=True, exist_ok=True)
     archivos = {"objetos": objetos, "salas": salas, "guion": {str(k): v for k, v in guion.items()}, "conexiones": conexiones,
                 "textos": textos, "anotaciones": anotaciones, "items": items, "audios": audios,
-                "eventos": eventos, "config": config}
+                "eventos": eventos, "config": config, "muebles": muebles}
     for nombre, data in archivos.items():
         (SALIDA / f"{nombre}.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nOK: {len(archivos)} archivos JSON escritos en {SALIDA.relative_to(RAIZ)}")

@@ -218,6 +218,14 @@ func _armar_grilla() -> void:
 						ok = false
 						break
 			grilla.set_point_solid(id, not ok)
+	# Muebles sólidos: sus celdas (con un margen para el cuerpo del personaje) no se pisan.
+	for c in salas:
+		for r in salas[c].rects_solidos():
+			var g: Rect2 = r.grow(5)
+			for x in range(int(floor(g.position.x / CELDA)), int(ceil(g.end.x / CELDA))):
+				for y in range(int(floor(g.position.y / CELDA)), int(ceil(g.end.y / CELDA))):
+					if grilla.is_in_bounds(x, y):
+						grilla.set_point_solid(Vector2i(x, y), true)
 
 
 ## Camino desde "desde" hasta el punto libre más cercano a "hasta" (en px de la nave).
@@ -235,12 +243,44 @@ func camino(desde: Vector2, hasta: Vector2) -> PackedVector2Array:
 	return puntos
 
 
+## Camino hasta la celda libre más cercana a un rectángulo (un objeto, quizás sobre un mueble).
+func camino_a_rect(desde: Vector2, r: Rect2) -> PackedVector2Array:
+	var c := Vector2i((r.get_center() / CELDA).floor())
+	var mejor = null
+	var mejor_d := INF
+	for dx in range(-10, 11):
+		for dy in range(-10, 11):
+			var id := c + Vector2i(dx, dy)
+			if grilla.is_in_boundsv(id) and not grilla.is_point_solid(id):
+				var p := Vector2(id) * CELDA + Vector2(CELDA, CELDA) / 2.0
+				var cerca := Vector2(clampf(p.x, r.position.x, r.end.x), clampf(p.y, r.position.y, r.end.y))
+				# distancia al borde del objeto; a igualdad, la más cercana al centro
+				var d := p.distance_to(cerca) * 1000.0 + p.distance_to(r.get_center())
+				if d < mejor_d:
+					mejor = id
+					mejor_d = d
+	var a = _celda_libre(desde)
+	if a == null or mejor == null:
+		return PackedVector2Array()
+	var puntos := PackedVector2Array()
+	for id in grilla.get_id_path(a, mejor):
+		puntos.append(Vector2(id) * CELDA + Vector2(CELDA, CELDA) / 2.0)
+	if puntos.size() > 0:
+		puntos.remove_at(0)
+	return puntos
+
+
+## Celda libre más cercana al punto (distancia real, hasta 8 celdas alrededor).
 func _celda_libre(punto: Vector2):
 	var c := Vector2i((punto / CELDA).floor())
-	for radio in range(0, 6):
-		for dx in range(-radio, radio + 1):
-			for dy in range(-radio, radio + 1):
-				var id := c + Vector2i(dx, dy)
-				if grilla.is_in_boundsv(id) and not grilla.is_point_solid(id):
-					return id
-	return null
+	var mejor = null
+	var mejor_d := INF
+	for dx in range(-8, 9):
+		for dy in range(-8, 9):
+			var id := c + Vector2i(dx, dy)
+			if grilla.is_in_boundsv(id) and not grilla.is_point_solid(id):
+				var d := (Vector2(id) * CELDA + Vector2(CELDA, CELDA) / 2.0).distance_squared_to(punto)
+				if d < mejor_d:
+					mejor = id
+					mejor_d = d
+	return mejor
