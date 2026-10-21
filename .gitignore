@@ -1,0 +1,11 @@
+# Ejecutable de Godot (no se sube al repo; se descarga de godotengine.org)
+*.exe
+*.zip
+
+# Archivos generados por Godot
+.godot/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store

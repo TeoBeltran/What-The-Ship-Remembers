@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[node name="PruebaPaso0" type="Node2D"]
+
+[node name="Fondo" type="ColorRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="Personaje" type="ColorRect" parent="."]
+offset_left = 560.0
+offset_top = 280.0
+offset_right = 592.0
+offset_bottom = 344.0
+color = Color(1, 1, 1, 1)
+
+[node name="Texto" type="Label" parent="."]
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 640.0
+offset_bottom = 80.0
+text = "Paso 0 OK: Claude puede escribir en la carpeta del proyecto."
