@@ -6,7 +6,8 @@ extends Node2D
 ## Los objetos "ocultos" (columna oculto) no se dibujan ni se pueden elegir: solo marcan el lugar
 ## al que camina una cinemática forzada.
 
-const TILE := 16
+const TILE := Medidas.TILE
+const E := Medidas.ESCALA
 
 var ids: Array[String] = []   # un id, o varios si es la consola de NORA
 var rect := Rect2()           # en coordenadas de la sala
@@ -87,7 +88,7 @@ func _draw() -> void:
 	if id_visible_pendiente() == "":
 		c = c.darkened(0.35)
 	draw_rect(rect, c)
-	draw_rect(rect, c.darkened(0.5), false, 1.0)
+	draw_rect(rect, c.darkened(0.5), false, E)
 	if mostrar_id:
 		var texto := "NORA" if es_consola else ids[0]
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(0, -2), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color.YELLOW)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(0, -2 * E), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, int(8 * E), Color.YELLOW)

@@ -2,8 +2,9 @@ extends CharacterBody2D
 ## Personaje en greybox (paso 3): rectángulo blanco.
 ## Se mueve con flechas/WASD o siguiendo una ruta (click derecho). Las teclas cancelan la ruta.
 
-const VELOCIDAD := 90.0
-const TAMANO := Vector2(10, 14)
+const E := Medidas.ESCALA
+const VELOCIDAD := 90.0 * E   # ~5,6 tiles por segundo
+const TAMANO := Vector2(10, 14) * E
 
 var ruta := PackedVector2Array()
 var bloqueado := false  # por ejemplo, mientras hay un diálogo abierto
@@ -56,7 +57,7 @@ func _physics_process(delta: float) -> void:
 	elif not ruta.is_empty():
 		if alcance_objetivo > 0 and objetivo.grow(alcance_objetivo).has_point(position):
 			ruta.clear()  # ya llegó al objeto
-		while not ruta.is_empty() and position.distance_to(ruta[0]) < 2.0:
+		while not ruta.is_empty() and position.distance_to(ruta[0]) < 2.0 * E:
 			ruta.remove_at(0)
 		if ruta.is_empty():
 			velocity = Vector2.ZERO
@@ -83,5 +84,5 @@ func _draw() -> void:
 	# Destino del click derecho: una crucecita.
 	if not ruta.is_empty():
 		var d := to_local(ruta[ruta.size() - 1])
-		draw_line(d + Vector2(-3, -3), d + Vector2(3, 3), Color(1, 1, 1, 0.6))
-		draw_line(d + Vector2(-3, 3), d + Vector2(3, -3), Color(1, 1, 1, 0.6))
+		draw_line(d + Vector2(-3, -3) * E, d + Vector2(3, 3) * E, Color(1, 1, 1, 0.6), E)
+		draw_line(d + Vector2(-3, 3) * E, d + Vector2(3, -3) * E, Color(1, 1, 1, 0.6), E)

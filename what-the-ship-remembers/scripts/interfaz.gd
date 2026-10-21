@@ -1,9 +1,11 @@
 extends CanvasLayer
 ## Interfaz en greybox (pasos 3 a 5): estado arriba, caja de diálogo (con preguntas de opciones),
 ## avisos, indicación para interactuar, fundido a negro entre turnos y menú de pausa (Esc).
+## Paso 6: panel de luz (L) para repartir la capacidad entre las salas. En el paso 7 pasa al mapa (Tab).
 
 signal dialogo_terminado
 signal respuesta(indice: int)
+signal luz_pedida(sala: String, nivel: int)  # el jugador quiere cambiar la luz desde el panel
 
 const NOMBRE_HABLANTE := {"PERSONAJE": "Yo", "NORA": "NORA"}
 const NOMBRE_AUDIO := {"estatica": "estática de radio", "chisporroteo": "chisporroteo eléctrico"}
@@ -30,6 +32,9 @@ var _seleccion := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# La interfaz está pensada a 640x360 y se agranda a la resolución real (1920x1080 → x3).
+	var escala: float = get_viewport().get_visible_rect().size.y / Medidas.UI_BASE.y
+	scale = Vector2(escala, escala)
 	estado = _label(Vector2(8, 4), 12)
 	mensaje = _label(Vector2(8, 284), 12)
 	mensaje.size.x = 624
@@ -46,6 +51,7 @@ func _ready() -> void:
 	avisos.alignment = BoxContainer.ALIGNMENT_BEGIN
 	add_child(avisos)
 	_crear_caja()
+	_crear_panel_luz()
 	_crear_negro()
 	_crear_menu()
 
@@ -302,3 +308,143 @@ func abrir_menu() -> void:
 func cerrar_menu() -> void:
 	menu.visible = false
 	get_tree().paused = false
+
+
+# ============================================================
+# Panel de luz (L) — paso 6
+# ============================================================
+# Una fila por sala desbloqueada: tres cuadritos (nivel), lleno = encendido, vacío = se puede,
+# tachado = esa sala no llega (falta un arreglo o es su máximo en el Alfa).
+# ↑/↓ (W/S) elige sala · ←/→ (A/D) baja o sube · click en un cuadrito · L o Esc cierra.
+
+const COLOR_LUZ_ON := Color(0.95, 0.85, 0.45)
+const COLOR_LUZ_OFF := Color(0.25, 0.25, 0.28)
+const COLOR_LUZ_NO := Color(0.12, 0.12, 0.13)
+
+var panel_luz: PanelContainer
+var _luz_filas: VBoxContainer
+var _luz_capacidad: Label
+var _luz_salas: Array = []      # códigos de las salas que se muestran, en orden
+var _luz_nombres: Dictionary = {}
+var _luz_sel := 0
+
+
+func _crear_panel_luz() -> void:
+	panel_luz = PanelContainer.new()
+	panel_luz.position = Vector2(420, 40)
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.05, 0.05, 0.07, 0.94)
+	estilo.border_color = Color(0.6, 0.6, 0.65)
+	estilo.set_border_width_all(1)
+	estilo.set_content_margin_all(8)
+	panel_luz.add_theme_stylebox_override("panel", estilo)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	panel_luz.add_child(v)
+	var titulo := Label.new()
+	titulo.text = "LUZ DE LA NAVE"
+	titulo.add_theme_font_size_override("font_size", 11)
+	v.add_child(titulo)
+	_luz_filas = VBoxContainer.new()
+	_luz_filas.add_theme_constant_override("separation", 3)
+	v.add_child(_luz_filas)
+	_luz_capacidad = Label.new()
+	_luz_capacidad.add_theme_font_size_override("font_size", 10)
+	v.add_child(_luz_capacidad)
+	var pie := Label.new()
+	pie.text = "↑/↓ sala · ←/→ luz · L cerrar"
+	pie.add_theme_font_size_override("font_size", 8)
+	pie.add_theme_color_override("font_color", Color(0.55, 0.55, 0.6))
+	v.add_child(pie)
+	panel_luz.visible = false
+	add_child(panel_luz)
+
+
+func luz_abierta() -> bool:
+	return panel_luz.visible
+
+
+func abrir_luz(nombres: Dictionary) -> void:
+	_luz_nombres = nombres
+	_luz_salas.clear()
+	for s in Estado.salas:
+		if Estado.desbloqueadas.has(s):
+			_luz_salas.append(s)
+	_luz_salas.sort_custom(func(a, b): return int(Estado.salas[a]["numero"]) < int(Estado.salas[b]["numero"]))
+	_luz_sel = maxi(_luz_salas.find(Estado.sala_actual), 0)
+	panel_luz.visible = true
+	refrescar_luz()
+
+
+func cerrar_luz() -> void:
+	panel_luz.visible = false
+
+
+func mover_seleccion_luz(paso: int) -> void:
+	if _luz_salas.is_empty():
+		return
+	_luz_sel = posmod(_luz_sel + paso, _luz_salas.size())
+	refrescar_luz()
+
+
+## Pide subir (+1) o bajar (-1) la luz de la sala elegida.
+func cambiar_luz(paso: int) -> void:
+	if _luz_salas.is_empty():
+		return
+	var s: String = _luz_salas[_luz_sel]
+	luz_pedida.emit(s, int(Estado.luz[s]) + paso)
+
+
+func refrescar_luz() -> void:
+	if not panel_luz.visible:
+		return
+	for f in _luz_filas.get_children():
+		_luz_filas.remove_child(f)
+		f.queue_free()
+	for i in _luz_salas.size():
+		var s: String = _luz_salas[i]
+		var nivel := int(Estado.luz[s])
+		var maximo := Estado.luz_maxima(s)
+		var fila := HBoxContainer.new()
+		fila.add_theme_constant_override("separation", 4)
+		var marca := Label.new()
+		marca.text = ">" if i == _luz_sel else ""
+		marca.custom_minimum_size = Vector2(8, 0)
+		marca.add_theme_font_size_override("font_size", 10)
+		fila.add_child(marca)
+		var nombre := Label.new()
+		nombre.text = _luz_nombres.get(s, s)
+		nombre.custom_minimum_size = Vector2(92, 0)
+		nombre.add_theme_font_size_override("font_size", 10)
+		if s == Estado.sala_actual:
+			nombre.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
+		fila.add_child(nombre)
+		for n in range(1, 4):
+			var c := ColorRect.new()
+			c.custom_minimum_size = Vector2(10, 8)
+			c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			c.color = COLOR_LUZ_ON if n <= nivel else (COLOR_LUZ_OFF if n <= maximo else COLOR_LUZ_NO)
+			if n > maximo:
+				var x := Label.new()  # tachado: esa sala no llega a este nivel
+				x.text = "×"
+				x.add_theme_font_size_override("font_size", 8)
+				x.add_theme_color_override("font_color", Color(0.4, 0.4, 0.42))
+				x.position = Vector2(2, -3)
+				c.add_child(x)
+			var sala_c := s
+			var nivel_c := n
+			c.gui_input.connect(func(ev):
+				if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+					_luz_sel = _luz_salas.find(sala_c)
+					# click en el nivel que ya tiene: lo baja uno (así se puede apagar)
+					luz_pedida.emit.call_deferred(sala_c, nivel_c if int(Estado.luz[sala_c]) != nivel_c else nivel_c - 1))
+			fila.add_child(c)
+		var texto := Label.new()
+		texto.text = Estado.NOMBRES_LUZ[nivel]
+		texto.add_theme_font_size_override("font_size", 9)
+		texto.add_theme_color_override("font_color", Color(0.7, 0.7, 0.72))
+		fila.add_child(texto)
+		_luz_filas.add_child(fila)
+	var usada := Estado.capacidad_usada()
+	var total := Estado.cfg("capacidad_luz")
+	_luz_capacidad.text = "Capacidad: %d / %d   (libre %d)" % [usada, total, total - usada]

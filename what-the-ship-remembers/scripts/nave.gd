@@ -8,8 +8,9 @@ extends Node2D
 
 signal aviso(texto: String)
 
-const PARED := 8.0
-const CELDA := 8  # grilla de caminos (px)
+const PARED := float(Medidas.PARED)
+const CELDA := Medidas.CELDA  # grilla de caminos (px)
+const E := Medidas.ESCALA
 const COLOR_PISO := Color(0.42, 0.42, 0.44)
 const COLOR_PARED := Color(0.2, 0.2, 0.22)
 
@@ -95,7 +96,7 @@ func _crear_pasillo(a: String, b: String, hueco_a: Rect2, hueco_b: Rect2, horizo
 	cuerpo.add_child(barrera)
 	# Sensor alrededor de la barrera, para avisar por qué no se puede pasar.
 	var sensor := Area2D.new()
-	sensor.add_child(_forma(r_barrera.grow(6)))
+	sensor.add_child(_forma(r_barrera.grow(6 * E)))
 	add_child(sensor)
 	var pasillo := {"a": a, "b": b, "piso": piso, "paredes": lados, "barrera": barrera, "sensor": sensor, "abierto": true}
 	sensor.body_entered.connect(func(body): if body.has_method("es_personaje") and not pasillo["abierto"]: _avisar_cerrado(pasillo))
@@ -111,7 +112,7 @@ func _crear_trabadas() -> void:
 				var hueco: Rect2 = salas[c].hueco_puerta(p)
 				cuerpo.add_child(_forma(hueco))
 				var sensor := Area2D.new()
-				sensor.add_child(_forma(hueco.grow(6)))
+				sensor.add_child(_forma(hueco.grow(6 * E)))
 				add_child(sensor)
 				sensor.body_entered.connect(func(body): if body.has_method("es_personaje"): aviso.emit("No cede. Algo la traba."))
 				trabadas.append(hueco)
@@ -221,7 +222,7 @@ func _armar_grilla() -> void:
 	# Muebles sólidos: sus celdas (con un margen para el cuerpo del personaje) no se pisan.
 	for c in salas:
 		for r in salas[c].rects_solidos():
-			var g: Rect2 = r.grow(5)
+			var g: Rect2 = r.grow(5 * E)
 			for x in range(int(floor(g.position.x / CELDA)), int(ceil(g.end.x / CELDA))):
 				for y in range(int(floor(g.position.y / CELDA)), int(ceil(g.end.y / CELDA))):
 					if grilla.is_in_bounds(x, y):

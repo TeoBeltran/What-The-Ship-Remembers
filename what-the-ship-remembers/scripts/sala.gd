@@ -1,15 +1,19 @@
 extends Node2D
 ## Una sala en greybox (paso 3): piso, paredes con colisión, manchas según el tiempo, puertas y niebla.
+## Paso 6: capa de oscuridad según el nivel de luz de la sala (encima de piso, muebles y objetos;
+## debajo de las puertas y del personaje, para poder orientarse aunque esté apagada).
 ## Las salas se ubican dentro de la nave (escenas/nave.tscn); los pasillos los arma la nave.
 ## Lenguaje visual (doc 07): piso gris medio, paredes gris oscuro, vacío negro.
 ## El tiempo NUNCA se marca con un color: pasado sin manchas, presente pocas, futuro muchas y con óxido.
 
-const TILE := 16
-const PARED := 8
+const TILE := Medidas.TILE
+const PARED := Medidas.PARED
+const E := Medidas.ESCALA  # detalles chicos pensados a 16 px
 
 @export var codigo: String = "MAN"       ## Código de la sala en la planilla (MAN, COM, SCO, PTA)
-@export var ancho: int = 20              ## En tiles de 16 px
+@export var ancho: int = 20              ## En tiles
 @export var alto: int = 12
+@export var pos_tiles: Vector2i = Vector2i.ZERO  ## Ubicación en la nave, en tiles (esquina de arriba a la izquierda)
 
 const COLOR_PISO := Color(0.42, 0.42, 0.44)
 const COLOR_PARED := Color(0.2, 0.2, 0.22)
@@ -53,11 +57,13 @@ func hueco_puerta(p) -> Rect2:
 
 
 func _ready() -> void:
+	position = Vector2(pos_tiles * TILE)
 	for p in puertas():
 		p.ubicar(tamano(), PARED)
 	_crear_paredes()
 	_crear_muebles()
 	_crear_objetos()
+	_crear_oscuridad()
 	_crear_niebla()
 	actualizar_tiempo()
 	Estado.turno_empezado.connect(func(_t): actualizar_tiempo())
@@ -122,6 +128,39 @@ func _crear_objetos() -> void:
 		n.configurar(consola, Estado.objetos[consola[0]]["pos"], true)
 		add_child(n)
 		objetos_nodos.append(n)
+
+
+# ---------------- oscuridad (luz, paso 6) ----------------
+# 0 apagada: no se ve nada · 1 baja: bastante oscura · 2 media: tenue · 3 máxima: nada.
+# La luz es de la sala, no del tiempo: no cambia al cambiar de turno.
+
+const OSCURIDAD := [1.0, 0.72, 0.4, 0.0]
+
+var _oscuridad: Node2D
+var _tween_luz: Tween
+
+func _crear_oscuridad() -> void:
+	_oscuridad = Node2D.new()
+	_oscuridad.z_index = 3  # objetos 2 · oscuridad 3 · puertas 4 · personaje 5 · niebla 20
+	add_child(_oscuridad)
+	_oscuridad.draw.connect(func():
+		_oscuridad.draw_rect(Rect2(Vector2.ZERO, tamano()), Color.BLACK))
+	_oscuridad.modulate.a = _alfa_oscuridad()
+	Estado.luz_cambiada.connect(func(s, _n): if s == codigo: _animar_oscuridad())
+	Estado.sala_desbloqueada.connect(func(s): if s == codigo: _animar_oscuridad())
+	Estado.turno_empezado.connect(func(_t): _oscuridad.modulate.a = _alfa_oscuridad())
+
+
+func _alfa_oscuridad() -> float:
+	return OSCURIDAD[clampi(int(Estado.luz.get(codigo, 0)), 0, 3)]
+
+
+## La luz cambia con un fundido corto (los objetos aparecen o desaparecen al instante, debajo).
+func _animar_oscuridad() -> void:
+	if _tween_luz:
+		_tween_luz.kill()
+	_tween_luz = create_tween()
+	_tween_luz.tween_property(_oscuridad, "modulate:a", _alfa_oscuridad(), 0.35)
 
 
 # ---------------- niebla ----------------
@@ -196,19 +235,19 @@ func _generar_manchas(tiempo: String) -> void:
 		"futuro": cantidad = 40
 	for i in cantidad:
 		var grande := tiempo == "futuro" and rng.randf() < 0.35
-		var w := rng.randi_range(3, 5) if not grande else rng.randi_range(5, 12)
-		var h := rng.randi_range(2, 4) if not grande else rng.randi_range(3, 8)
-		var pos := Vector2(rng.randf_range(PARED + 2, s.x - PARED - 2 - w), rng.randf_range(PARED + 2, s.y - PARED - 2 - h))
+		var w := (rng.randi_range(3, 5) if not grande else rng.randi_range(5, 12)) * E
+		var h := (rng.randi_range(2, 4) if not grande else rng.randi_range(3, 8)) * E
+		var pos := Vector2(rng.randf_range(PARED + 2 * E, s.x - PARED - 2 * E - w), rng.randf_range(PARED + 2 * E, s.y - PARED - 2 * E - h))
 		var color := COLOR_MANCHA
 		if tiempo == "futuro":
 			var r := rng.randf()
 			color = COLOR_OXIDO if r < 0.4 else (COLOR_OXIDO_CLARO if r < 0.55 else COLOR_MANCHA_OSCURA)
-		manchas.append([Rect2(pos.floor(), Vector2(w, h)), color])
+		manchas.append([Rect2((pos / E).floor() * E, Vector2(w, h)), color])  # alineadas a la grilla de 16
 	# En el futuro también se manchan las paredes (óxido en los bordes).
 	if tiempo == "futuro":
 		for i in 14:
 			var lado := rng.randi_range(0, 3)
-			var largo := rng.randi_range(6, 20)
+			var largo := rng.randi_range(6, 20) * E
 			var r: Rect2
 			match lado:
 				0: r = Rect2(rng.randf_range(0, s.x - largo), 0, largo, PARED)
@@ -231,11 +270,11 @@ func _draw() -> void:
 		var estado = m.get("en_futuro") if futuro else null
 		var c := COLOR_MUEBLE.darkened(0.2) if estado else COLOR_MUEBLE
 		draw_rect(r, c)
-		draw_rect(r, c.darkened(0.45), false, 1.0)
+		draw_rect(r, c.darkened(0.45), false, E)
 		match estado:
 			"caído":  # silla volcada: patas hacia un costado
-				draw_line(r.position + Vector2(2, 2), r.end - Vector2(2, 2), c.darkened(0.6), 2.0)
-				draw_line(r.position + Vector2(2, r.size.y - 4), r.end - Vector2(2, 4), c.darkened(0.6), 1.0)
+				draw_line(r.position + Vector2(2, 2) * E, r.end - Vector2(2, 2) * E, c.darkened(0.6), 2.0 * E)
+				draw_line(r.position + Vector2(2 * E, r.size.y - 4 * E), r.end - Vector2(2, 4) * E, c.darkened(0.6), E)
 			"roto":  # grieta
 				var x := r.position.x + r.size.x * 0.45
-				draw_polyline(PackedVector2Array([Vector2(x, r.position.y), Vector2(x + 4, r.get_center().y), Vector2(x - 2, r.end.y)]), c.darkened(0.7), 2.0)
+				draw_polyline(PackedVector2Array([Vector2(x, r.position.y), Vector2(x + 4 * E, r.get_center().y), Vector2(x - 2 * E, r.end.y)]), c.darkened(0.7), 2.0 * E)

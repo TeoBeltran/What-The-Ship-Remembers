@@ -4,14 +4,17 @@ extends Node2D
 ## Paso 4: objetos e interacción (E, o click derecho sobre un objeto), textos, avisos.
 ## Paso 5: interacciones forzadas como cinemática (camina solo hasta el objeto y recién ahí habla),
 ##         descansar hablando con NORA (cuando no tiene nada nuevo) y fin de turno al quedarse sin energía.
+## Paso 6: luz. Panel con L para repartir la capacidad (en el paso 7 pasa al mapa); oscuridad por sala.
 ##
-## Controles: E interactuar · ruedita / I / O zoom · Esc menú
+## Controles: E interactuar · L luz · ruedita / I / O zoom · Esc menú
+## Pantalla: F11 pantalla completa
 ## Depuración (provisoria): F1 info e IDs · F2 abrir sala común · F3 recargar energía
 ##                          F4 turno siguiente · F5 cambiar la luz de la sala actual
 
 const NOMBRES := {"MAN": "Sala de mando", "COM": "Comunicaciones", "SCO": "Sala común", "PTA": "Sala de la puerta"}
 const ZOOMS := [0.75, 1.0, 1.5, 2.0]
-const ALCANCE := 14.0  # px alrededor de un objeto para poder interactuar
+const E := Medidas.ESCALA
+const ALCANCE := 14.0 * E  # px alrededor de un objeto para poder interactuar
 
 var depuracion := false
 var _zoom_i := 1
@@ -37,6 +40,11 @@ func _ready() -> void:
 	Estado.audio_reproducido.connect(ui.aviso_audio)
 	nave.aviso.connect(ui.mostrar_mensaje)
 	ui.respuesta.connect(_on_respuesta)
+	ui.luz_pedida.connect(_on_luz_pedida)
+	Estado.luz_cambiada.connect(func(_s, _n): _actualizar_hud(); ui.refrescar_luz())
+	Estado.evento_especial.connect(func(id):
+		if id == "arreglo_com":
+			ui.aviso("Comunicaciones ya puede llegar a luz máxima"))
 	Estado.forzadas_automaticas = false  # las forzadas se hacen como cinemática (ver _physics_process)
 	Estado.nueva_partida()
 
@@ -55,7 +63,7 @@ func _empezar_turno() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	personaje.bloqueado = ui.dialogo_activo() or _fin_turno
+	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta()
 	# ¿Entró a otra sala? (en los pasillos no se cambia de sala)
 	var sala: String = nave.sala_en(personaje.position)
 	if sala != "" and sala != Estado.sala_actual:
@@ -68,9 +76,9 @@ func _physics_process(_delta: float) -> void:
 	if _pendiente != null and personaje.ruta.is_empty():
 		var obj = _pendiente
 		_pendiente = null
-		if obj.rect_global().grow(ALCANCE + 4).has_point(personaje.position):
+		if obj.rect_global().grow(ALCANCE + 4 * E).has_point(personaje.position):
 			_interactuar_con(obj)
-	if ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _alfa_terminado:
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or _fin_turno or _alfa_terminado:
 		return
 	# Cinemática en curso: cuando llega (o se traba), recién ahí se dispara la interacción forzada.
 	if _cinematica != "":
@@ -107,7 +115,7 @@ func _empezar_cinematica(id: String) -> void:
 	if r.grow(ALCANCE).has_point(personaje.position):
 		personaje.detener()  # ya está al lado
 	else:
-		personaje.seguir(_camino_a_objeto(r), r, ALCANCE - 3)
+		personaje.seguir(_camino_a_objeto(r), r, ALCANCE - 3 * E)
 
 
 ## Camino hasta el lugar libre más cercano al objeto y, al final, derecho hacia el objeto
@@ -124,8 +132,10 @@ func _terminar_cinematica() -> void:
 	personaje.cinematica = false
 	personaje.detener()
 	if not Estado.interactuar(id):
-		push_warning("No se pudo hacer la forzada %s: %s" % [id, Estado.motivo_no_usable(id)])
-		Estado.obj[id]["usado"] = true  # para no quedar en un bucle
+		# Si dejó de verse (por ejemplo, se bajó la luz), no se pierde: se hace cuando se vuelva a ver.
+		if Estado.se_ve(id) and Estado.objetos[id]["sala"] == Estado.sala_actual:
+			push_warning("No se pudo hacer la forzada %s: %s" % [id, Estado.motivo_no_usable(id)])
+			Estado.obj[id]["usado"] = true  # para no quedar en un bucle
 
 
 ## Texto (opcional) → negro → turno siguiente en la sala de mando. En el último turno, fin del Alfa.
@@ -205,7 +215,7 @@ func _interactuar_con(obj) -> void:
 
 
 func _actualizar_indicacion() -> void:
-	if ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _cinematica != "":
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or _fin_turno or _cinematica != "":
 		ui.indicacion.text = ""
 		return
 	var obj = objeto_cercano()
@@ -228,7 +238,7 @@ func _actualizar_indicacion() -> void:
 ## Objeto visible bajo un punto de la nave (para el click derecho).
 func _objeto_en(punto: Vector2):
 	for obj in nave.salas[Estado.sala_actual].objetos_nodos:
-		if obj.se_ve() and obj.rect_global().grow(2).has_point(punto):
+		if obj.se_ve() and obj.rect_global().grow(2 * E).has_point(punto):
 			return obj
 	return null
 
@@ -239,13 +249,14 @@ func _objeto_en(punto: Vector2):
 
 func _actualizar_hud() -> void:
 	var sala: String = Estado.sala_actual
-	ui.estado.text = "Turno %d    Energía %d/%d    %s" % [
-		Estado.turno, Estado.energia, Estado.cfg("energia_por_turno"), NOMBRES.get(sala, sala)]
+	ui.estado.text = "Turno %d    Energía %d/%d    %s    Luz %s    Capacidad %d/%d" % [
+		Estado.turno, Estado.energia, Estado.cfg("energia_por_turno"), NOMBRES.get(sala, sala),
+		Estado.NOMBRES_LUZ[int(Estado.luz[sala])].to_lower(), Estado.capacidad_usada(), Estado.cfg("capacidad_luz")]
 	if depuracion:
 		ui.depuracion.text = "[DEPURACIÓN] Tiempo: %s · Luz: %d · Capacidad %d/%d · F2 abrir sala común · F3 energía · F4 turno · F5 luz" % [
 			Estado.tiempo_de(sala), Estado.luz[sala], Estado.capacidad_usada(), Estado.cfg("capacidad_luz")]
 	else:
-		ui.depuracion.text = "E interactuar · Click derecho moverse · Ruedita/I/O zoom · Esc menú · F1 depuración"
+		ui.depuracion.text = "E interactuar · Click derecho moverse · L luz · Ruedita/I/O zoom · Esc menú · F1 depuración"
 
 
 func _set_depuracion(valor: bool) -> void:
@@ -273,6 +284,10 @@ func _zoom(paso: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Menú de pausa
 	if event.is_action_pressed("ui_cancel"):
+		if ui.luz_abierta():
+			ui.cerrar_luz()
+			get_viewport().set_input_as_handled()
+			return
 		if ui.menu_abierto():
 			ui.cerrar_menu()
 		else:
@@ -301,6 +316,23 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Durante una cinemática o el cambio de turno no se controla al personaje.
 	if _cinematica != "" or _fin_turno:
 		return
+	# Panel de luz abierto: ↑/↓ (W/S) sala, ←/→ (A/D) nivel, L cierra. El click lo manejan los cuadritos.
+	if ui.luz_abierta():
+		if event is InputEventKey and event.pressed and not event.echo:
+			match event.keycode:
+				KEY_UP, KEY_W:
+					ui.mover_seleccion_luz(-1)
+				KEY_DOWN, KEY_S:
+					ui.mover_seleccion_luz(1)
+				KEY_LEFT, KEY_A:
+					ui.cambiar_luz(-1)
+				KEY_RIGHT, KEY_D:
+					ui.cambiar_luz(1)
+				KEY_L, KEY_E, KEY_ENTER:
+					ui.cerrar_luz()
+		elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+			ui.cerrar_luz()
+		return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
 			MOUSE_BUTTON_RIGHT:
@@ -314,7 +346,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if obj == null:
 					personaje.seguir(nave.camino(personaje.position, punto))
 				else:
-					personaje.seguir(_camino_a_objeto(obj.rect_global()), obj.rect_global(), ALCANCE - 3)
+					personaje.seguir(_camino_a_objeto(obj.rect_global()), obj.rect_global(), ALCANCE - 3 * E)
 			MOUSE_BUTTON_WHEEL_UP:
 				_zoom(1)
 			MOUSE_BUTTON_WHEEL_DOWN:
@@ -328,6 +360,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			if obj:
 				personaje.detener()
 				_interactuar_con(obj)
+		KEY_L:
+			personaje.detener()
+			_pendiente = null
+			ui.abrir_luz(NOMBRES)
 		KEY_I:
 			_zoom(1)
 		KEY_O:
@@ -349,6 +385,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				ui.mostrar_mensaje("[Depuración] Ya es el último turno del Alfa.")
 		KEY_F5:
 			_ciclar_luz()
+		KEY_F11:
+			_pantalla_completa()
 		_:
 			return
 	_actualizar_hud()
@@ -362,3 +400,25 @@ func _ciclar_luz() -> void:
 		ui.mostrar_mensaje("[Depuración] Luz de %s: %d (capacidad %d/%d)." % [s, nivel, Estado.capacidad_usada(), Estado.cfg("capacidad_luz")])
 	else:
 		ui.mostrar_mensaje("[Depuración] No se pudo: " + Estado.motivo_no_luz(s, nivel) + ". Bajá la luz de otra sala.")
+
+
+## F11: pantalla completa / ventana. A 1920x1080 en pantalla completa se ve 1:1 (cada píxel del arte, exacto).
+func _pantalla_completa() -> void:
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+## El jugador pide un nivel de luz desde el panel. No cuesta energía (01, sección 5).
+func _on_luz_pedida(sala: String, nivel: int) -> void:
+	if nivel < 0 or nivel > 3:
+		return
+	if nivel > Estado.luz_maxima(sala) and nivel <= int(Estado.salas[sala]["luz_max_alfa"]):
+		ui.mostrar_mensaje("%s no llega a luz %s todavía. Algo no está conectado." % [NOMBRES.get(sala, sala), Estado.NOMBRES_LUZ[nivel].to_lower()])
+		return
+	if nivel > Estado.luz_maxima(sala):
+		ui.mostrar_mensaje("%s no llega a luz %s." % [NOMBRES.get(sala, sala), Estado.NOMBRES_LUZ[nivel].to_lower()])
+		return
+	if not Estado.set_luz(sala, nivel):
+		ui.mostrar_mensaje("No alcanza la capacidad de luz. Bajá la luz de otra sala.")

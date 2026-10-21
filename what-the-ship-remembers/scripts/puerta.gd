@@ -2,7 +2,7 @@ extends Node2D
 ## Puerta en el borde de una sala (paso 3). Es el hueco en la pared: la nave arma el pasillo
 ## hacia la sala "destino" y decide si se puede pasar. Sin destino = puerta trabada (no se pasa).
 
-const ANCHO := 32.0
+const ANCHO := float(Medidas.ANCHO_PUERTA)
 
 @export var destino: String = ""                                   ## Sala a la que lleva (vacío = trabada)
 @export_enum("arriba", "abajo", "izquierda", "derecha") var lado: String = "derecha"
@@ -11,7 +11,7 @@ const ANCHO := 32.0
 const COLOR_ABIERTA := Color(0.55, 0.6, 0.66)
 const COLOR_BLOQUEADA := Color(0.5, 0.16, 0.16)
 
-var _grosor := 8.0
+var _grosor := float(Medidas.PARED)
 
 
 func es_puerta() -> bool:
@@ -30,6 +30,7 @@ func ubicar(tamano_sala: Vector2, grosor_pared: float) -> void:
 
 
 func _ready() -> void:
+	z_index = 4  # por encima de la oscuridad de la sala: las salidas se ven aunque esté apagada
 	Estado.sala_desbloqueada.connect(func(_s): queue_redraw())
 
 

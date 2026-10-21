@@ -378,10 +378,23 @@ func desbloquear(sala: String) -> void:
 # Luz
 # ============================================================
 
+const NOMBRES_LUZ := ["Apagada", "Baja", "Media", "Máxima"]
+
+
+## Capacidad que ocupa una sala con un nivel de luz: el nivel, salvo a luz máxima,
+## donde ocupa "capacidad_a_luz_max" (normalmente 3; hay arreglos que la bajan a 2 o 1).
+func ocupa(sala: String, nivel := -1) -> int:
+	if nivel < 0:
+		nivel = int(luz[sala])
+	if nivel == 3:
+		return int(salas[sala].get("capacidad_a_luz_max", 3))
+	return nivel
+
+
 func capacidad_usada() -> int:
 	var total := 0
 	for s in luz:
-		total += int(luz[s])
+		total += ocupa(s)
 	return total
 
 
@@ -402,7 +415,7 @@ func motivo_no_luz(sala: String, nivel: int) -> String:
 		return "nivel inválido"
 	if nivel > luz_maxima(sala):
 		return "esa sala llega como mucho a %d" % luz_maxima(sala)
-	if capacidad_usada() - int(luz[sala]) + nivel > cfg("capacidad_luz"):
+	if capacidad_usada() - ocupa(sala) + ocupa(sala, nivel) > cfg("capacidad_luz"):
 		return "no alcanza la capacidad de luz (libre: %d)" % capacidad_libre()
 	return ""
 
@@ -412,6 +425,8 @@ func motivo_no_luz(sala: String, nivel: int) -> String:
 func set_luz(sala: String, nivel: int) -> bool:
 	if motivo_no_luz(sala, nivel) != "":
 		return false
+	if int(luz[sala]) == nivel:
+		return true
 	luz[sala] = nivel
 	luz_cambiada.emit(sala, nivel)
 	if sala == sala_actual:
