@@ -1,29 +1,33 @@
 extends Node2D
-## Una sala en greybox (paso 3): piso, paredes con colisión, manchas según el tiempo, puertas y niebla.
-## Paso 6: capa de oscuridad según el nivel de luz de la sala (encima de piso, muebles y objetos;
-## debajo de las puertas y del personaje, para poder orientarse aunque esté apagada).
-## Las salas se ubican dentro de la nave (escenas/nave.tscn); los pasillos los arma la nave.
-## Lenguaje visual (doc 07): piso gris medio, paredes gris oscuro, vacío negro.
+## Una sala de la nave. Medidas en tiles, del PISO (lo caminable): las paredes van alrededor
+## (frente de 2 tiles arriba, 1 tile a los costados y abajo). El piso, las paredes, las puertas y
+## los pasillos los arma y dibuja la nave (nave.gd), a partir de estas medidas.
+## Acá se dibuja lo que va encima del piso: manchas según el tiempo y muebles; y las capas de
+## oscuridad (luz, paso 6) y niebla, que tapan las zonas de la sala que le pasa la nave.
 ## El tiempo NUNCA se marca con un color: pasado sin manchas, presente pocas, futuro muchas y con óxido.
 
 const TILE := Medidas.TILE
-const PARED := Medidas.PARED
 const E := Medidas.ESCALA  # detalles chicos pensados a 16 px
 
 @export var codigo: String = "MAN"       ## Código de la sala en la planilla (MAN, COM, SCO, PTA)
-@export var ancho: int = 20              ## En tiles
-@export var alto: int = 12
-@export var pos_tiles: Vector2i = Vector2i.ZERO  ## Ubicación en la nave, en tiles (esquina de arriba a la izquierda)
+@export var ancho: int = 20              ## Piso en tiles. PAR, para que las placas del piso no queden cortadas
+@export var alto: int = 12               ## Piso en tiles. PAR
+@export var pos_tiles: Vector2i = Vector2i.ZERO  ## Esquina de arriba a la izquierda del piso, en tiles de la nave
+@export_range(0, 15) var piso: int = 0     ## Material del piso (arte/tiles/pisos.png, ver arte_nave.gd)
+@export_range(0, 23) var pared: int = 3    ## Frente de la pared de arriba (arte/tiles/paredes.png)
+## Puertas trabadas en la pared de arriba: columna (en tiles, PAR) de la mitad izquierda de cada puerta doble.
+@export var puertas_trabadas: Array[int] = []
 
-const COLOR_PISO := Color(0.42, 0.42, 0.44)
-const COLOR_PARED := Color(0.2, 0.2, 0.22)
-const COLOR_MANCHA := Color(0.3, 0.3, 0.31)
-const COLOR_MANCHA_OSCURA := Color(0.24, 0.23, 0.22)
-const COLOR_OXIDO := Color(0.45, 0.28, 0.17)
-const COLOR_OXIDO_CLARO := Color(0.55, 0.36, 0.2)
+# Manchas semitransparentes: se ve el piso del tileset debajo.
+const COLOR_MANCHA := Color(0.12, 0.12, 0.13, 0.35)
+const COLOR_MANCHA_OSCURA := Color(0.08, 0.07, 0.06, 0.5)
+const COLOR_OXIDO := Color(0.45, 0.25, 0.12, 0.55)
+const COLOR_OXIDO_CLARO := Color(0.58, 0.36, 0.18, 0.45)
 const COLOR_MUEBLE := Color(0.31, 0.3, 0.29)  # muebles: iguales en todos los tiempos
 
 var manchas: Array = []  # [Rect2, Color]
+## Zonas de la sala (piso y sus paredes, sin los pasillos), en coordenadas de la sala. Las arma la nave.
+var zonas: Array = []
 
 
 func tamano() -> Vector2:
@@ -34,33 +38,16 @@ func centro() -> Vector2:
 	return tamano() / 2.0
 
 
-func puertas() -> Array:
-	return get_children().filter(func(n): return n.has_method("es_puerta"))
-
-
-func puerta_hacia(destino: String) -> Node:
-	for p in puertas():
-		if p.destino == destino:
-			return p
-	return null
-
-
-## Rectángulo de la sala (paredes incluidas) en coordenadas de la nave.
+## Piso de la sala en coordenadas de la nave. Estar acá adentro = estar en la sala
+## (las puertas, los pasillos y las aberturas entre sala y pasillo son del pasillo).
 func rect_global() -> Rect2:
 	return Rect2(position, tamano())
 
 
-## Hueco de una puerta en la pared, en coordenadas de la nave.
-func hueco_puerta(p) -> Rect2:
-	var t: Vector2 = p.tamano_hueco()
-	return Rect2(position + p.position - t / 2.0, t)
-
-
 func _ready() -> void:
+	if ancho % 2 or alto % 2:
+		push_warning("Sala %s: ancho y alto tienen que ser pares (placas de piso de 2x2 tiles)" % codigo)
 	position = Vector2(pos_tiles * TILE)
-	for p in puertas():
-		p.ubicar(tamano(), PARED)
-	_crear_paredes()
 	_crear_muebles()
 	_crear_objetos()
 	_crear_oscuridad()
@@ -68,6 +55,13 @@ func _ready() -> void:
 	actualizar_tiempo()
 	Estado.turno_empezado.connect(func(_t): actualizar_tiempo())
 	Estado.sala_cambiada.connect(func(_s): _niebla.queue_redraw())
+
+
+## La nave avisa qué zonas son de la sala (cuando ya armó los pasillos).
+func poner_zonas(lista: Array) -> void:
+	zonas = lista
+	_oscuridad.queue_redraw()
+	_niebla.queue_redraw()
 
 
 # ---------------- muebles (fijos en todos los tiempos) ----------------
@@ -144,7 +138,8 @@ func _crear_oscuridad() -> void:
 	_oscuridad.z_index = 3  # objetos 2 · oscuridad 3 · puertas 4 · personaje 5 · niebla 20
 	add_child(_oscuridad)
 	_oscuridad.draw.connect(func():
-		_oscuridad.draw_rect(Rect2(Vector2.ZERO, tamano()), Color.BLACK))
+		for r in zonas:
+			_oscuridad.draw_rect(r, Color.BLACK))
 	_oscuridad.modulate.a = _alfa_oscuridad()
 	Estado.luz_cambiada.connect(func(s, _n): if s == codigo: _animar_oscuridad())
 	Estado.sala_desbloqueada.connect(func(s): if s == codigo: _animar_oscuridad())
@@ -176,50 +171,13 @@ func _crear_niebla() -> void:
 		if codigo == Estado.sala_actual:
 			return
 		var color := Color(0, 0, 0, 0.6) if Estado.visitadas.has(codigo) else Color.BLACK
-		_niebla.draw_rect(Rect2(Vector2.ZERO, tamano()), color))
+		for r in zonas:
+			_niebla.draw_rect(r, color))
 
 
 func actualizar_tiempo() -> void:
 	_generar_manchas(Estado.tiempo_de(codigo))
 	queue_redraw()
-
-
-# ---------------- paredes ----------------
-
-func _crear_paredes() -> void:
-	var s := tamano()
-	var cuerpo := StaticBody2D.new()
-	add_child(cuerpo)
-	# Cada lado se arma con tramos, dejando huecos donde hay puertas.
-	for lado in ["arriba", "abajo", "izquierda", "derecha"]:
-		var horizontal: bool = lado in ["arriba", "abajo"]
-		var largo: float = s.x if horizontal else s.y
-		var huecos := []
-		for p in puertas():
-			if p.lado == lado:
-				huecos.append(Vector2(p.centro * largo - p.ANCHO / 2.0, p.centro * largo + p.ANCHO / 2.0))
-		huecos.sort_custom(func(a, b): return a.x < b.x)
-		var desde := 0.0
-		var tramos := []
-		for h in huecos:
-			tramos.append(Vector2(desde, h.x))
-			desde = h.y
-		tramos.append(Vector2(desde, largo))
-		for t in tramos:
-			if t.y - t.x <= 0:
-				continue
-			var r: Rect2
-			match lado:
-				"arriba": r = Rect2(t.x, 0, t.y - t.x, PARED)
-				"abajo": r = Rect2(t.x, s.y - PARED, t.y - t.x, PARED)
-				"izquierda": r = Rect2(0, t.x, PARED, t.y - t.x)
-				"derecha": r = Rect2(s.x - PARED, t.x, PARED, t.y - t.x)
-			var forma := CollisionShape2D.new()
-			var rect := RectangleShape2D.new()
-			rect.size = r.size
-			forma.shape = rect
-			forma.position = r.get_center()
-			cuerpo.add_child(forma)
 
 
 # ---------------- manchas por tiempo ----------------
@@ -237,30 +195,25 @@ func _generar_manchas(tiempo: String) -> void:
 		var grande := tiempo == "futuro" and rng.randf() < 0.35
 		var w := (rng.randi_range(3, 5) if not grande else rng.randi_range(5, 12)) * E
 		var h := (rng.randi_range(2, 4) if not grande else rng.randi_range(3, 8)) * E
-		var pos := Vector2(rng.randf_range(PARED + 2 * E, s.x - PARED - 2 * E - w), rng.randf_range(PARED + 2 * E, s.y - PARED - 2 * E - h))
+		var pos := Vector2(rng.randf_range(2 * E, s.x - 2 * E - w), rng.randf_range(2 * E, s.y - 2 * E - h))
 		var color := COLOR_MANCHA
 		if tiempo == "futuro":
 			var r := rng.randf()
 			color = COLOR_OXIDO if r < 0.4 else (COLOR_OXIDO_CLARO if r < 0.55 else COLOR_MANCHA_OSCURA)
 		manchas.append([Rect2((pos / E).floor() * E, Vector2(w, h)), color])  # alineadas a la grilla de 16
-	# En el futuro también se manchan las paredes (óxido en los bordes).
+	# En el futuro también se oxida la pared de arriba (abajo del frente, donde toca el piso).
 	if tiempo == "futuro":
-		for i in 14:
-			var lado := rng.randi_range(0, 3)
+		var alto_frente := Medidas.FRENTE * TILE
+		for i in 10:
+			var largo := rng.randi_range(4, 14) * E
+			var h := rng.randi_range(4, 12) * E
+			manchas.append([Rect2(rng.randf_range(0, s.x - largo), -h, largo, h), COLOR_OXIDO.darkened(0.3)])
+		for i in 4:
 			var largo := rng.randi_range(6, 20) * E
-			var r: Rect2
-			match lado:
-				0: r = Rect2(rng.randf_range(0, s.x - largo), 0, largo, PARED)
-				1: r = Rect2(rng.randf_range(0, s.x - largo), s.y - PARED, largo, PARED)
-				2: r = Rect2(0, rng.randf_range(0, s.y - largo), PARED, largo)
-				3: r = Rect2(s.x - PARED, rng.randf_range(0, s.y - largo), PARED, largo)
-			manchas.append([r.abs(), COLOR_OXIDO.darkened(0.35)])
+			manchas.append([Rect2(rng.randf_range(0, s.x - largo), -alto_frente, largo, rng.randi_range(3, 8) * E), COLOR_MANCHA_OSCURA])
 
 
 func _draw() -> void:
-	var s := tamano()
-	draw_rect(Rect2(Vector2.ZERO, s), COLOR_PARED)
-	draw_rect(Rect2(Vector2(PARED, PARED), s - Vector2(PARED, PARED) * 2), COLOR_PISO)
 	for m in manchas:
 		draw_rect(m[0], m[1])
 	# Muebles fijos (hoja muebles): están en todos los tiempos; en el futuro pueden estar caídos o rotos.

@@ -3,6 +3,8 @@ class_name Medidas
 ## Todo lo que se dibuja o choca en el mundo depende de TILE: si el arte cambiara de tamaño,
 ## se cambia TILE (y la resolución base en project.godot) y nada más.
 ## La planilla (objetos, muebles) y las salas (ancho, alto, pos_tiles) están en tiles, no en píxeles.
+## Desde el arte de pisos y paredes, todo va en la grilla de tiles: ancho, alto y posición de las
+## salas son del PISO (lo caminable); las paredes van alrededor (ver nave.gd).
 
 ## Tamaño de un tile en píxeles. El tileset del juego es de 48x48.
 const TILE := 48
@@ -11,10 +13,13 @@ const TILE := 48
 ## (grosores de línea, márgenes, velocidad) que se pensaron a 16 px.
 const ESCALA := TILE / 16.0
 
-## Grosor de las paredes (medio tile).
-const PARED := TILE / 2
+## Grosor de las paredes de los costados y de abajo (1 tile).
+const PARED := TILE
 
-## Ancho del hueco de una puerta (2 tiles).
+## Alto del frente de la pared de arriba, en tiles (se ve de frente, como en un RPG visto desde arriba).
+const FRENTE := 2
+
+## Ancho de una puerta: puerta doble, 2 tiles (dos sprites de 48x96, el de la derecha espejado).
 const ANCHO_PUERTA := TILE * 2
 
 ## Celda de la grilla de caminos del click derecho (medio tile).

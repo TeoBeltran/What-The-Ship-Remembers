@@ -1,56 +1,92 @@
 extends Node2D
-## Puerta en el borde de una sala (paso 3). Es el hueco en la pared: la nave arma el pasillo
-## hacia la sala "destino" y decide si se puede pasar. Sin destino = puerta trabada (no se pasa).
+## Puerta doble (2x2 tiles) en una pared que se ve de frente. La crea la nave (nave.gd).
+## Se dibuja: la pared de esa sala/pasillo (se ve en los 24 px de arriba), el vano oscuro y
+## dos sprites de puerta (el de la derecha espejado, para que quede simétrica).
+## Se abre sola cuando el personaje se acerca y el pasillo está abierto; si no, queda cerrada y avisa por qué.
+## Sin pasillo = puerta trabada (nunca se abre).
 
-const ANCHO := float(Medidas.ANCHO_PUERTA)
+signal aviso(texto: String)
 
-@export var destino: String = ""                                   ## Sala a la que lleva (vacío = trabada)
-@export_enum("arriba", "abajo", "izquierda", "derecha") var lado: String = "derecha"
-@export_range(0.0, 1.0) var centro: float = 0.5                    ## Posición a lo largo del lado (0 a 1)
+const T := Medidas.TILE
+const TAMANO := Vector2(Medidas.ANCHO_PUERTA, T * Medidas.FRENTE)
+const VELOCIDAD := 14.0  # cuadros por segundo
 
-const COLOR_ABIERTA := Color(0.55, 0.6, 0.66)
-const COLOR_BLOQUEADA := Color(0.5, 0.16, 0.16)
-
-var _grosor := float(Medidas.PARED)
+var pasillo = null          # Dictionary del pasillo (nave.gd), o null si está trabada
+var pared := 3              # bloque de pared que va detrás (arte_nave.gd)
+var _cuadro := 0.0
+var _cerca := 0             # personajes dentro del área de cercanía
+var _cuerpo: CollisionShape2D
 
 
 func es_puerta() -> bool:
 	return true
 
 
-## La ubica sobre el lado que corresponde (la llama la sala).
-func ubicar(tamano_sala: Vector2, grosor_pared: float) -> void:
-	_grosor = grosor_pared
-	match lado:
-		"arriba": position = Vector2(centro * tamano_sala.x, grosor_pared / 2.0)
-		"abajo": position = Vector2(centro * tamano_sala.x, tamano_sala.y - grosor_pared / 2.0)
-		"izquierda": position = Vector2(grosor_pared / 2.0, centro * tamano_sala.y)
-		"derecha": position = Vector2(tamano_sala.x - grosor_pared / 2.0, centro * tamano_sala.y)
-	queue_redraw()
+func rect_global() -> Rect2:
+	return Rect2(position, TAMANO)
+
+
+func trabada() -> bool:
+	return pasillo == null
+
+
+func se_puede_pasar() -> bool:
+	return pasillo != null and pasillo["abierto"]
 
 
 func _ready() -> void:
 	z_index = 4  # por encima de la oscuridad de la sala: las salidas se ven aunque esté apagada
-	Estado.sala_desbloqueada.connect(func(_s): queue_redraw())
+	var cuerpo := StaticBody2D.new()
+	add_child(cuerpo)
+	_cuerpo = _forma(Rect2(Vector2.ZERO, TAMANO))
+	cuerpo.add_child(_cuerpo)
+	# Área de cercanía: abre la puerta, o avisa por qué no se puede pasar.
+	var area := Area2D.new()
+	area.add_child(_forma(Rect2(Vector2.ZERO, TAMANO).grow(T * 0.75)))
+	add_child(area)
+	area.body_entered.connect(func(b):
+		if b.has_method("es_personaje"):
+			_cerca += 1
+			if trabada():
+				aviso.emit("No cede. Algo la traba.")
+			elif not se_puede_pasar():
+				aviso.emit("No puedo pasar: " + str(pasillo.get("motivo", "")) + "."))
+	area.body_exited.connect(func(b):
+		if b.has_method("es_personaje"):
+			_cerca = maxi(0, _cerca - 1))
 
 
-## Hacia afuera de la sala.
-func normal_afuera() -> Vector2:
-	match lado:
-		"arriba": return Vector2.UP
-		"abajo": return Vector2.DOWN
-		"izquierda": return Vector2.LEFT
-	return Vector2.RIGHT
+func _forma(r: Rect2) -> CollisionShape2D:
+	var forma := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = r.size
+	forma.shape = rect
+	forma.position = r.get_center()
+	return forma
 
 
-func bloqueada() -> bool:
-	return destino == "" or not Estado.desbloqueadas.has(destino)
-
-
-func tamano_hueco() -> Vector2:
-	return Vector2(ANCHO, _grosor) if lado in ["arriba", "abajo"] else Vector2(_grosor, ANCHO)
+func _process(delta: float) -> void:
+	var abrir := _cerca > 0 and se_puede_pasar()
+	var antes := int(_cuadro)
+	if abrir:
+		_cuadro = minf(_cuadro + delta * VELOCIDAD, ArteNave.CUADROS_PUERTA - 1)
+	else:
+		_cuadro = maxf(_cuadro - delta * VELOCIDAD, 0.0)
+	# Se puede pasar desde que está casi abierta; vuelve a ser sólida recién cerrada del todo.
+	var solida := _cuadro < ArteNave.CUADROS_PUERTA - 1.5
+	if _cuerpo.disabled == solida:
+		_cuerpo.set_deferred("disabled", not solida)
+	if int(_cuadro) != antes:
+		queue_redraw()
 
 
 func _draw() -> void:
-	var t := tamano_hueco()
-	draw_rect(Rect2(-t / 2.0, t), COLOR_BLOQUEADA if bloqueada() else COLOR_ABIERTA)
+	# Pared detrás (se ve arriba de la hoja de la puerta) y vano oscuro.
+	draw_texture_rect_region(ArteNave.tex_paredes(), Rect2(Vector2.ZERO, TAMANO), ArteNave.region_pared(pared))
+	draw_rect(Rect2(Vector2(0, T / 2.0), Vector2(TAMANO.x, TAMANO.y - T / 2.0)), ArteNave.COLOR_VANO)
+	var tex := ArteNave.tex_puerta()
+	var region := ArteNave.region_puerta(int(_cuadro))
+	draw_texture_rect_region(tex, Rect2(0, 0, T, TAMANO.y), region)
+	draw_set_transform(Vector2(TAMANO.x, 0), 0.0, Vector2(-1, 1))  # hoja derecha espejada
+	draw_texture_rect_region(tex, Rect2(0, 0, T, TAMANO.y), region)
+	draw_set_transform(Vector2.ZERO)
