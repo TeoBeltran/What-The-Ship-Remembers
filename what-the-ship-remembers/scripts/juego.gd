@@ -6,8 +6,10 @@ extends Node2D
 ##         descansar hablando con NORA (cuando no tiene nada nuevo) y fin de turno al quedarse sin energía.
 ## Paso 6: luz. Panel con L para repartir la capacidad; oscuridad por sala.
 ## Paso 7: mapa manteniendo Tab (luz con la rueda o L, marcas Pa/Pr/Ft) y barra de energía.
+## Paso 8: consola de NORA con menú de temas (conversaciones disponibles, descansar, nada por ahora)
+##         y menú del personaje con Q (anotaciones, conversaciones con NORA, inventario).
 ##
-## Controles: E interactuar · Tab mapa · L luz · ruedita / I / O zoom · Esc menú
+## Controles: E interactuar · Tab mapa · Q anotaciones · L luz · ruedita / I / O zoom · Esc menú
 ## Pantalla: F11 pantalla completa
 ## Depuración (provisoria): F1 info e IDs · F2 abrir sala común · F3 recargar energía
 ##                          F4 turno siguiente · F5 cambiar la luz de la sala actual
@@ -24,6 +26,7 @@ var _cinematica := ""  # id de la interacción forzada hacia la que camina solo
 var _fin_turno := false  # durante el texto y el fundido a negro entre turnos
 var _alfa_terminado := false
 var _ultima_pos := Vector2.ZERO  # última posición dentro de la sala actual (para volver si no puede pasar)
+var _opciones_nora: Array = []  # lo que significa cada opción de la pregunta abierta: id de conversación, "descansar" o "nada"
 
 @onready var nave: Node2D = $Nave
 @onready var personaje: CharacterBody2D = $Personaje
@@ -67,7 +70,7 @@ func _empezar_turno() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta() or ui.mapa.visible
+	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible
 	# ¿Entró a otra sala? (en los pasillos no se cambia de sala)
 	var sala: String = nave.sala_en(personaje.position)
 	if sala != "" and sala != Estado.sala_actual:
@@ -82,7 +85,7 @@ func _physics_process(_delta: float) -> void:
 		_pendiente = null
 		if obj.rect_global().grow(ALCANCE + 4 * E).has_point(personaje.position):
 			_interactuar_con(obj)
-	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or _fin_turno or _alfa_terminado:
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible or _fin_turno or _alfa_terminado:
 		return
 	# Cinemática en curso: cuando llega (o se traba), recién ahí se dispara la interacción forzada.
 	if _cinematica != "":
@@ -162,16 +165,47 @@ func _terminar_turno(lineas: Array) -> void:
 	_fin_turno = false
 
 
-## NORA sin nada nuevo: pregunta si querés descansar (terminar el turno).
-func _preguntar_descanso() -> void:
-	var lineas: Array = Estado.textos.get("SIS_DESCANSAR_PREGUNTA", [])
-	var linea: Dictionary = lineas[-1] if not lineas.is_empty() else {"hablante": "NORA", "texto": "¿Desea descansar?"}
-	ui.preguntar(linea, ["Sí, descansar", "Todavía no"])
+# ============================================================
+# Consola de NORA (paso 8)
+# ============================================================
+# Con temas nuevos: menú con un tema por conversación disponible + Descansar + Nada por ahora.
+# Sin temas: "No tengo nada nuevo para informarle. ¿Desea descansar?" (Sí / Todavía no).
+# Al terminar una conversación elegida, si quedan temas, el menú vuelve solo.
+
+func _linea_sistema(id: String, por_defecto: String) -> Dictionary:
+	var lineas: Array = Estado.textos.get(id, [])
+	return lineas[-1] if not lineas.is_empty() else {"hablante": "NORA", "texto": por_defecto}
+
+
+func _hablar_con_nora() -> void:
+	var temas := Estado.conversaciones_disponibles()
+	if temas.is_empty():
+		_opciones_nora = ["descansar", "nada"]
+		ui.preguntar(_linea_sistema("SIS_DESCANSAR_PREGUNTA", "No tengo nada nuevo para informarle. ¿Desea descansar?"),
+			["Sí, descansar", "Todavía no"])
+		return
+	_opciones_nora = temas.duplicate()
+	var textos: Array = []
+	for id in temas:
+		textos.append(Estado.tema_de(id))
+	_opciones_nora.append_array(["descansar", "nada"])
+	textos.append_array(["Descansar (terminar el turno)", "Nada por ahora"])
+	ui.preguntar(_linea_sistema("SIS_NORA_MENU", "¿En qué puedo ayudarle?"), textos, true)
 
 
 func _on_respuesta(indice: int) -> void:
-	if indice == 0:
-		_terminar_turno(Estado.textos.get("SIS_DESCANSAR_SI", []))
+	var eleccion: String = _opciones_nora[indice] if indice < _opciones_nora.size() else "nada"
+	_opciones_nora = []
+	match eleccion:
+		"descansar":
+			_terminar_turno(Estado.textos.get("SIS_DESCANSAR_SI", []))
+		"nada":
+			pass
+		_:
+			if Estado.interactuar(eleccion):
+				await ui.dialogo_terminado
+				if not Estado.conversaciones_disponibles().is_empty() and not _fin_turno:
+					_hablar_con_nora()
 
 
 func _process(_delta: float) -> void:
@@ -207,12 +241,12 @@ func objeto_cercano():
 
 
 func _interactuar_con(obj) -> void:
+	if obj.es_consola:
+		_hablar_con_nora()
+		return
 	var id: String = obj.id_usable()
 	if id != "":
 		Estado.interactuar(id)
-		return
-	if obj.es_consola:
-		_preguntar_descanso()
 		return
 	var pendiente: String = obj.id_visible_pendiente()
 	if pendiente == "":
@@ -222,19 +256,21 @@ func _interactuar_con(obj) -> void:
 
 
 func _actualizar_indicacion() -> void:
-	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or _fin_turno or _cinematica != "":
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible or _fin_turno or _cinematica != "":
 		ui.indicacion.text = ""
 		return
 	var obj = objeto_cercano()
 	if obj == null:
 		ui.indicacion.text = ""
 		return
+	if obj.es_consola:
+		var nuevos := Estado.conversaciones_disponibles().size()
+		ui.indicacion.text = "E: hablar con NORA" + ("" if nuevos == 0 else " (%d %s)" % [nuevos, "tema nuevo" if nuevos == 1 else "temas nuevos"])
+		return
 	var id: String = obj.id_usable()
 	if id != "":
 		var costo: int = Estado.costo_interaccion(id)
-		ui.indicacion.text = ("E: hablar con NORA" if obj.es_consola else "E: investigar " + obj.nombre()) + ("" if costo == 0 else " (%d)" % costo)
-	elif obj.es_consola:
-		ui.indicacion.text = "E: hablar con NORA"
+		ui.indicacion.text = "E: investigar " + obj.nombre() + ("" if costo == 0 else " (%d)" % costo)
 	elif obj.id_visible_pendiente() != "":
 		var costo: int = Estado.costo_interaccion(obj.id_visible_pendiente())
 		ui.indicacion.text = "E: investigar %s (%d) — no alcanza la energía" % [obj.nombre(), costo]
@@ -263,7 +299,7 @@ func _actualizar_hud() -> void:
 		ui.depuracion.text = "[DEPURACIÓN] Tiempo: %s · Luz: %d · Capacidad %d/%d · F2 abrir sala común · F3 energía · F4 turno · F5 luz" % [
 			Estado.tiempo_de(sala), Estado.luz[sala], Estado.capacidad_usada(), Estado.cfg("capacidad_luz")]
 	else:
-		ui.depuracion.text = "E interactuar · Click derecho moverse · Tab mapa · L luz · Ruedita/I/O zoom · Esc menú · F1 depuración"
+		ui.depuracion.text = "E interactuar · Click derecho moverse · Tab mapa · Q anotaciones · L luz · Ruedita/I/O zoom · Esc menú · F1 depuración"
 
 
 func _set_depuracion(valor: bool) -> void:
@@ -291,6 +327,10 @@ func _zoom(paso: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Menú de pausa
 	if event.is_action_pressed("ui_cancel"):
+		if ui.menu_personaje.visible:
+			ui.menu_personaje.cerrar()
+			get_viewport().set_input_as_handled()
+			return
 		if ui.mapa.visible:
 			ui.mapa.cerrar()
 			get_viewport().set_input_as_handled()
@@ -306,6 +346,38 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if ui.menu_abierto() or _alfa_terminado:
+		return
+	# Menú del personaje (Q): anotaciones, conversaciones, inventario.
+	if ui.menu_personaje.visible:
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_Q:
+					if not event.echo:
+						ui.menu_personaje.cerrar()
+				KEY_LEFT, KEY_A:
+					ui.menu_personaje.cambiar_pestana(-1)
+				KEY_RIGHT, KEY_D, KEY_TAB:
+					ui.menu_personaje.cambiar_pestana(1)
+				KEY_1, KEY_KP_1:
+					ui.menu_personaje.elegir(0)
+				KEY_2, KEY_KP_2:
+					ui.menu_personaje.elegir(1)
+				KEY_3, KEY_KP_3:
+					ui.menu_personaje.elegir(2)
+				KEY_UP, KEY_W:
+					ui.menu_personaje.desplazar(-1)
+				KEY_DOWN, KEY_S:
+					ui.menu_personaje.desplazar(1)
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q:
+		if not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno or _cinematica != ""):
+			if ui.mapa.visible:
+				ui.mapa.cerrar()
+			personaje.detener()
+			_pendiente = null
+			ui.menu_personaje.abrir()
+		get_viewport().set_input_as_handled()
 		return
 	# Tab abre y cierra el mapa (no durante diálogos, el panel de luz ni el cambio de turno).
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:

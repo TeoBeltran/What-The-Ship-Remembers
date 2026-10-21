@@ -50,6 +50,8 @@ var visitadas_turno: Dictionary = {}  # salas visitadas en el turno actual
 var marcas: Dictionary = {}           # sala -> "Pa"/"Pr"/"Ft" (del jugador, por turno)
 var inventario: Array[String] = []
 var anotaciones: Array[String] = []
+var anotaciones_turno: Dictionary = {} # id de anotación -> turno en que se agregó (paso 8)
+var conversaciones: Array = []        # conversaciones con NORA ya tenidas, en orden: {id, turno} (paso 8)
 
 
 func _init() -> void:
@@ -106,6 +108,8 @@ func nueva_partida() -> void:
 	visitadas.clear()
 	inventario.clear()
 	anotaciones.clear()
+	anotaciones_turno.clear()
+	conversaciones.clear()
 	empezar_turno()
 
 
@@ -242,6 +246,8 @@ func interactuar(id: String) -> bool:
 		return false
 	_gastar(costo_interaccion(id))
 	obj[id]["usado"] = true
+	if es_conversacion(id):
+		conversaciones.append({"id": id, "turno": turno})
 	objeto_usado.emit(id)
 	for d in objetos[id]["disparadores"]:
 		_ejecutar_disparador(int(d["tipo"]), str(d["param"]))
@@ -264,6 +270,7 @@ func _ejecutar_disparador(tipo: int, param: String) -> void:
 		4:
 			if not anotaciones.has(param):
 				anotaciones.append(param)
+				anotaciones_turno[param] = turno
 			anotacion_agregada.emit(param)
 		5:
 			obj[param]["desdibujado"] = true
@@ -278,6 +285,41 @@ func _evento(id: String) -> void:
 			if id.begins_with("desbloquear_"):
 				desbloquear(id.trim_prefix("desbloquear_"))
 	evento_especial.emit(id)
+
+
+# ============================================================
+# NORA (paso 8)
+# ============================================================
+
+## Las conversaciones con NORA son los objetos MAN_N* (consola de la sala de mando).
+func es_conversacion(id: String) -> bool:
+	return id.begins_with("MAN_N")
+
+
+## Conversaciones que se pueden elegir ahora en la consola (no forzadas: esas salen solas).
+func conversaciones_disponibles() -> Array:
+	var lista := []
+	for id in objetos:
+		if es_conversacion(id) and not objetos[id]["forzada"] and se_puede_usar(id):
+			lista.append(id)
+	lista.sort_custom(func(a, b): return int(a.trim_prefix("MAN_N")) < int(b.trim_prefix("MAN_N")))
+	return lista
+
+
+## Líneas de texto de una conversación (su primer disparador de texto).
+func lineas_de(id: String) -> Array:
+	for d in objetos[id]["disparadores"]:
+		if int(d["tipo"]) == 1:
+			return textos.get(str(d["param"]), [])
+	return []
+
+
+## Tema que ve el jugador en el menú de NORA: la primera línea del personaje (sin comillas ni puntos suspensivos finales).
+func tema_de(id: String) -> String:
+	for l in lineas_de(id):
+		if l["hablante"] == "PERSONAJE":
+			return str(l["texto"])
+	return "Hablar"
 
 
 ## Primera interacción forzada pendiente en la sala actual ("" = ninguna). La usa el juego para las cinemáticas.

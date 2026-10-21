@@ -452,6 +452,13 @@
       "texto": "Voy a descansar un rato."
     }
   ],
+  "SIS_NORA_MENU": [
+    {
+      "orden": 1,
+      "hablante": "NORA",
+      "texto": "¿En qué puedo ayudarle?"
+    }
+  ],
   "T_COM_M": [
     {
       "orden": 1,

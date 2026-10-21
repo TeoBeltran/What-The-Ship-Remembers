@@ -30,7 +30,9 @@ ORDEN_TIJERA = ["COM_R", "COM_O", "COM_S"]
 # cancela el diálogo obligatorio del presente).
 OPCIONALES_SIM = {"COM_M"}
 # Textos que usa el código directamente (no un objeto)
-TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI"]
+TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI", "SIS_NORA_MENU"]
+# NORA_OTRA = NORA hablando con datos de otro tiempo (se ve/oye distinto, ver 01 sección 2.1)
+HABLANTES = ["PERSONAJE", "NORA", "NORA_OTRA"]
 
 errores, avisos = [], []
 def err(m): errores.append(m)
@@ -105,6 +107,8 @@ def main():
             err(f"textos fila {r['_fila']}: falta id"); continue
         if not r.get("texto"):
             err(f"textos fila {r['_fila']}: '{tid}' sin texto")
+        if r.get("hablante") not in HABLANTES:
+            err(f"textos fila {r['_fila']}: '{tid}' hablante '{r.get('hablante')}' no válido (usar {', '.join(HABLANTES)})")
         textos.setdefault(tid, []).append({"orden": a_int(r["orden"], f"textos {tid}", "orden"),
                                            "hablante": r["hablante"], "texto": r["texto"]})
     for tid, lineas in textos.items():
