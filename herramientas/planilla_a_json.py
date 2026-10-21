@@ -199,7 +199,20 @@ def main():
             "tiempo": tiempo, "turno_min": turno, "luz_min": luz, "costo": costo,
             "forzada": si_no(r.get("forzada")), "texto_al_entrar": r.get("texto_al_entrar"),
             "tipo_cond": tipo if conds else None, "condiciones": conds, "disparadores": disps,
+            "pos": [a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto")],
         }
+
+    # ---------- posiciones (tiles dentro de la sala) ----------
+    TAM_SALAS = {"MAN": (20, 12), "COM": (18, 12), "SCO": (22, 12), "PTA": (10, 8)}  # escenas/salas/*.tscn
+    for oid, o in objetos.items():
+        x, y, w, h = o["pos"]
+        if None in (x, y, w, h):
+            continue
+        if w < 1 or h < 1:
+            err(f"objeto {oid}: ancho y alto tienen que ser al menos 1")
+        tam = TAM_SALAS.get(o["sala"])
+        if tam and (x < 0 or y < 0 or x + w > tam[0] or y + h > tam[1]):
+            err(f"objeto {oid}: la posición ({x},{y},{w}x{h}) se sale de la sala {o['sala']} ({tam[0]}x{tam[1]} tiles)")
 
     # ---------- referencias ----------
     usados = {"textos": set(), "anotaciones": set(), "items": set(), "audios": set(), "eventos": set()}

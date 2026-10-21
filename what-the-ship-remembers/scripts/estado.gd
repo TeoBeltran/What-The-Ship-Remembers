@@ -119,6 +119,8 @@ func empezar_turno() -> void:
 
 
 func tiempo_de(sala: String) -> String:
+	if not guion.has(str(turno)):
+		return "presente"  # antes de empezar la partida
 	return guion[str(turno)][sala]
 
 
@@ -325,8 +327,17 @@ func mover_a(destino: String) -> bool:
 	_marcar_visita(destino)
 	sala_cambiada.emit(destino)
 	revisar_activaciones()
+	_textos_al_entrar()
 	procesar_forzadas()
 	return true
+
+
+## Textos automáticos al entrar (campo TextoAlEntrar): se muestran si el objeto se ve, sin usarlo.
+func _textos_al_entrar() -> void:
+	for id in objetos_visibles(sala_actual):
+		var t = objetos[id].get("texto_al_entrar")
+		if t:
+			texto_mostrado.emit(t, textos.get(t, []))
 
 
 func desbloquear(sala: String) -> void:

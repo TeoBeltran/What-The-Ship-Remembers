@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sala.gd" id="1"]
+[ext_resource type="PackedScene" path="res://escenas/puerta.tscn" id="2"]
+
+[node name="SalaSCO" type="Node2D"]
+script = ExtResource("1")
+codigo = "SCO"
+ancho = 22
+alto = 12
+
+[node name="PuertaCOM" parent="." instance=ExtResource("2")]
+destino = "COM"
+lado = "izquierda"
+centro = 0.5
+
+[node name="PuertaTrabada" parent="." instance=ExtResource("2")]
+destino = ""
+lado = "derecha"
+centro = 0.5
