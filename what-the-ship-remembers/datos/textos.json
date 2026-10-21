@@ -1,0 +1,439 @@
+{
+  "T_MAN_A": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Un cable suelto. Lo reconecto… listo."
+    }
+  ],
+  "T_MAN_N1": [
+    {
+      "orden": 1,
+      "hablante": "NORA",
+      "texto": "Buenos días. Signos vitales estables."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "La nave opera con energía mínima. Su traje tiene energía limitada por turno: úsela con cuidado."
+    }
+  ],
+  "T_MAN_N2": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Qué pasó acá?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Mis registros de los últimos días están dañados. No sé dónde está el resto de la tripulación."
+    }
+  ],
+  "T_MAN_N3": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Cuál era la misión?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Mis registros de misión están dañados. Solo puedo confirmar que salimos hace 112 días."
+    }
+  ],
+  "T_MAN_N4": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Por qué está todo tan oscuro?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "La energía no alcanza para iluminar todas las salas. Puede repartirla desde el mapa: Tab, y después la rueda del mouse o la tecla L."
+    },
+    {
+      "orden": 3,
+      "hablante": "NORA",
+      "texto": "En el mapa también puede marcar cómo encontró cada sala."
+    },
+    {
+      "orden": 4,
+      "hablante": "NORA",
+      "texto": "El circuito de comunicaciones está cortado. El panel está debajo de esta consola."
+    }
+  ],
+  "T_MAN_N5": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Esa sala, la de la puerta…"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Esa sala no figura en mi mapa."
+    }
+  ],
+  "T_MAN_N6": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El plano de comunicaciones tampoco la muestra."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Coincide con mis datos."
+    }
+  ],
+  "T_MAN_N8": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Encontré una nota con mi letra."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "No puedo verificar escritura a mano."
+    }
+  ],
+  "T_MAN_N9": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Yo trabajaba en comunicaciones?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Según mis registros, sí."
+    }
+  ],
+  "T_MAN_N10": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Cuántos éramos?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Nueve."
+    }
+  ],
+  "T_MAN_N11": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "¿Estás bien, NORA?"
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "Diagnóstico normal. Energía de la nave al 12%."
+    }
+  ],
+  "T_MAN_N12": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Vi el registro de transmisiones."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "No tengo acceso al registro de comunicaciones con el circuito cortado."
+    }
+  ],
+  "T_MAN_N13": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La taza de la sala común se movió."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "No registro movimiento en la sala común desde… no puedo leer la fecha."
+    }
+  ],
+  "T_COM_A": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Está tibia. Alguien estuvo acá hace un rato."
+    }
+  ],
+  "T_COM_B": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Un reporte en cola: «Día 112 de misión. Sin novedades.»"
+    }
+  ],
+  "T_COM_C": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Todo ordenado. Menos la tijera, que no está."
+    }
+  ],
+  "T_COM_D": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Operador de comunicaciones… es mi nombre. No recuerdo haber trabajado acá."
+    }
+  ],
+  "T_COM_E": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Solo estática. Giro el dial hasta que se estabiliza: 7.41."
+    }
+  ],
+  "T_COM_F": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Un plano de evacuación. Arriba de comunicaciones no hay nada. Ni la sala de la puerta."
+    }
+  ],
+  "T_COM_G": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Agarro una hoja y se rompe. La dejo ahí."
+    }
+  ],
+  "T_COM_H": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Registro de transmisiones. Todo rutinario. La última entrada: 7.41. La fecha no se lee."
+    }
+  ],
+  "T_COM_I": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Está destrozada. Todavía chisporrotea."
+    }
+  ],
+  "T_COM_J": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Paso el dedo por la silueta de la tijera. Siempre faltó acá."
+    }
+  ],
+  "T_COM_K": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El mismo plano, amarillento. Se despega de la pared."
+    }
+  ],
+  "T_COM_L": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una nota pegada en la radio: 7.41. Es mi letra. No recuerdo haber escrito esto."
+    }
+  ],
+  "T_COM_M": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una tijera sobre la mesa."
+    },
+    {
+      "orden": 2,
+      "hablante": "PERSONAJE",
+      "texto": "¿Esto ya estaba acá? No lo recuerdo."
+    }
+  ],
+  "T_COM_O": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La tijera, llena de polvo. La guardo en el bolsillo."
+    }
+  ],
+  "T_COM_Q": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La puerta de la sala común cede. Adentro está todo a oscuras."
+    }
+  ],
+  "T_SCO_A": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Nueve sillas, todas en su lugar."
+    }
+  ],
+  "T_SCO_B": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El dispensador funciona. El agua está fría."
+    }
+  ],
+  "T_SCO_C": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La pizarra de turnos. Nueve nombres. El mío está ahí."
+    }
+  ],
+  "T_SCO_D": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una taza con mi nombre. La descuelgo y la dejo sobre la mesa."
+    }
+  ],
+  "T_SCO_E": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Un calendario. Los días están tachados hasta el 112."
+    }
+  ],
+  "T_SCO_F": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una foto de la tripulación. Nueve personas. Yo estoy ahí."
+    }
+  ],
+  "T_SCO_G": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Nueve manos repartidas. Se fueron en medio de la partida."
+    }
+  ],
+  "T_SCO_H": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una silla volcada. La levanto."
+    }
+  ],
+  "T_SCO_I": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una taza con mi nombre."
+    }
+  ],
+  "T_SCO_J": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La taza está sobre la mesa, con un resto seco de café. ¿No estaba colgada?"
+    }
+  ],
+  "T_SCO_K": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La pizarra de turnos, borrada a medias. Varios nombres no se leen."
+    }
+  ],
+  "T_SCO_L": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El reloj está detenido: 03:12."
+    }
+  ],
+  "T_SCO_M": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una chaqueta olvidada en el respaldo."
+    }
+  ],
+  "T_SCO_N": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "La mesa está partida al medio."
+    }
+  ],
+  "T_SCO_O": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Mi taza. Rota."
+    }
+  ],
+  "T_SCO_P": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El calendario, en el piso. No se lee nada."
+    }
+  ],
+  "T_SCO_Q": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "El dispensador está seco. Cuelgan cables."
+    }
+  ],
+  "T_SCO_S": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "No ceden. Algo las traba."
+    }
+  ],
+  "T_PTA_A": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Una puerta. Está cerrada."
+    },
+    {
+      "orden": 2,
+      "hablante": "NORA",
+      "texto": "No tengo registros de esa puerta. Esta sala no figura en mi mapa interno."
+    }
+  ],
+  "T_PTA_B": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Tiene soporte. No tiene nombre."
+    }
+  ],
+  "T_PTA_C": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Todavía tiene el plástico protector. Parece nueva."
+    }
+  ],
+  "T_PTA_D": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Oxidada. Sigue cerrada."
+    }
+  ],
+  "T_PTA_E": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Polvo acumulado contra la puerta. Nadie la tocó en mucho tiempo."
+    }
+  ]
+}

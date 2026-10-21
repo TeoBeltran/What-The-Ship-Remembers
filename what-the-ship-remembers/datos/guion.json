@@ -1,0 +1,74 @@
+{
+  "1": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "2": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "3": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "4": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "pasado",
+    "PTA": "presente"
+  },
+  "5": {
+    "MAN": "presente",
+    "COM": "pasado",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "6": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "futuro",
+    "PTA": "presente"
+  },
+  "7": {
+    "MAN": "presente",
+    "COM": "futuro",
+    "SCO": "pasado",
+    "PTA": "pasado"
+  },
+  "8": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "9": {
+    "MAN": "presente",
+    "COM": "pasado",
+    "SCO": "futuro",
+    "PTA": "presente"
+  },
+  "10": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "pasado",
+    "PTA": "futuro"
+  },
+  "11": {
+    "MAN": "presente",
+    "COM": "futuro",
+    "SCO": "presente",
+    "PTA": "presente"
+  },
+  "12": {
+    "MAN": "presente",
+    "COM": "presente",
+    "SCO": "presente",
+    "PTA": "presente"
+  }
+}

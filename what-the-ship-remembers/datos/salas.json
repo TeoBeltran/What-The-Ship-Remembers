@@ -1,0 +1,38 @@
+{
+  "MAN": {
+    "numero": 1,
+    "nombre": "Sala de mando",
+    "desbloqueada_inicio": true,
+    "luz_inicial": 3,
+    "luz_max_sin_arreglo": 3,
+    "luz_max_alfa": 3,
+    "capacidad_a_luz_max": 3
+  },
+  "COM": {
+    "numero": 2,
+    "nombre": "Comunicaciones",
+    "desbloqueada_inicio": true,
+    "luz_inicial": 2,
+    "luz_max_sin_arreglo": 2,
+    "luz_max_alfa": 3,
+    "capacidad_a_luz_max": 3
+  },
+  "SCO": {
+    "numero": 3,
+    "nombre": "Sala común",
+    "desbloqueada_inicio": false,
+    "luz_inicial": 0,
+    "luz_max_sin_arreglo": 2,
+    "luz_max_alfa": 2,
+    "capacidad_a_luz_max": 3
+  },
+  "PTA": {
+    "numero": 4,
+    "nombre": "Sala de la puerta",
+    "desbloqueada_inicio": true,
+    "luz_inicial": 3,
+    "luz_max_sin_arreglo": 3,
+    "luz_max_alfa": 3,
+    "capacidad_a_luz_max": 3
+  }
+}

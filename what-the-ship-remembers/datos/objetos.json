@@ -1,0 +1,1209 @@
+{
+  "MAN_A": {
+    "sala": "MAN",
+    "letra": "A",
+    "descripcion": "Panel eléctrico bajo la consola, circuito de comunicaciones cortado",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_N4",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_A"
+      },
+      {
+        "tipo": 0,
+        "param": "arreglo_com"
+      },
+      {
+        "tipo": 4,
+        "param": "A_MAN_A"
+      }
+    ]
+  },
+  "MAN_N1": {
+    "sala": "MAN",
+    "letra": "N1",
+    "descripcion": "NORA: Despertar (forzada en T1)",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N1"
+      }
+    ]
+  },
+  "MAN_N2": {
+    "sala": "MAN",
+    "letra": "N2",
+    "descripcion": "NORA: ¿Qué pasó acá?",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N2"
+      }
+    ]
+  },
+  "MAN_N3": {
+    "sala": "MAN",
+    "letra": "N3",
+    "descripcion": "NORA: ¿Cuál era la misión?",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N3"
+      }
+    ]
+  },
+  "MAN_N4": {
+    "sala": "MAN",
+    "letra": "N4",
+    "descripcion": "NORA: ¿Por qué está todo tan oscuro? ⭐",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N4"
+      }
+    ]
+  },
+  "MAN_N5": {
+    "sala": "MAN",
+    "letra": "N5",
+    "descripcion": "NORA: Esa sala, la de la puerta… ⭐",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "PTA_A",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N5"
+      }
+    ]
+  },
+  "MAN_N6": {
+    "sala": "MAN",
+    "letra": "N6",
+    "descripcion": "NORA: El plano tampoco la muestra",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_F",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N6"
+      }
+    ]
+  },
+  "MAN_N8": {
+    "sala": "MAN",
+    "letra": "N8",
+    "descripcion": "NORA: Encontré una nota con mi letra",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_L",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N8"
+      }
+    ]
+  },
+  "MAN_N9": {
+    "sala": "MAN",
+    "letra": "N9",
+    "descripcion": "NORA: ¿Yo trabajaba en comunicaciones?",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_D",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N9"
+      }
+    ]
+  },
+  "MAN_N10": {
+    "sala": "MAN",
+    "letra": "N10",
+    "descripcion": "NORA: ¿Cuántos éramos?",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "O",
+    "condiciones": [
+      {
+        "objeto": "SCO_C",
+        "campo": "usado"
+      },
+      {
+        "objeto": "SCO_K",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N10"
+      }
+    ]
+  },
+  "MAN_N11": {
+    "sala": "MAN",
+    "letra": "N11",
+    "descripcion": "NORA: ¿Estás bien, NORA?",
+    "tiempo": "presente",
+    "turno_min": 6,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N11"
+      }
+    ]
+  },
+  "MAN_N12": {
+    "sala": "MAN",
+    "letra": "N12",
+    "descripcion": "NORA: Vi el registro de transmisiones",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_H",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N12"
+      }
+    ]
+  },
+  "MAN_N13": {
+    "sala": "MAN",
+    "letra": "N13",
+    "descripcion": "NORA: La taza se movió",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "SCO_J",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N13"
+      }
+    ]
+  },
+  "COM_A": {
+    "sala": "COM",
+    "letra": "A",
+    "descripcion": "Taza de café junto a la consola, todavía tibia",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_A"
+      }
+    ]
+  },
+  "COM_B": {
+    "sala": "COM",
+    "letra": "B",
+    "descripcion": "Consola de radio con un reporte en cola",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_B"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_B"
+      }
+    ]
+  },
+  "COM_C": {
+    "sala": "COM",
+    "letra": "C",
+    "descripcion": "Panel de herramientas, falta la tijera",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_C"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_C"
+      }
+    ]
+  },
+  "COM_D": {
+    "sala": "COM",
+    "letra": "D",
+    "descripcion": "Lista de turnos: el personaje es operador de comunicaciones",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_D"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_D"
+      }
+    ]
+  },
+  "COM_E": {
+    "sala": "COM",
+    "letra": "E",
+    "descripcion": "Radio principal, solo estática",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_E"
+      },
+      {
+        "tipo": 3,
+        "param": "estatica"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_E"
+      }
+    ]
+  },
+  "COM_F": {
+    "sala": "COM",
+    "letra": "F",
+    "descripcion": "Plano de evacuación sin la sala de la puerta",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_F"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_F"
+      }
+    ]
+  },
+  "COM_G": {
+    "sala": "COM",
+    "letra": "G",
+    "descripcion": "Pila de hojas de protocolo",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_G"
+      }
+    ]
+  },
+  "COM_H": {
+    "sala": "COM",
+    "letra": "H",
+    "descripcion": "Registro de transmisiones en pantalla",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_H"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_H"
+      }
+    ]
+  },
+  "COM_I": {
+    "sala": "COM",
+    "letra": "I",
+    "descripcion": "Consola de radio destrozada, con chispas",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_I"
+      },
+      {
+        "tipo": 3,
+        "param": "chisporroteo"
+      }
+    ]
+  },
+  "COM_J": {
+    "sala": "COM",
+    "letra": "J",
+    "descripcion": "Panel de herramientas oxidado, hueco de la tijera vacío",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_J"
+      }
+    ]
+  },
+  "COM_K": {
+    "sala": "COM",
+    "letra": "K",
+    "descripcion": "Plano de evacuación amarillento, despegado a medias",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_K"
+      }
+    ]
+  },
+  "COM_L": {
+    "sala": "COM",
+    "letra": "L",
+    "descripcion": "Nota en la radio con la frecuencia, con su letra",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_E",
+        "campo": "usado"
+      },
+      {
+        "objeto": "COM_H",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_L"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_L"
+      }
+    ]
+  },
+  "COM_M": {
+    "sala": "COM",
+    "letra": "M",
+    "descripcion": "Tijera sobre la mesa (se observa, nunca se agarra)",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_J",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_M"
+      }
+    ]
+  },
+  "COM_N": {
+    "sala": "COM",
+    "letra": "N",
+    "descripcion": "Tijera sobre la mesa",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_M",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": []
+  },
+  "COM_O": {
+    "sala": "COM",
+    "letra": "O",
+    "descripcion": "Tijera sobre la mesa, con polvo",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_M",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_O"
+      },
+      {
+        "tipo": 2,
+        "param": "tijera"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_O"
+      },
+      {
+        "tipo": 5,
+        "param": "COM_O"
+      }
+    ]
+  },
+  "COM_P": {
+    "sala": "COM",
+    "letra": "P",
+    "descripcion": "La hoja rota, amarillenta, en el piso",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_G",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": []
+  },
+  "COM_Q": {
+    "sala": "COM",
+    "letra": "Q",
+    "descripcion": "Puerta bloqueada hacia la sala común",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 8,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_Q"
+      },
+      {
+        "tipo": 0,
+        "param": "desbloquear_SCO"
+      }
+    ]
+  },
+  "SCO_A": {
+    "sala": "SCO",
+    "letra": "A",
+    "descripcion": "Mesa larga con 9 sillas acomodadas",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_A"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_A"
+      }
+    ]
+  },
+  "SCO_B": {
+    "sala": "SCO",
+    "letra": "B",
+    "descripcion": "Dispensador de agua funcionando",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_B"
+      }
+    ]
+  },
+  "SCO_C": {
+    "sala": "SCO",
+    "letra": "C",
+    "descripcion": "Pizarra de turnos con 9 nombres",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_C"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_C"
+      }
+    ]
+  },
+  "SCO_D": {
+    "sala": "SCO",
+    "letra": "D",
+    "descripcion": "Taza con su nombre, colgada",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_D"
+      },
+      {
+        "tipo": 5,
+        "param": "SCO_I"
+      }
+    ]
+  },
+  "SCO_E": {
+    "sala": "SCO",
+    "letra": "E",
+    "descripcion": "Calendario con días tachados hasta el 112",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_E"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_E"
+      }
+    ]
+  },
+  "SCO_F": {
+    "sala": "SCO",
+    "letra": "F",
+    "descripcion": "Foto grupal de la tripulación",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_F"
+      }
+    ]
+  },
+  "SCO_G": {
+    "sala": "SCO",
+    "letra": "G",
+    "descripcion": "Partida de cartas a medio jugar",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_G"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_G"
+      }
+    ]
+  },
+  "SCO_H": {
+    "sala": "SCO",
+    "letra": "H",
+    "descripcion": "Silla volcada junto a la puerta",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_H"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_H"
+      }
+    ]
+  },
+  "SCO_I": {
+    "sala": "SCO",
+    "letra": "I",
+    "descripcion": "Taza con su nombre, colgada",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_I"
+      }
+    ]
+  },
+  "SCO_J": {
+    "sala": "SCO",
+    "letra": "J",
+    "descripcion": "Taza sobre la mesa, con café seco",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "SCO_D",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_J"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_J"
+      }
+    ]
+  },
+  "SCO_K": {
+    "sala": "SCO",
+    "letra": "K",
+    "descripcion": "Pizarra de turnos borrada a medias",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_K"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_K"
+      }
+    ]
+  },
+  "SCO_L": {
+    "sala": "SCO",
+    "letra": "L",
+    "descripcion": "Reloj de pared detenido a las 03:12",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_L"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_L"
+      }
+    ]
+  },
+  "SCO_M": {
+    "sala": "SCO",
+    "letra": "M",
+    "descripcion": "Chaqueta olvidada en una silla",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_M"
+      }
+    ]
+  },
+  "SCO_N": {
+    "sala": "SCO",
+    "letra": "N",
+    "descripcion": "Mesa larga partida al medio",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_N"
+      }
+    ]
+  },
+  "SCO_O": {
+    "sala": "SCO",
+    "letra": "O",
+    "descripcion": "Taza rota en el piso",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "SCO_D",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_O"
+      },
+      {
+        "tipo": 4,
+        "param": "A_SCO_O"
+      }
+    ]
+  },
+  "SCO_P": {
+    "sala": "SCO",
+    "letra": "P",
+    "descripcion": "Calendario caído, ilegible",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_P"
+      }
+    ]
+  },
+  "SCO_Q": {
+    "sala": "SCO",
+    "letra": "Q",
+    "descripcion": "Dispensador seco, cables colgando",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_Q"
+      }
+    ]
+  },
+  "SCO_R": {
+    "sala": "SCO",
+    "letra": "R",
+    "descripcion": "Una sola silla en pie entre las caídas",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "SCO_H",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": []
+  },
+  "SCO_S": {
+    "sala": "SCO",
+    "letra": "S",
+    "descripcion": "Puertas hacia el resto de la nave, trabadas",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_SCO_S"
+      }
+    ]
+  },
+  "PTA_A": {
+    "sala": "PTA",
+    "letra": "A",
+    "descripcion": "La puerta, gastada",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_PTA_A"
+      },
+      {
+        "tipo": 4,
+        "param": "A_PTA_A"
+      }
+    ]
+  },
+  "PTA_B": {
+    "sala": "PTA",
+    "letra": "B",
+    "descripcion": "Soporte de placa vacío",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_PTA_B"
+      }
+    ]
+  },
+  "PTA_C": {
+    "sala": "PTA",
+    "letra": "C",
+    "descripcion": "La puerta, con el plástico protector puesto",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_PTA_C"
+      },
+      {
+        "tipo": 4,
+        "param": "A_PTA_C"
+      }
+    ]
+  },
+  "PTA_D": {
+    "sala": "PTA",
+    "letra": "D",
+    "descripcion": "La puerta, oxidada",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_PTA_D"
+      }
+    ]
+  },
+  "PTA_E": {
+    "sala": "PTA",
+    "letra": "E",
+    "descripcion": "Polvo acumulado contra la puerta",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_PTA_E"
+      }
+    ]
+  }
+}

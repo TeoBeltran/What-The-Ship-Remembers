@@ -1,0 +1,8 @@
+{
+  "energia_por_turno": 15,
+  "capacidad_luz": 10,
+  "costo_cruzar_puerta": 3,
+  "costo_cruzar_desde_luz_max": 2,
+  "descuento_luz_max": 1,
+  "turnos_alfa": 12
+}

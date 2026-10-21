@@ -1,0 +1,8 @@
+{
+  "arreglo_com": {
+    "descripcion": "Comunicaciones pasa a poder tener luz máxima (3)."
+  },
+  "desbloquear_SCO": {
+    "descripcion": "Desbloquea la sala común. Queda con luz 0."
+  }
+}
