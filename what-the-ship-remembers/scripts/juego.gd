@@ -93,7 +93,7 @@ func _interactuar_con(obj) -> void:
 	if pendiente == "":
 		ui.mostrar_mensaje("No hay nada más para hacer acá." if not obj.es_consola else "NORA no tiene nada nuevo para decir.")
 	else:
-		ui.mostrar_mensaje("No puedo: " + Estado.motivo_no_usable(pendiente) + ".")
+		ui.mostrar_mensaje("No puedo investigar %s: %s." % [obj.nombre(), Estado.motivo_no_usable(pendiente)])
 
 
 func _actualizar_indicacion() -> void:
@@ -107,9 +107,10 @@ func _actualizar_indicacion() -> void:
 	var id: String = obj.id_usable()
 	if id != "":
 		var costo: int = Estado.costo_interaccion(id)
-		ui.indicacion.text = ("E: hablar con NORA" if obj.es_consola else "E: investigar") + ("" if costo == 0 else " (%d)" % costo)
+		ui.indicacion.text = ("E: hablar con NORA" if obj.es_consola else "E: investigar " + obj.nombre()) + ("" if costo == 0 else " (%d)" % costo)
 	elif obj.id_visible_pendiente() != "":
-		ui.indicacion.text = "E: investigar (sin energía)"
+		var costo: int = Estado.costo_interaccion(obj.id_visible_pendiente())
+		ui.indicacion.text = "E: investigar %s (%d) — no alcanza la energía" % [obj.nombre(), costo]
 	else:
 		ui.indicacion.text = ""
 

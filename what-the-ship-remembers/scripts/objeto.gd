@@ -47,6 +47,19 @@ func id_visible_pendiente() -> String:
 	return ""
 
 
+## Nombre que ve el jugador (columna "nombre" de la planilla), del id que se usaría o del que se ve.
+func nombre() -> String:
+	if es_consola:
+		return "NORA"
+	var id := id_usable()
+	if id == "":
+		id = id_visible_pendiente()
+	if id == "":
+		id = ids[0]
+	var n = Estado.objetos[id].get("nombre")
+	return str(n) if n else id
+
+
 func se_ve() -> bool:
 	if es_consola:
 		return Estado.sala_actual == "MAN" or Estado.visitadas.has("MAN")  # la consola siempre está

@@ -200,6 +200,7 @@ def main():
             "forzada": si_no(r.get("forzada")), "texto_al_entrar": r.get("texto_al_entrar"),
             "tipo_cond": tipo if conds else None, "condiciones": conds, "disparadores": disps,
             "pos": [a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto")],
+            "nombre": r.get("nombre"),
         }
 
     # ---------- posiciones (tiles dentro de la sala) ----------
@@ -237,6 +238,8 @@ def main():
             if o["texto_al_entrar"] not in textos:
                 err(f"objeto {oid}: texto_al_entrar '{o['texto_al_entrar']}' no existe")
             usados["textos"].add(o["texto_al_entrar"])
+        if o["disparadores"] and not o["nombre"]:
+            err(f"objeto {oid}: falta el nombre (se muestra al acercarse: 'E: investigar <nombre>')")
         if o["forzada"] and o["costo"] not in (0, None):
             err(f"objeto {oid}: es forzada, el costo tiene que ser 0")
         if o["forzada"] and not o["disparadores"]:
