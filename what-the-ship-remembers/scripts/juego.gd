@@ -4,9 +4,10 @@ extends Node2D
 ## Paso 4: objetos e interacción (E, o click derecho sobre un objeto), textos, avisos.
 ## Paso 5: interacciones forzadas como cinemática (camina solo hasta el objeto y recién ahí habla),
 ##         descansar hablando con NORA (cuando no tiene nada nuevo) y fin de turno al quedarse sin energía.
-## Paso 6: luz. Panel con L para repartir la capacidad (en el paso 7 pasa al mapa); oscuridad por sala.
+## Paso 6: luz. Panel con L para repartir la capacidad; oscuridad por sala.
+## Paso 7: mapa manteniendo Tab (luz con la rueda o L, marcas Pa/Pr/Ft) y barra de energía.
 ##
-## Controles: E interactuar · L luz · ruedita / I / O zoom · Esc menú
+## Controles: E interactuar · Tab mapa · L luz · ruedita / I / O zoom · Esc menú
 ## Pantalla: F11 pantalla completa
 ## Depuración (provisoria): F1 info e IDs · F2 abrir sala común · F3 recargar energía
 ##                          F4 turno siguiente · F5 cambiar la luz de la sala actual
@@ -41,6 +42,9 @@ func _ready() -> void:
 	nave.aviso.connect(ui.mostrar_mensaje)
 	ui.respuesta.connect(_on_respuesta)
 	ui.luz_pedida.connect(_on_luz_pedida)
+	ui.mapa.luz_pedida.connect(_on_luz_pedida)
+	ui.mapa.mensaje.connect(ui.mostrar_mensaje)
+	ui.mapa.configurar(nave, personaje, NOMBRES)
 	Estado.luz_cambiada.connect(func(_s, _n): _actualizar_hud(); ui.refrescar_luz())
 	Estado.evento_especial.connect(func(id):
 		if id == "arreglo_com":
@@ -63,7 +67,7 @@ func _empezar_turno() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta()
+	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta() or ui.mapa.visible
 	# ¿Entró a otra sala? (en los pasillos no se cambia de sala)
 	var sala: String = nave.sala_en(personaje.position)
 	if sala != "" and sala != Estado.sala_actual:
@@ -78,7 +82,7 @@ func _physics_process(_delta: float) -> void:
 		_pendiente = null
 		if obj.rect_global().grow(ALCANCE + 4 * E).has_point(personaje.position):
 			_interactuar_con(obj)
-	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or _fin_turno or _alfa_terminado:
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or _fin_turno or _alfa_terminado:
 		return
 	# Cinemática en curso: cuando llega (o se traba), recién ahí se dispara la interacción forzada.
 	if _cinematica != "":
@@ -172,6 +176,9 @@ func _on_respuesta(indice: int) -> void:
 
 func _process(_delta: float) -> void:
 	camara.position = personaje.position
+	# El mapa se cierra solo si aparece un diálogo, el menú o el cambio de turno.
+	if ui.mapa.visible and (ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _alfa_terminado):
+		ui.mapa.cerrar()
 	_actualizar_indicacion()
 
 
@@ -215,7 +222,7 @@ func _interactuar_con(obj) -> void:
 
 
 func _actualizar_indicacion() -> void:
-	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or _fin_turno or _cinematica != "":
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or _fin_turno or _cinematica != "":
 		ui.indicacion.text = ""
 		return
 	var obj = objeto_cercano()
@@ -256,7 +263,7 @@ func _actualizar_hud() -> void:
 		ui.depuracion.text = "[DEPURACIÓN] Tiempo: %s · Luz: %d · Capacidad %d/%d · F2 abrir sala común · F3 energía · F4 turno · F5 luz" % [
 			Estado.tiempo_de(sala), Estado.luz[sala], Estado.capacidad_usada(), Estado.cfg("capacidad_luz")]
 	else:
-		ui.depuracion.text = "E interactuar · Click derecho moverse · L luz · Ruedita/I/O zoom · Esc menú · F1 depuración"
+		ui.depuracion.text = "E interactuar · Click derecho moverse · Tab mapa · L luz · Ruedita/I/O zoom · Esc menú · F1 depuración"
 
 
 func _set_depuracion(valor: bool) -> void:
@@ -284,6 +291,10 @@ func _zoom(paso: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Menú de pausa
 	if event.is_action_pressed("ui_cancel"):
+		if ui.mapa.visible:
+			ui.mapa.cerrar()
+			get_viewport().set_input_as_handled()
+			return
 		if ui.luz_abierta():
 			ui.cerrar_luz()
 			get_viewport().set_input_as_handled()
@@ -295,6 +306,33 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if ui.menu_abierto() or _alfa_terminado:
+		return
+	# Tab abre y cierra el mapa (no durante diálogos, el panel de luz ni el cambio de turno).
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
+		if ui.mapa.visible:
+			ui.mapa.cerrar()
+		elif not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno):
+			if _cinematica == "":
+				personaje.detener()
+				_pendiente = null
+			ui.mapa.abrir()
+		get_viewport().set_input_as_handled()
+		return
+	# Mapa abierto: L luz, 1/2/3 marcas, 0 borrar. Sobre la sala bajo el mouse, o la actual. WASD lo mueve (mapa.gd).
+	if ui.mapa.visible:
+		if event is InputEventKey and event.pressed and not event.echo:
+			var s: String = ui.mapa.sala_objetivo()
+			match event.keycode:
+				KEY_L:
+					ui.mapa.ciclar_luz(s)
+				KEY_1, KEY_KP_1:
+					ui.mapa.marcar(s, "Pa")
+				KEY_2, KEY_KP_2:
+					ui.mapa.marcar(s, "Pr")
+				KEY_3, KEY_KP_3:
+					ui.mapa.marcar(s, "Ft")
+				KEY_0, KEY_KP_0, KEY_BACKSPACE, KEY_DELETE:
+					ui.mapa.marcar(s, "")
 		return
 	# Pregunta con opciones: ←/→ (o A/D, W/S) eligen, E / Enter / Espacio confirman; el click lo manejan los botones.
 	if ui.pregunta_activa():

@@ -1,7 +1,8 @@
 extends CanvasLayer
 ## Interfaz en greybox (pasos 3 a 5): estado arriba, caja de diálogo (con preguntas de opciones),
 ## avisos, indicación para interactuar, fundido a negro entre turnos y menú de pausa (Esc).
-## Paso 6: panel de luz (L) para repartir la capacidad entre las salas. En el paso 7 pasa al mapa (Tab).
+## Paso 6: panel de luz (L) para repartir la capacidad entre las salas (atajo; también se hace desde el mapa).
+## Paso 7: barra de energía y mapa con Tab (scripts/mapa.gd).
 
 signal dialogo_terminado
 signal respuesta(indice: int)
@@ -23,6 +24,8 @@ var caja_pie: Label
 var caja_opciones: HBoxContainer
 var negro: ColorRect
 var negro_texto: Label
+var mapa: Control
+var barra_energia: Control
 
 var _cola: Array = []          # líneas pendientes {hablante, texto}
 var _tiempo_mensaje := 0.0
@@ -35,7 +38,11 @@ func _ready() -> void:
 	# La interfaz está pensada a 640x360 y se agranda a la resolución real (1920x1080 → x3).
 	var escala: float = get_viewport().get_visible_rect().size.y / Medidas.UI_BASE.y
 	scale = Vector2(escala, escala)
+	# El mapa va primero: los mensajes y el estado se dibujan por encima.
+	mapa = preload("res://scripts/mapa.gd").new()
+	add_child(mapa)
 	estado = _label(Vector2(8, 4), 12)
+	_crear_barra_energia()
 	mensaje = _label(Vector2(8, 284), 12)
 	mensaje.size.x = 624
 	mensaje.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -368,7 +375,7 @@ func abrir_luz(nombres: Dictionary) -> void:
 	_luz_nombres = nombres
 	_luz_salas.clear()
 	for s in Estado.salas:
-		if Estado.desbloqueadas.has(s):
+		if Estado.desbloqueadas.has(s) and Estado.visitadas.has(s):  # no revela salas donde nunca entró
 			_luz_salas.append(s)
 	_luz_salas.sort_custom(func(a, b): return int(Estado.salas[a]["numero"]) < int(Estado.salas[b]["numero"]))
 	_luz_sel = maxi(_luz_salas.find(Estado.sala_actual), 0)
@@ -448,3 +455,27 @@ func refrescar_luz() -> void:
 	var usada := Estado.capacidad_usada()
 	var total := Estado.cfg("capacidad_luz")
 	_luz_capacidad.text = "Capacidad: %d / %d   (libre %d)" % [usada, total, total - usada]
+
+
+# ============================================================
+# Barra de energía (paso 7)
+# ============================================================
+# Un segmento por punto de energía del turno, debajo del texto de estado.
+
+func _crear_barra_energia() -> void:
+	barra_energia = Control.new()
+	barra_energia.position = Vector2(8, 20)
+	barra_energia.size = Vector2(150, 5)
+	barra_energia.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(barra_energia)
+	barra_energia.draw.connect(func():
+		var maximo := maxi(Estado.cfg("energia_por_turno"), 1)
+		var ancho := barra_energia.size.x / maximo
+		for i in maximo:
+			var lleno := i < Estado.energia
+			var c := Color(0.45, 0.85, 0.95) if lleno else Color(0.18, 0.2, 0.22)
+			if lleno and Estado.energia <= 3:
+				c = Color(0.95, 0.55, 0.35)  # poca energía
+			barra_energia.draw_rect(Rect2(i * ancho, 0, ancho - 1, barra_energia.size.y), c))
+	Estado.energia_cambiada.connect(func(_e): barra_energia.queue_redraw())
+	Estado.turno_empezado.connect(func(_t): barra_energia.queue_redraw())
