@@ -134,6 +134,20 @@ def main():
     if sorted(guion) != list(range(1, n_turnos + 1)):
         err(f"guion: tiene que tener los turnos 1 a {n_turnos}, uno por fila")
 
+    # ---------- conexiones ----------
+    conexiones = []
+    for r in leer_hoja(wb, "conexiones"):
+        a, b = r["desde"], r["hasta"]
+        for x in (a, b):
+            if x not in salas:
+                err(f"conexiones fila {r['_fila']}: la sala '{x}' no existe")
+        if a == b:
+            err(f"conexiones fila {r['_fila']}: conecta una sala consigo misma")
+        conexiones.append([a, b])
+    for s in salas:
+        if not any(s in c for c in conexiones):
+            err(f"conexiones: la sala {s} no está conectada con ninguna")
+
     # ---------- objetos ----------
     objetos = {}
     for r in leer_hoja(wb, "objetos"):
@@ -314,7 +328,7 @@ def main():
         err("la tijera del futuro (COM_O) tiene que agarrarse antes del último turno")
 
     return reporte({"uso": primer_uso, "vista": primera_vista, "objetos": objetos,
-                    "datos": (objetos, salas, guion, textos, anotaciones, items, audios, eventos, config)})
+                    "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config)})
 
 
 def reporte(sim):
@@ -338,9 +352,9 @@ def reporte(sim):
     if errores:
         print("\nNo se escribieron los JSON. Corregí los errores y volvé a correrlo.")
         return 1
-    objetos, salas, guion, textos, anotaciones, items, audios, eventos, config = sim["datos"]
+    objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config = sim["datos"]
     SALIDA.mkdir(parents=True, exist_ok=True)
-    archivos = {"objetos": objetos, "salas": salas, "guion": {str(k): v for k, v in guion.items()},
+    archivos = {"objetos": objetos, "salas": salas, "guion": {str(k): v for k, v in guion.items()}, "conexiones": conexiones,
                 "textos": textos, "anotaciones": anotaciones, "items": items, "audios": audios,
                 "eventos": eventos, "config": config}
     for nombre, data in archivos.items():
