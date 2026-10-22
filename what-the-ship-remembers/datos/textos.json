@@ -788,5 +788,17 @@
       "hablante": "NORA",
       "texto": "¿En qué puedo ayudarle?"
     }
+  ],
+  "T_COM_Y": [
+    {
+      "orden": 1,
+      "hablante": "PERSONAJE",
+      "texto": "Registro de transmisiones. Todo rutinario."
+    },
+    {
+      "orden": 2,
+      "hablante": "PERSONAJE",
+      "texto": "La última entrada es de un control de rutina. No hay nada en 7.41."
+    }
   ]
 }

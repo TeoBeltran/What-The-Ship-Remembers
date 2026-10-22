@@ -1,0 +1,380 @@
+{
+  "consola_larga": {
+    "hoja": "cosas2",
+    "region": [
+      67,
+      19,
+      298,
+      57
+    ]
+  },
+  "consola_naranja": {
+    "hoja": "cosas2",
+    "region": [
+      76,
+      137,
+      240,
+      65
+    ]
+  },
+  "consola_control": {
+    "hoja": "cosas2",
+    "region": [
+      168,
+      259,
+      100,
+      74
+    ]
+  },
+  "mesa_oscura": {
+    "hoja": "cosas2",
+    "region": [
+      72,
+      483,
+      146,
+      73
+    ]
+  },
+  "mesa_naranja": {
+    "hoja": "cosas2",
+    "region": [
+      72,
+      584,
+      147,
+      73
+    ]
+  },
+  "mesa_clara": {
+    "hoja": "cosas2",
+    "region": [
+      72,
+      687,
+      147,
+      69
+    ]
+  },
+  "mesa_azul": {
+    "hoja": "cosas2",
+    "region": [
+      72,
+      780,
+      147,
+      75
+    ]
+  },
+  "silla_frente": {
+    "hoja": "cosas2",
+    "region": [
+      295,
+      495,
+      33,
+      65
+    ]
+  },
+  "silla_espalda": {
+    "hoja": "cosas2",
+    "region": [
+      248,
+      576,
+      32,
+      48
+    ]
+  },
+  "silla_lado": {
+    "hoja": "cosas2",
+    "region": [
+      298,
+      600,
+      27,
+      56
+    ]
+  },
+  "estantes": {
+    "hoja": "cosas",
+    "region": [
+      432,
+      0,
+      144,
+      48
+    ]
+  },
+  "estante_colgado": {
+    "hoja": "cosas",
+    "region": [
+      528,
+      0,
+      144,
+      48
+    ]
+  },
+  "hoja_a": {
+    "hoja": "cosas",
+    "region": [
+      446,
+      159,
+      19,
+      17
+    ]
+  },
+  "hoja_b": {
+    "hoja": "cosas",
+    "region": [
+      496,
+      161,
+      16,
+      13
+    ]
+  },
+  "hoja_c": {
+    "hoja": "cosas",
+    "region": [
+      544,
+      158,
+      16,
+      20
+    ]
+  },
+  "hoja_suelta": {
+    "hoja": "cosas",
+    "region": [
+      447,
+      208,
+      18,
+      16
+    ]
+  },
+  "hojas_pila": {
+    "hoja": "cosas",
+    "region": [
+      530,
+      196,
+      43,
+      40
+    ]
+  },
+  "hojas_rotas": {
+    "hoja": "cosas",
+    "region": [
+      673,
+      145,
+      45,
+      46
+    ]
+  },
+  "caja_carton": {
+    "hoja": "cosas",
+    "region": [
+      640,
+      159,
+      16,
+      18
+    ]
+  },
+  "maquina_a": {
+    "hoja": "cosas",
+    "region": [
+      638,
+      240,
+      35,
+      48
+    ]
+  },
+  "maquina_b": {
+    "hoja": "cosas",
+    "region": [
+      672,
+      240,
+      25,
+      48
+    ]
+  },
+  "terminal_naranja": {
+    "hoja": "cosas",
+    "region": [
+      213,
+      355,
+      11,
+      75
+    ]
+  },
+  "terminal_azul": {
+    "hoja": "cosas",
+    "region": [
+      354,
+      346,
+      12,
+      75
+    ]
+  },
+  "terminal_azul_b": {
+    "hoja": "cosas",
+    "region": [
+      257,
+      432,
+      13,
+      68
+    ]
+  },
+  "terminal_naranja_b": {
+    "hoja": "cosas",
+    "region": [
+      210,
+      490,
+      12,
+      75
+    ]
+  },
+  "terminal_cian": {
+    "hoja": "cosas",
+    "region": [
+      288,
+      528,
+      48,
+      48
+    ]
+  },
+  "terminal_apagada": {
+    "hoja": "cosas",
+    "region": [
+      336,
+      528,
+      48,
+      48
+    ]
+  },
+  "rejilla_luz": {
+    "hoja": "cosas",
+    "region": [
+      63,
+      408,
+      50,
+      60
+    ]
+  },
+  "rejilla_oscura": {
+    "hoja": "cosas",
+    "region": [
+      96,
+      498,
+      48,
+      60
+    ]
+  },
+  "cajitas": {
+    "hoja": "cosas",
+    "region": [
+      288,
+      104,
+      47,
+      32
+    ]
+  },
+  "tacho": {
+    "hoja": "cosas",
+    "region": [
+      391,
+      391,
+      33,
+      34
+    ]
+  },
+  "mon_azul": {
+    "hoja": "pantallas",
+    "region": [
+      1,
+      1,
+      46,
+      45
+    ]
+  },
+  "mon_verde": {
+    "hoja": "pantallas",
+    "region": [
+      1,
+      98,
+      45,
+      44
+    ]
+  },
+  "mon_naranja": {
+    "hoja": "pantallas",
+    "region": [
+      1,
+      194,
+      46,
+      44
+    ]
+  },
+  "mon_rota": {
+    "hoja": "pantallas",
+    "region": [
+      2,
+      386,
+      44,
+      44
+    ]
+  },
+  "mon_apagada": {
+    "hoja": "pantallas",
+    "region": [
+      1,
+      482,
+      45,
+      44
+    ]
+  },
+  "panel_datos": {
+    "hoja": "pantallas",
+    "region": [
+      384,
+      3,
+      96,
+      90
+    ]
+  },
+  "panel_cian": {
+    "hoja": "pantallas",
+    "region": [
+      384,
+      98,
+      96,
+      91
+    ]
+  },
+  "panel_apagado": {
+    "hoja": "pantallas",
+    "region": [
+      384,
+      291,
+      96,
+      90
+    ]
+  },
+  "panel_roto": {
+    "hoja": "pantallas",
+    "region": [
+      384,
+      386,
+      96,
+      91
+    ]
+  },
+  "puerta": {
+    "hoja": "puerta",
+    "region": [
+      0,
+      22,
+      48,
+      74
+    ]
+  },
+  "botella_caida": {
+    "hoja": "cosas",
+    "region": [
+      730,
+      300,
+      28,
+      23
+    ]
+  }
+}

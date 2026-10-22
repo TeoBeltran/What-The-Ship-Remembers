@@ -32,6 +32,7 @@ var audios: Dictionary = {}
 var eventos: Dictionary = {}
 var config: Dictionary = {}
 var muebles: Array = []               # fijos en todos los tiempos (solo se dibujan)
+var sprites: Dictionary = {}          # catálogo de recortes de las hojas de arte (ArteObjetos)
 
 ## true: las interacciones forzadas se usan solas apenas se ven (simulación).
 ## false: el juego las pide con siguiente_forzada() y las hace como cinemática (camina hasta el objeto).
@@ -75,6 +76,7 @@ func cargar_datos() -> void:
 	eventos = _leer("eventos")
 	config = _leer("config")
 	muebles = _leer("muebles")
+	sprites = _leer("sprites")
 
 
 func _leer(nombre: String):

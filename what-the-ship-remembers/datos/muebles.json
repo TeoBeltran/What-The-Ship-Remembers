@@ -9,7 +9,9 @@
       2
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "consola_larga",
+    "sprite_futuro": null
   },
   {
     "sala": "COM",
@@ -21,7 +23,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "roto"
+    "en_futuro": "roto",
+    "sprite": "mesa_azul repetir",
+    "sprite_futuro": null
   },
   {
     "sala": "COM",
@@ -33,7 +37,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "estantes",
+    "sprite_futuro": null
   },
   {
     "sala": "COM",
@@ -45,7 +51,9 @@
       2
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "mesa_oscura repetir",
+    "sprite_futuro": null
   },
   {
     "sala": "COM",
@@ -57,7 +65,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "cajitas",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -69,7 +79,9 @@
       2
     ],
     "solido": true,
-    "en_futuro": "roto"
+    "en_futuro": "roto",
+    "sprite": "mesa_naranja repetir",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -81,7 +93,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_frente",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -93,7 +107,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_frente",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -105,7 +121,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_frente",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -117,7 +135,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_espalda",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -129,7 +149,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_espalda",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -141,7 +163,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_espalda",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -153,7 +177,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_espalda",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -165,7 +191,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": "caído"
+    "en_futuro": "caído",
+    "sprite": "silla_lado",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -177,7 +205,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "estante_colgado",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -189,7 +219,9 @@
       1
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "ninguno",
+    "sprite_futuro": null
   },
   {
     "sala": "SCO",
@@ -201,6 +233,8 @@
       2
     ],
     "solido": true,
-    "en_futuro": null
+    "en_futuro": null,
+    "sprite": "ninguno",
+    "sprite_futuro": null
   }
 ]

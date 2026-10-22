@@ -218,9 +218,23 @@ func _draw() -> void:
 		draw_rect(m[0], m[1])
 	# Muebles fijos (hoja muebles): están en todos los tiempos; en el futuro pueden estar caídos o rotos.
 	var futuro := Estado.tiempo_de(codigo) == "futuro"
+	var tinte := ArteObjetos.tinte(Estado.tiempo_de(codigo))
 	for m in _muebles():
 		var r := _rect_mueble(m)
 		var estado = m.get("en_futuro") if futuro else null
+		# Con sprite: el del futuro si tiene; si no, el mismo caído (girado) o roto (más oscuro y con grieta).
+		var spec = m.get("sprite")
+		if estado and m.get("sprite_futuro"):
+			spec = m["sprite_futuro"]
+			estado = null
+		elif spec and estado == "caído" and not str(spec).contains("girado"):
+			spec = str(spec) + " girado"
+		if spec:
+			ArteObjetos.dibujar(self, spec, r, tinte.darkened(0.2) if estado == "roto" else tinte, true)
+			if estado == "roto" and str(spec) != "ninguno":
+				var gx := r.position.x + r.size.x * 0.45
+				draw_polyline(PackedVector2Array([Vector2(gx, r.position.y), Vector2(gx + 4 * E, r.get_center().y), Vector2(gx - 2 * E, r.end.y)]), Color(0.1, 0.1, 0.1), 2.0 * E)
+			continue
 		var c := COLOR_MUEBLE.darkened(0.2) if estado else COLOR_MUEBLE
 		draw_rect(r, c)
 		draw_rect(r, c.darkened(0.45), false, E)

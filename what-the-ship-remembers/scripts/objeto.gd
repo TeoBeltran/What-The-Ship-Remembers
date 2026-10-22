@@ -1,5 +1,6 @@
 extends Node2D
-## Objeto investigable en greybox (paso 4): un rectángulo de color en su lugar de la sala.
+## Objeto investigable: un sprite de las hojas de arte (columna sprite de la planilla, ver ArteObjetos)
+## o, si no tiene, un rectángulo de color en su lugar de la sala (greybox, paso 4).
 ## Se dibuja si el núcleo dice que se ve (activo, en su tiempo, no desdibujado y con luz suficiente).
 ## Los objetos que ocupan el mismo lugar (por ejemplo, la pinza en los tres tiempos) tienen el mismo color.
 ## La consola de NORA es un solo objeto que agrupa todas las conversaciones (MAN_N1…N13).
@@ -83,12 +84,18 @@ func rect_global() -> Rect2:
 func _draw() -> void:
 	if not se_ve():
 		return
-	var c := color
+	var o: Dictionary = Estado.objetos[ids[0]]
+	var spec = o.get("sprite")
+	if not es_consola and Estado.obj[ids[0]]["usado"] and o.get("sprite_usado"):
+		spec = o["sprite_usado"]  # cómo queda después de usarlo (la silla levantada, el panel arreglado)
 	# Ya usado (y no hay nada más para hacer): más apagado.
-	if id_visible_pendiente() == "":
-		c = c.darkened(0.35)
-	draw_rect(rect, c)
-	draw_rect(rect, c.darkened(0.5), false, E)
+	var terminado := id_visible_pendiente() == "" and not es_consola
+	var tinte := ArteObjetos.tinte(Estado.tiempo_de(o["sala"]))
+	if not ArteObjetos.dibujar(self, spec, rect, tinte.darkened(0.15) if terminado else tinte):
+		var c := color.darkened(0.35) if terminado else color
+		draw_rect(rect, c)
+		draw_rect(rect, c.darkened(0.5), false, E)
 	if mostrar_id:
+		draw_rect(rect, Color.YELLOW, false, E)
 		var texto := "NORA" if es_consola else ids[0]
 		draw_string(ThemeDB.fallback_font, rect.position + Vector2(0, -2 * E), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 32, Color.YELLOW)

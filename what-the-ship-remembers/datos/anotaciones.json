@@ -23,5 +23,6 @@
   "A_SCO_O": "Mi taza está rota en el piso de la sala común.",
   "A_PTA_A": "NORA no tiene registros de la sala de la puerta.",
   "A_PTA_C": "La puerta de esa sala parecía nueva.",
-  "A_COM_U": "Encontré un destornillador para abrir el panel. Me falta una pinza para el cable."
+  "A_COM_U": "Encontré un destornillador para abrir el panel. Me falta una pinza para el cable.",
+  "A_COM_Y": "Vi el registro de transmisiones sin ninguna entrada en 7.41."
 }

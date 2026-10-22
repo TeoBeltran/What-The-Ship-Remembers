@@ -34,7 +34,9 @@
     ],
     "nombre": "Panel eléctrico",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "rejilla_oscura",
+    "sprite_usado": null
   },
   "MAN_N1": {
     "sala": "MAN",
@@ -62,7 +64,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N2": {
     "sala": "MAN",
@@ -95,7 +99,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N3": {
     "sala": "MAN",
@@ -128,7 +134,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N4": {
     "sala": "MAN",
@@ -161,7 +169,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N5": {
     "sala": "MAN",
@@ -194,7 +204,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N6": {
     "sala": "MAN",
@@ -227,7 +239,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N8": {
     "sala": "MAN",
@@ -260,7 +274,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N9": {
     "sala": "MAN",
@@ -293,7 +309,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N10": {
     "sala": "MAN",
@@ -330,7 +348,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N11": {
     "sala": "MAN",
@@ -358,7 +378,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N12": {
     "sala": "MAN",
@@ -391,7 +413,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N13": {
     "sala": "MAN",
@@ -424,7 +448,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "COM_A": {
     "sala": "COM",
@@ -452,7 +478,9 @@
     ],
     "nombre": "Taza de café",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_B": {
     "sala": "COM",
@@ -484,7 +512,9 @@
     ],
     "nombre": "Consola de radio",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "mon_naranja",
+    "sprite_usado": null
   },
   "COM_C": {
     "sala": "COM",
@@ -516,7 +546,9 @@
     ],
     "nombre": "Panel de herramientas",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "ninguno",
+    "sprite_usado": null
   },
   "COM_D": {
     "sala": "COM",
@@ -548,7 +580,9 @@
     ],
     "nombre": "Lista de turnos",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "terminal_azul",
+    "sprite_usado": null
   },
   "COM_E": {
     "sala": "COM",
@@ -584,7 +618,9 @@
     ],
     "nombre": "Radio",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "mon_azul",
+    "sprite_usado": null
   },
   "COM_F": {
     "sala": "COM",
@@ -616,7 +652,9 @@
     ],
     "nombre": "Plano de evacuación",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "terminal_naranja",
+    "sprite_usado": null
   },
   "COM_G": {
     "sala": "COM",
@@ -644,7 +682,9 @@
     ],
     "nombre": "Hojas de protocolo",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "hojas_pila",
+    "sprite_usado": null
   },
   "COM_H": {
     "sala": "COM",
@@ -676,7 +716,9 @@
     ],
     "nombre": "Registro de transmisiones",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "terminal_cian",
+    "sprite_usado": null
   },
   "COM_I": {
     "sala": "COM",
@@ -708,7 +750,9 @@
     ],
     "nombre": "Consola de radio",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "mon_rota",
+    "sprite_usado": null
   },
   "COM_J": {
     "sala": "COM",
@@ -736,7 +780,9 @@
     ],
     "nombre": "Panel de herramientas",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "ninguno",
+    "sprite_usado": null
   },
   "COM_K": {
     "sala": "COM",
@@ -764,7 +810,9 @@
     ],
     "nombre": "Plano de evacuación",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "terminal_naranja_b",
+    "sprite_usado": null
   },
   "COM_L": {
     "sala": "COM",
@@ -805,7 +853,9 @@
     ],
     "nombre": "Nota en la radio",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "hoja_suelta",
+    "sprite_usado": null
   },
   "COM_M": {
     "sala": "COM",
@@ -846,7 +896,9 @@
     ],
     "nombre": "Pinza",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_N": {
     "sala": "COM",
@@ -874,7 +926,9 @@
     ],
     "nombre": "Pinza",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_O": {
     "sala": "COM",
@@ -914,7 +968,9 @@
     ],
     "nombre": "Pinza",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_P": {
     "sala": "COM",
@@ -942,7 +998,9 @@
     ],
     "nombre": "Hoja rota",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "hojas_rotas",
+    "sprite_usado": null
   },
   "COM_Q": {
     "sala": "COM",
@@ -974,7 +1032,9 @@
     ],
     "nombre": "Puerta de la sala común",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "ninguno",
+    "sprite_usado": null
   },
   "SCO_A": {
     "sala": "SCO",
@@ -1006,7 +1066,9 @@
     ],
     "nombre": "Mesa larga",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "ninguno",
+    "sprite_usado": null
   },
   "SCO_B": {
     "sala": "SCO",
@@ -1034,7 +1096,9 @@
     ],
     "nombre": "Dispensador de agua",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "maquina_b",
+    "sprite_usado": null
   },
   "SCO_C": {
     "sala": "SCO",
@@ -1066,7 +1130,9 @@
     ],
     "nombre": "Pizarra de turnos",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "panel_cian",
+    "sprite_usado": null
   },
   "SCO_D": {
     "sala": "SCO",
@@ -1098,7 +1164,9 @@
     ],
     "nombre": "Taza con mi nombre",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_E": {
     "sala": "SCO",
@@ -1106,7 +1174,7 @@
     "descripcion": "Calendario con días tachados hasta el 112",
     "tiempo": "pasado",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1130,7 +1198,9 @@
     ],
     "nombre": "Calendario",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "hoja_c",
+    "sprite_usado": null
   },
   "SCO_F": {
     "sala": "SCO",
@@ -1138,7 +1208,7 @@
     "descripcion": "Foto grupal de la tripulación",
     "tiempo": "pasado",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1158,7 +1228,9 @@
     ],
     "nombre": "Foto de la tripulación",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_G": {
     "sala": "SCO",
@@ -1190,7 +1262,9 @@
     ],
     "nombre": "Partida de cartas",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_H": {
     "sala": "SCO",
@@ -1222,7 +1296,9 @@
     ],
     "nombre": "Silla volcada",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "silla_frente girado",
+    "sprite_usado": "silla_frente"
   },
   "SCO_I": {
     "sala": "SCO",
@@ -1250,7 +1326,9 @@
     ],
     "nombre": "Taza con mi nombre",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_J": {
     "sala": "SCO",
@@ -1287,7 +1365,9 @@
     ],
     "nombre": "Taza sobre la mesa",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_K": {
     "sala": "SCO",
@@ -1319,7 +1399,9 @@
     ],
     "nombre": "Pizarra de turnos",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "panel_datos",
+    "sprite_usado": null
   },
   "SCO_L": {
     "sala": "SCO",
@@ -1327,7 +1409,7 @@
     "descripcion": "Reloj de pared detenido a las 03:12",
     "tiempo": "presente",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1351,7 +1433,9 @@
     ],
     "nombre": "Reloj de pared",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_M": {
     "sala": "SCO",
@@ -1359,7 +1443,7 @@
     "descripcion": "Chaqueta olvidada en una silla",
     "tiempo": "presente",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1379,7 +1463,9 @@
     ],
     "nombre": "Chaqueta",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_N": {
     "sala": "SCO",
@@ -1407,7 +1493,9 @@
     ],
     "nombre": "Mesa partida",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "ninguno",
+    "sprite_usado": null
   },
   "SCO_O": {
     "sala": "SCO",
@@ -1444,7 +1532,9 @@
     ],
     "nombre": "Taza rota",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "SCO_P": {
     "sala": "SCO",
@@ -1452,7 +1542,7 @@
     "descripcion": "Calendario caído, ilegible",
     "tiempo": "futuro",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1472,7 +1562,9 @@
     ],
     "nombre": "Calendario caído",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "hoja_suelta",
+    "sprite_usado": null
   },
   "SCO_Q": {
     "sala": "SCO",
@@ -1480,7 +1572,7 @@
     "descripcion": "Dispensador seco, cables colgando",
     "tiempo": "futuro",
     "turno_min": 1,
-    "luz_min": 3,
+    "luz_min": 2,
     "costo": 4,
     "forzada": false,
     "texto_al_entrar": null,
@@ -1500,7 +1592,9 @@
     ],
     "nombre": "Dispensador de agua",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "maquina_b",
+    "sprite_usado": null
   },
   "SCO_R": {
     "sala": "SCO",
@@ -1528,7 +1622,9 @@
     ],
     "nombre": "Silla",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "silla_frente",
+    "sprite_usado": null
   },
   "SCO_S": {
     "sala": "SCO",
@@ -1556,7 +1652,9 @@
     ],
     "nombre": "Puertas hacia el resto de la nave",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "PTA_A": {
     "sala": "PTA",
@@ -1588,7 +1686,9 @@
     ],
     "nombre": "Puerta",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "puerta doble pared",
+    "sprite_usado": null
   },
   "PTA_B": {
     "sala": "PTA",
@@ -1616,7 +1716,9 @@
     ],
     "nombre": "Soporte de placa",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "PTA_C": {
     "sala": "PTA",
@@ -1648,7 +1750,9 @@
     ],
     "nombre": "Puerta",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "puerta doble pared",
+    "sprite_usado": null
   },
   "PTA_D": {
     "sala": "PTA",
@@ -1676,7 +1780,9 @@
     ],
     "nombre": "Puerta",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "puerta doble pared",
+    "sprite_usado": null
   },
   "PTA_E": {
     "sala": "PTA",
@@ -1704,7 +1810,9 @@
     ],
     "nombre": "Polvo junto a la puerta",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_R": {
     "sala": "COM",
@@ -1732,7 +1840,9 @@
     ],
     "nombre": "Mesa",
     "turno_max": 6,
-    "oculto": true
+    "oculto": true,
+    "sprite": null,
+    "sprite_usado": null
   },
   "COM_S": {
     "sala": "COM",
@@ -1769,7 +1879,9 @@
     ],
     "nombre": "Pinza",
     "turno_max": null,
-    "oculto": true
+    "oculto": true,
+    "sprite": null,
+    "sprite_usado": null
   },
   "MAN_N14": {
     "sala": "MAN",
@@ -1802,7 +1914,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "MAN_N15": {
     "sala": "MAN",
@@ -1830,7 +1944,9 @@
     ],
     "nombre": "Consola de NORA",
     "turno_max": 2,
-    "oculto": false
+    "oculto": false,
+    "sprite": "consola_control",
+    "sprite_usado": null
   },
   "COM_T": {
     "sala": "COM",
@@ -1875,7 +1991,9 @@
     ],
     "nombre": "Pinza",
     "turno_max": null,
-    "oculto": true
+    "oculto": true,
+    "sprite": null,
+    "sprite_usado": null
   },
   "MAN_B": {
     "sala": "MAN",
@@ -1920,7 +2038,9 @@
     ],
     "nombre": "Panel eléctrico",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": "rejilla_oscura",
+    "sprite_usado": "rejilla_luz"
   },
   "COM_U": {
     "sala": "COM",
@@ -1958,13 +2078,574 @@
       }
     ],
     "pos": [
-      13,
+      14,
       1,
-      3,
+      1,
       1
     ],
     "nombre": "Destornillador",
     "turno_max": null,
-    "oculto": false
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "COM_V": {
+    "sala": "COM",
+    "letra": "V",
+    "descripcion": "Taza de café fría, con un borde de café seco",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      4,
+      8,
+      1,
+      1
+    ],
+    "nombre": "Taza de café",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "COM_W": {
+    "sala": "COM",
+    "letra": "W",
+    "descripcion": "Taza de café rota sobre la mesita",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      4,
+      8,
+      1,
+      1
+    ],
+    "nombre": "Taza rota",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "COM_X": {
+    "sala": "COM",
+    "letra": "X",
+    "descripcion": "Pila de hojas de protocolo ordenada",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      7,
+      7,
+      2,
+      1
+    ],
+    "nombre": "Hojas de protocolo",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "hoja_b",
+    "sprite_usado": null
+  },
+  "COM_Y": {
+    "sala": "COM",
+    "letra": "Y",
+    "descripcion": "Registro de transmisiones al día, sin la entrada 7.41",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 4,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_Y"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_Y"
+      }
+    ],
+    "pos": [
+      6,
+      1,
+      2,
+      1
+    ],
+    "nombre": "Registro de transmisiones",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "terminal_cian",
+    "sprite_usado": null
+  },
+  "COM_Z": {
+    "sala": "COM",
+    "letra": "Z",
+    "descripcion": "Pantalla del registro apagada",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      6,
+      1,
+      2,
+      1
+    ],
+    "nombre": "Registro de transmisiones",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "terminal_apagada",
+    "sprite_usado": null
+  },
+  "COM_AA": {
+    "sala": "COM",
+    "letra": "AA",
+    "descripcion": "Plano de evacuación nuevo, plastificado",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      16,
+      8,
+      1,
+      2
+    ],
+    "nombre": "Plano de evacuación",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "terminal_naranja",
+    "sprite_usado": null
+  },
+  "COM_AB": {
+    "sala": "COM",
+    "letra": "AB",
+    "descripcion": "Lista de turnos descolorida",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      16,
+      2,
+      1,
+      2
+    ],
+    "nombre": "Lista de turnos",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "terminal_azul_b",
+    "sprite_usado": null
+  },
+  "COM_AC": {
+    "sala": "COM",
+    "letra": "AC",
+    "descripcion": "Marca limpia en la pared donde estaba la lista de turnos",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 3,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      16,
+      2,
+      1,
+      2
+    ],
+    "nombre": "Pared",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_T": {
+    "sala": "SCO",
+    "letra": "T",
+    "descripcion": "Silla en su lugar",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      2,
+      8,
+      1,
+      1
+    ],
+    "nombre": "Silla",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "silla_frente",
+    "sprite_usado": null
+  },
+  "SCO_U": {
+    "sala": "SCO",
+    "letra": "U",
+    "descripcion": "Mazo de cartas en su caja",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      12,
+      5,
+      2,
+      1
+    ],
+    "nombre": "Cartas",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "caja_carton",
+    "sprite_usado": null
+  },
+  "SCO_V": {
+    "sala": "SCO",
+    "letra": "V",
+    "descripcion": "Cartas desparramadas en el piso",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      12,
+      8,
+      2,
+      1
+    ],
+    "nombre": "Cartas",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_W": {
+    "sala": "SCO",
+    "letra": "W",
+    "descripcion": "Pizarra de turnos en blanco, torcida",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      10,
+      1,
+      4,
+      1
+    ],
+    "nombre": "Pizarra de turnos",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "panel_apagado",
+    "sprite_usado": null
+  },
+  "SCO_X": {
+    "sala": "SCO",
+    "letra": "X",
+    "descripcion": "Dispensador de agua que gotea",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      19,
+      1,
+      1,
+      2
+    ],
+    "nombre": "Dispensador de agua",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "maquina_b",
+    "sprite_usado": null
+  },
+  "SCO_Y": {
+    "sala": "SCO",
+    "letra": "Y",
+    "descripcion": "Calendario tachado hasta el 112, descolorido",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      5,
+      1,
+      2,
+      1
+    ],
+    "nombre": "Calendario",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": "hoja_c",
+    "sprite_usado": null
+  },
+  "SCO_Z": {
+    "sala": "SCO",
+    "letra": "Z",
+    "descripcion": "Foto de la tripulación descolorida",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      15,
+      1,
+      2,
+      1
+    ],
+    "nombre": "Foto de la tripulación",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_AA": {
+    "sala": "SCO",
+    "letra": "AA",
+    "descripcion": "Marco de la foto con el vidrio roto",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      15,
+      1,
+      2,
+      1
+    ],
+    "nombre": "Marco roto",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_AB": {
+    "sala": "SCO",
+    "letra": "AB",
+    "descripcion": "Reloj de pared andando",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      18,
+      1,
+      1,
+      1
+    ],
+    "nombre": "Reloj de pared",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_AC": {
+    "sala": "SCO",
+    "letra": "AC",
+    "descripcion": "Reloj caído en el piso, sin agujas",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      18,
+      2,
+      1,
+      1
+    ],
+    "nombre": "Reloj caído",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_AD": {
+    "sala": "SCO",
+    "letra": "AD",
+    "descripcion": "Chaqueta colgada en la pared",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      17,
+      1,
+      1,
+      1
+    ],
+    "nombre": "Chaqueta",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "SCO_AE": {
+    "sala": "SCO",
+    "letra": "AE",
+    "descripcion": "Chaqueta en el piso, gastada",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      16,
+      8,
+      1,
+      1
+    ],
+    "nombre": "Chaqueta",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "PTA_F": {
+    "sala": "PTA",
+    "letra": "F",
+    "descripcion": "Soporte con la placa tapada por el plástico protector (no se lee)",
+    "tiempo": "pasado",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      6,
+      1,
+      1,
+      1
+    ],
+    "nombre": "Soporte de placa",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
+  },
+  "PTA_G": {
+    "sala": "PTA",
+    "letra": "G",
+    "descripcion": "Soporte de placa oxidado, vacío",
+    "tiempo": "futuro",
+    "turno_min": 1,
+    "luz_min": 2,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [],
+    "pos": [
+      6,
+      1,
+      1,
+      1
+    ],
+    "nombre": "Soporte de placa",
+    "turno_max": null,
+    "oculto": false,
+    "sprite": null,
+    "sprite_usado": null
   }
 }

@@ -36,6 +36,9 @@ TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI
                   "T_CIERRE_PINZA", "T_CIERRE_GENERAL", "T_CIERRE_FIN"]  # cierre del Alfa (juego.gd, paso 9)
 # NORA_OTRA = NORA hablando con datos de otro tiempo (se ve/oye distinto, ver 01 sección 2.1)
 HABLANTES = ["PERSONAJE", "NORA", "NORA_OTRA"]
+# Hojas de arte para los sprites (tamaño en píxeles) y opciones que se pueden escribir después del nombre
+HOJAS_ARTE = {"cosas": (1056, 576), "cosas2": (480, 1104), "pantallas": (480, 576), "puerta": (48, 384)}
+OPCIONES_SPRITE = {"girado", "espejo", "repetir", "doble", "pared"}
 
 errores, avisos = [], []
 def err(m): errores.append(m)
@@ -134,6 +137,37 @@ def main():
     eventos = tabla_simple("eventos", ["descripcion"])
     config = {r["clave"]: r["valor"] for r in leer_hoja(wb, "config")}
 
+    # ---------- sprites (catálogo de recortes de las hojas de arte) ----------
+    sprites = {}
+    if "sprites" in wb.sheetnames:
+        for r in leer_hoja(wb, "sprites"):
+            donde = f"sprites fila {r['_fila']}"
+            n, hoja = r.get("nombre"), r.get("hoja")
+            if not n:
+                err(f"{donde}: falta el nombre"); continue
+            if n in sprites or n == "ninguno":
+                err(f"{donde}: nombre '{n}' repetido o reservado")
+            if hoja not in HOJAS_ARTE:
+                err(f"{donde}: hoja '{hoja}' no existe (opciones: {', '.join(HOJAS_ARTE)})"); continue
+            x, y, w, h = (a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto"))
+            if None in (x, y, w, h):
+                continue
+            W, H = HOJAS_ARTE[hoja]
+            if x < 0 or y < 0 or w <= 0 or h <= 0 or x + w > W or y + h > H:
+                err(f"{donde}: el recorte {x},{y} {w}x{h} se sale de la hoja {hoja} ({W}x{H})")
+            sprites[n] = {"hoja": hoja, "region": [x, y, w, h]}
+
+    def revisar_sprite(valor, donde, campo):
+        if valor is None:
+            return None
+        partes = str(valor).split()
+        if partes[0] != "ninguno" and partes[0] not in sprites:
+            err(f"{donde}: {campo} '{partes[0]}' no está en la hoja sprites")
+        for o in partes[1:]:
+            if o not in OPCIONES_SPRITE:
+                err(f"{donde}: {campo} tiene una opción desconocida '{o}' (opciones: {', '.join(sorted(OPCIONES_SPRITE))})")
+        return " ".join(partes)
+
     # ---------- guion ----------
     guion = {}
     for r in leer_hoja(wb, "guion"):
@@ -219,6 +253,8 @@ def main():
             "nombre": r.get("nombre"),
             "turno_max": a_int(r["turnoMax"], donde, "turnoMax") if r.get("turnoMax") is not None else None,
             "oculto": si_no(r.get("oculto")),
+            "sprite": revisar_sprite(r.get("sprite"), donde, "sprite"),
+            "sprite_usado": revisar_sprite(r.get("sprite_usado"), donde, "sprite_usado"),
         }
         o = objetos[oid]
         if o["turno_max"] is not None and turno is not None and o["turno_max"] < turno:
@@ -239,7 +275,9 @@ def main():
             err(f"{donde}: en_futuro tiene que ser caído, roto o vacío (vale {en_futuro!r})")
         muebles.append({"sala": r["sala"], "nombre": r.get("nombre"),
                         "pos": [a_int(r.get(k), donde, k) for k in ("x", "y", "ancho", "alto")],
-                        "solido": si_no(r.get("solido")), "en_futuro": en_futuro})
+                        "solido": si_no(r.get("solido")), "en_futuro": en_futuro,
+                        "sprite": revisar_sprite(r.get("sprite"), donde, "sprite"),
+                        "sprite_futuro": revisar_sprite(r.get("sprite_futuro"), donde, "sprite_futuro")})
 
     # ---------- posiciones (tiles dentro de la sala) ----------
     TAM_SALAS = {"MAN": (20, 12), "COM": (18, 12), "SCO": (22, 12), "PTA": (10, 8)}  # escenas/salas/*.tscn
@@ -389,7 +427,7 @@ def main():
             err(f"pinza: {b} (T{tb}) tiene que pasar después de {a} (T{ta})")
 
     return reporte({"uso": primer_uso, "vista": primera_vista, "objetos": objetos,
-                    "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles)})
+                    "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles, sprites)})
 
 
 def reporte(sim):
@@ -413,11 +451,11 @@ def reporte(sim):
     if errores:
         print("\nNo se escribieron los JSON. Corregí los errores y volvé a correrlo.")
         return 1
-    objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles = sim["datos"]
+    objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles, sprites = sim["datos"]
     SALIDA.mkdir(parents=True, exist_ok=True)
     archivos = {"objetos": objetos, "salas": salas, "guion": {str(k): v for k, v in guion.items()}, "conexiones": conexiones,
                 "textos": textos, "anotaciones": anotaciones, "items": items, "audios": audios,
-                "eventos": eventos, "config": config, "muebles": muebles}
+                "eventos": eventos, "config": config, "muebles": muebles, "sprites": sprites}
     for nombre, data in archivos.items():
         (SALIDA / f"{nombre}.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nOK: {len(archivos)} archivos JSON escritos en {SALIDA.relative_to(RAIZ)}")
