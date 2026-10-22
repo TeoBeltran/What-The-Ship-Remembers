@@ -1,5 +1,7 @@
 class_name ArteNave
-## Pisos, paredes y puertas del tileset (arte/tiles). Todo en la grilla de 48 px (Medidas.TILE).
+## Pisos, paredes y puertas del tileset (arte/tiles). Los archivos están en una grilla de 48 px
+## (Medidas.TILE_ARTE); las regiones de acá son en píxeles del archivo y se dibujan en tiles del mundo
+## (Medidas.TILE = 48 x Medidas.ARTE).
 ##
 ## pisos.png (384x576): 16 materiales en 4 columnas x 4 grupos. Cada material ocupa 96x144:
 ##   arriba dos tiles sueltos de 48x48 y abajo una placa de 96x96.
@@ -15,8 +17,8 @@ const RUTA_PISOS := "res://arte/tiles/pisos.png"
 const RUTA_PAREDES := "res://arte/tiles/paredes.png"
 const RUTA_PUERTA := "res://arte/tiles/puerta.png"
 
-const T := Medidas.TILE
-const BLOQUE := T * 2  # 96: placa de piso y frente de pared
+const T := Medidas.TILE_ARTE  # en el archivo
+const BLOQUE := T * 2  # 96 px del archivo: placa de piso y frente de pared
 const CANT_PISOS := 16
 const CANT_PAREDES := 24
 const CUADROS_PUERTA := 4

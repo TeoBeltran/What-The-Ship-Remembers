@@ -92,9 +92,11 @@ func _draw() -> void:
 	var terminado := id_visible_pendiente() == "" and not es_consola
 	var tinte := ArteObjetos.tinte(Estado.tiempo_de(o["sala"]))
 	if not ArteObjetos.dibujar(self, spec, rect, tinte.darkened(0.15) if terminado else tinte):
+		# Sin sprite: cuadro a la mitad del lugar (con el tile de 96, un objeto suelto mide como antes).
 		var c := color.darkened(0.35) if terminado else color
-		draw_rect(rect, c)
-		draw_rect(rect, c.darkened(0.5), false, E)
+		var cuadro := Rect2(rect.get_center() - rect.size / 4.0, rect.size / 2.0)
+		draw_rect(cuadro, c)
+		draw_rect(cuadro, c.darkened(0.5), false, E / 2.0)
 	if mostrar_id:
 		draw_rect(rect, Color.YELLOW, false, E)
 		var texto := "NORA" if es_consola else ids[0]

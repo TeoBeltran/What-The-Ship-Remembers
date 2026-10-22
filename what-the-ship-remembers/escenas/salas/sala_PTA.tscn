@@ -5,7 +5,7 @@
 [node name="SalaPTA" type="Node2D"]
 script = ExtResource("1")
 codigo = "PTA"
-ancho = 10
-alto = 8
+ancho = 6
+alto = 4
 piso = 13
 pared = 8

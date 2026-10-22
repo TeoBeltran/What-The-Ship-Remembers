@@ -8,16 +8,17 @@ extends Node2D
 ## Moverse de sala se cobra al ENTRAR al piso de la otra sala (lo detecta el juego con sala_en()).
 ##
 ## Pasillo de costado (sala A a la izquierda, sala B a la derecha, misma altura), visto en tiles:
-##   entre la pared de A y la de B hay 6 columnas.
-##     filas 1-2  frente de pared
-##     filas 3-4  pasillo de arriba (une las dos puertas)
-##     filas 5-6  pared de frente con una puerta doble de cada lado (en el medio, pared)
-##     filas 7-8  dos recovecos abiertos hacia su sala (la abertura en la pared es del pasillo)
-##                separados por un tabique de 2 tiles
-##     fila 9     pared de abajo
+##   entre la pared de A y la de B hay 6 columnas. Se arma desde abajo (b = fila de la pared de abajo
+##   de las salas), así entra en salas de 6 tiles de alto:
+##     filas b-8, b-7  frente de pared (a la altura del frente de las salas si miden 6)
+##     filas b-6, b-5  pasillo de arriba (une las dos puertas)
+##     filas b-4, b-3  pared de frente con una puerta doble de cada lado (en el medio, pared)
+##     filas b-2, b-1  dos recovecos abiertos hacia su sala (la abertura en la pared es del pasillo)
+##                     separados por un tabique de 2 tiles
+##     fila b          pared de abajo
 ##   Así, vayas para donde vayas, siempre entrás por una puerta que se ve de frente.
 ## Salida trabada a la derecha (sala.salida_trabada_derecha): la mitad izquierda de un pasillo de costado,
-##   el recoveco (filas 7-8) y la puerta doble de frente (filas 5-6), que nunca abre.
+##   el recoveco y la puerta doble de frente, que nunca abre.
 ## Pasillo hacia arriba (sala A arriba, sala B abajo, centradas): 2 tiles de ancho; una puerta en el
 ##   frente de B y otra en el frente propio del pasillo, justo debajo de la pared de A.
 
@@ -146,11 +147,12 @@ func _pasillo_costado(izq, der) -> void:
 	var xa: int = izq.pos_tiles.x + izq.ancho        # columna de la pared derecha de la sala izquierda
 	var xb: int = der.pos_tiles.x - 1                # columna de la pared izquierda de la sala derecha
 	var y0: int = izq.pos_tiles.y
-	if xb - xa != 7 or der.pos_tiles.y != y0 or izq.alto < 10 or der.alto < 10:
-		push_error("Pasillo %s-%s: las salas tienen que estar a la misma altura (alto >= 10) y con 6 tiles entre sus paredes" % [izq.codigo, der.codigo])
+	if xb - xa != 7 or der.pos_tiles.y != y0 or izq.alto != der.alto or izq.alto < 6:
+		push_error("Pasillo %s-%s: las salas tienen que estar a la misma altura, medir lo mismo de alto (>= 6) y tener 6 tiles entre sus paredes" % [izq.codigo, der.codigo])
 		return
 	var p := _nuevo_pasillo(izq.codigo, der.codigo)
 	var id: String = p["id"]
+	y0 = izq.pos_tiles.y + izq.alto - 9  # así b (pared de abajo) = y0 + 9
 	for i in 6:
 		var x := xa + 1 + i
 		var u := i % 2
@@ -179,7 +181,7 @@ func _pasillo_costado(izq, der) -> void:
 ## según el mapa, la sala común sigue hacia la derecha, al resto de la nave).
 func _salida_trabada(s) -> void:
 	var xa: int = s.pos_tiles.x + s.ancho   # columna de la pared derecha de la sala
-	var y0: int = s.pos_tiles.y
+	var y0: int = s.pos_tiles.y + s.alto - 9  # mismas filas que un pasillo de costado (b = y0 + 9)
 	var p := _nuevo_pasillo(s.codigo, s.codigo)
 	p["salida"] = true
 	var id: String = p["id"]

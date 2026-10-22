@@ -7,7 +7,7 @@ class_name ArteObjetos
 ##   doble   → dos copias, la segunda espejada (puerta doble)
 ##   pared   → apoyado en la pared de arriba (su base queda en el borde de arriba del rectángulo)
 ## "ninguno" = no se dibuja nada. Vacío = cuadro de color (greybox).
-## El arte está hecho a 48 px por tile, igual que Medidas.TILE: se dibuja 1:1, sin escalar.
+## El arte está hecho a 48 px por tile y se dibuja a escala Medidas.ARTE (x2), sin suavizar.
 
 const HOJAS := {
 	"cosas": "res://arte/tiles/objetos/cosas.png",
@@ -48,7 +48,8 @@ static func dibujar(ci: CanvasItem, spec, rect: Rect2, color := Color.WHITE, apo
 	var r: Array = s["region"]
 	var origen := Rect2(r[0], r[1], r[2], r[3])
 	var girado := partes.has("girado")
-	var tam := Vector2(origen.size.y, origen.size.x) if girado else origen.size
+	var dibujo := origen.size * Medidas.ARTE  # tamaño en el mundo
+	var tam := Vector2(dibujo.y, dibujo.x) if girado else dibujo
 	var n := 1
 	if partes.has("doble"):
 		n = 2
@@ -67,7 +68,7 @@ static func dibujar(ci: CanvasItem, spec, rect: Rect2, color := Color.WHITE, apo
 		var espejo := partes.has("espejo") != (partes.has("doble") and i == 1)
 		var centro := Vector2(x0 + tam.x * (i + 0.5), y0 + tam.y / 2.0)
 		ci.draw_set_transform(centro, PI / 2.0 if girado else 0.0, Vector2(-1 if espejo else 1, 1))
-		ci.draw_texture_rect_region(tex, Rect2(-origen.size / 2.0, origen.size), origen, color)
+		ci.draw_texture_rect_region(tex, Rect2(-dibujo / 2.0, dibujo), origen, color)
 	ci.draw_set_transform(Vector2.ZERO)
 	return true
 

@@ -6,8 +6,16 @@ class_name Medidas
 ## Desde el arte de pisos y paredes, todo va en la grilla de tiles: ancho, alto y posición de las
 ## salas son del PISO (lo caminable); las paredes van alrededor (ver nave.gd).
 
-## Tamaño de un tile en píxeles. El tileset del juego es de 48x48.
-const TILE := 48
+## El arte (tilesets, sprites, personaje) está dibujado en una grilla de 48 px y se muestra al doble
+## (pedido del usuario, 22/10/2026): cada píxel del arte ocupa 2x2 en pantalla, nítido.
+## Para cambiar el tamaño del arte en pantalla alcanza con cambiar ARTE; los archivos no se tocan.
+const ARTE := 2
+
+## Tamaño de un tile del arte, en píxeles del archivo.
+const TILE_ARTE := 48
+
+## Tamaño de un tile en el mundo (en pantalla, con la cámara a x1).
+const TILE := TILE_ARTE * ARTE
 
 ## Relación con el greybox original de 16 px. Sirve para escalar detalles chicos
 ## (grosores de línea, márgenes, velocidad) que se pensaron a 16 px.
@@ -19,7 +27,7 @@ const PARED := TILE
 ## Alto del frente de la pared de arriba, en tiles (se ve de frente, como en un RPG visto desde arriba).
 const FRENTE := 2
 
-## Ancho de una puerta: puerta doble, 2 tiles (dos sprites de 48x96, el de la derecha espejado).
+## Ancho de una puerta: puerta doble, 2 tiles (dos sprites de 48x96 del archivo, el de la derecha espejado).
 const ANCHO_PUERTA := TILE * 2
 
 ## Celda de la grilla de caminos del click derecho (medio tile).

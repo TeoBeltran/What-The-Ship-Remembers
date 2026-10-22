@@ -19,11 +19,12 @@ extends Node2D
 
 const NOMBRES := {"MAN": "Sala de mando", "COM": "Comunicaciones", "SCO": "Sala común", "PTA": "Sala de la puerta"}
 const ZOOMS := [0.75, 1.0, 1.5, 2.0]
+const ZOOM_INICIAL := 1  # x1 (el arte ya se dibuja al doble: Medidas.ARTE)
 const E := Medidas.ESCALA
 const ALCANCE := 14.0 * E  # px alrededor de un objeto para poder interactuar
 
 var depuracion := false
-var _zoom_i := 1
+var _zoom_i := ZOOM_INICIAL
 var _pendiente = null  # objeto al que se va caminando para interactuar (click derecho)
 var _cinematica := ""  # id de la interacción forzada hacia la que camina solo
 var _fin_turno := false  # durante el texto y el fundido a negro entre turnos
@@ -39,6 +40,7 @@ var _opciones_nora: Array = []  # lo que significa cada opción de la pregunta a
 
 
 func _ready() -> void:
+	camara.zoom = Vector2.ONE * ZOOMS[_zoom_i]
 	Estado.energia_cambiada.connect(func(_e): _actualizar_hud())
 	Estado.sala_cambiada.connect(func(_s): _actualizar_hud())
 	Estado.turno_empezado.connect(func(_t): _empezar_turno())

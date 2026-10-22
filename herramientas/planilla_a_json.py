@@ -280,7 +280,7 @@ def main():
                         "sprite_futuro": revisar_sprite(r.get("sprite_futuro"), donde, "sprite_futuro")})
 
     # ---------- posiciones (tiles dentro de la sala) ----------
-    TAM_SALAS = {"MAN": (20, 12), "COM": (18, 12), "SCO": (22, 12), "PTA": (10, 8)}  # escenas/salas/*.tscn
+    TAM_SALAS = {"MAN": (10, 6), "COM": (10, 6), "SCO": (12, 6), "PTA": (6, 4)}  # escenas/salas/*.tscn
     cosas = [(f"objeto {oid}", o) for oid, o in objetos.items()] + [(f"mueble {m['nombre']}", m) for m in muebles]
     for quien, o in cosas:
         x, y, w, h = o["pos"]

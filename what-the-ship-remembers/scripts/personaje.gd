@@ -1,18 +1,19 @@
 extends CharacterBody2D
 ## Personaje con sprite (arte/personaje/personaje.png: 4 cuadros de 30x75, en orden
-## abajo, derecha, arriba, izquierda). Se dibuja 1:1, como los tiles de 48.
+## abajo, derecha, arriba, izquierda). Se dibuja a escala Medidas.ARTE, como todo el arte.
 ## Se mueve con flechas/WASD o siguiendo una ruta (click derecho). Las teclas cancelan la ruta.
 ## La colisión es solo la zona de los pies: la cabeza y el torso pueden tapar paredes y muebles.
 
 const E := Medidas.ESCALA
 const VELOCIDAD := 90.0 * E   # ~5,6 tiles por segundo
-const TAMANO := Vector2(24, 18)  # colisión (pies), en píxeles
+const TAMANO := Vector2(24, 18) * Medidas.ARTE  # colisión (pies), en píxeles del mundo
 
 const HOJA := "res://arte/personaje/personaje.png"
-const CUADRO := Vector2(30, 75)
+const CUADRO := Vector2(30, 75)  # en el archivo
+const DIBUJO := CUADRO * Medidas.ARTE  # en el mundo
 enum { ABAJO, DERECHA, ARRIBA, IZQUIERDA }
 const PASO_SEG := 0.16  # cada cuánto alterna el balanceo al caminar
-const PASO_PX := 2.0     # cuánto sube en el balanceo
+const PASO_PX := 2.0 * Medidas.ARTE  # cuánto sube en el balanceo
 
 var ruta := PackedVector2Array()
 var bloqueado := false  # por ejemplo, mientras hay un diálogo abierto
@@ -127,13 +128,13 @@ func _tecla(a: Key, b: Key) -> float:
 func _draw() -> void:
 	if _hoja:
 		# Los pies (última fila del cuadro) apoyan en el borde de abajo de la colisión.
-		var arriba_izq := Vector2(-CUADRO.x / 2.0, TAMANO.y / 2.0 - CUADRO.y)
+		var arriba_izq := Vector2(-DIBUJO.x / 2.0, TAMANO.y / 2.0 - DIBUJO.y)
 		if _arriba:
 			arriba_izq.y -= PASO_PX
 		# Redondeado al píxel para que el pixel art no tiemble.
 		arriba_izq = (arriba_izq + global_position).round() - global_position
 		var region := Rect2(Vector2(_mira * CUADRO.x, 0), CUADRO)
-		draw_texture_rect_region(_hoja, Rect2(arriba_izq, CUADRO), region)
+		draw_texture_rect_region(_hoja, Rect2(arriba_izq, DIBUJO), region)
 	else:
 		draw_rect(Rect2(-TAMANO / 2.0, TAMANO), Color.WHITE)
 	# Destino del click derecho: una crucecita.
