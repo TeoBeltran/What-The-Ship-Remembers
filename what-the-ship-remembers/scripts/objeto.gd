@@ -1,7 +1,7 @@
 extends Node2D
 ## Objeto investigable en greybox (paso 4): un rectángulo de color en su lugar de la sala.
 ## Se dibuja si el núcleo dice que se ve (activo, en su tiempo, no desdibujado y con luz suficiente).
-## Los objetos que ocupan el mismo lugar (por ejemplo, la tijera en los tres tiempos) tienen el mismo color.
+## Los objetos que ocupan el mismo lugar (por ejemplo, la pinza en los tres tiempos) tienen el mismo color.
 ## La consola de NORA es un solo objeto que agrupa todas las conversaciones (MAN_N1…N13).
 ## Los objetos "ocultos" (columna oculto) no se dibujan ni se pueden elegir: solo marcan el lugar
 ## al que camina una cinemática forzada.

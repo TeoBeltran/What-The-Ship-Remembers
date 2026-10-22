@@ -1,9 +1,10 @@
 {
-  "energia_por_turno": 15,
+  "energia_por_turno": 14,
   "capacidad_luz": 10,
   "costo_cruzar_puerta": 3,
   "costo_cruzar_desde_luz_max": 2,
   "descuento_luz_max": 1,
   "turnos_alfa": 12,
-  "costo_volver_a_mando": 0
+  "costo_volver_a_mando": 0,
+  "energia_por_arreglo": 1
 }

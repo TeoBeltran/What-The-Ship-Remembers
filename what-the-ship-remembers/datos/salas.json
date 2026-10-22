@@ -3,8 +3,8 @@
     "numero": 1,
     "nombre": "Sala de mando",
     "desbloqueada_inicio": true,
-    "luz_inicial": 3,
-    "luz_max_sin_arreglo": 3,
+    "luz_inicial": 2,
+    "luz_max_sin_arreglo": 2,
     "luz_max_alfa": 3,
     "capacidad_a_luz_max": 3
   },

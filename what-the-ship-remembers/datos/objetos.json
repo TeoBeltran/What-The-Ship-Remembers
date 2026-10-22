@@ -2,12 +2,12 @@
   "MAN_A": {
     "sala": "MAN",
     "letra": "A",
-    "descripcion": "Panel eléctrico bajo la consola, circuito de comunicaciones cortado",
+    "descripcion": "Panel eléctrico roto bajo la consola: hacen falta herramientas",
     "tiempo": "presente",
     "turno_min": 1,
     "luz_min": 1,
-    "costo": 4,
-    "forzada": false,
+    "costo": 0,
+    "forzada": true,
     "texto_al_entrar": null,
     "tipo_cond": "Y",
     "condiciones": [
@@ -20,10 +20,6 @@
       {
         "tipo": 1,
         "param": "T_MAN_A"
-      },
-      {
-        "tipo": 0,
-        "param": "arreglo_com"
       },
       {
         "tipo": 4,
@@ -400,7 +396,7 @@
   "MAN_N13": {
     "sala": "MAN",
     "letra": "N13",
-    "descripcion": "NORA: La taza se movió",
+    "descripcion": "NORA: La taza tiene café seco",
     "tiempo": "presente",
     "turno_min": 1,
     "luz_min": 1,
@@ -493,7 +489,7 @@
   "COM_C": {
     "sala": "COM",
     "letra": "C",
-    "descripcion": "Panel de herramientas, falta la tijera",
+    "descripcion": "Panel de herramientas, falta la pinza",
     "tiempo": "pasado",
     "turno_min": 1,
     "luz_min": 2,
@@ -717,7 +713,7 @@
   "COM_J": {
     "sala": "COM",
     "letra": "J",
-    "descripcion": "Panel de herramientas oxidado, hueco de la tijera vacío",
+    "descripcion": "Panel de herramientas oxidado, hueco de la pinza vacío",
     "tiempo": "futuro",
     "turno_min": 1,
     "luz_min": 2,
@@ -814,7 +810,7 @@
   "COM_M": {
     "sala": "COM",
     "letra": "M",
-    "descripcion": "Tijera sobre la mesa (el personaje ya tiene la del futuro en el bolsillo)",
+    "descripcion": "Pinza sobre la mesa (el personaje ya tiene la del futuro en el bolsillo)",
     "tiempo": "pasado",
     "turno_min": 1,
     "luz_min": 2,
@@ -848,14 +844,14 @@
       1,
       1
     ],
-    "nombre": "Tijera",
+    "nombre": "Pinza",
     "turno_max": null,
     "oculto": false
   },
   "COM_N": {
     "sala": "COM",
     "letra": "N",
-    "descripcion": "Tijera sobre la mesa (la otra está en el bolsillo)",
+    "descripcion": "Pinza sobre la mesa (la otra está en el bolsillo)",
     "tiempo": "presente",
     "turno_min": 10,
     "luz_min": 1,
@@ -876,14 +872,14 @@
       1,
       1
     ],
-    "nombre": "Tijera",
+    "nombre": "Pinza",
     "turno_max": null,
     "oculto": false
   },
   "COM_O": {
     "sala": "COM",
     "letra": "O",
-    "descripcion": "Tijera sobre la mesa, con polvo",
+    "descripcion": "Pinza sobre la mesa, con polvo",
     "tiempo": "futuro",
     "turno_min": 7,
     "luz_min": 1,
@@ -899,7 +895,7 @@
       },
       {
         "tipo": 2,
-        "param": "tijera"
+        "param": "pinza"
       },
       {
         "tipo": 4,
@@ -916,7 +912,7 @@
       1,
       1
     ],
-    "nombre": "Tijera",
+    "nombre": "Pinza",
     "turno_max": null,
     "oculto": false
   },
@@ -1713,7 +1709,7 @@
   "COM_R": {
     "sala": "COM",
     "letra": "R",
-    "descripcion": "Lugar vacío en la mesa donde el personaje cree que dejó la tijera",
+    "descripcion": "Lugar vacío en la mesa donde el personaje cree que dejó la pinza",
     "tiempo": "presente",
     "turno_min": 6,
     "luz_min": 1,
@@ -1741,7 +1737,7 @@
   "COM_S": {
     "sala": "COM",
     "letra": "S",
-    "descripcion": "Diálogo obligatorio del presente: la tijera está en la mesa y en el bolsillo",
+    "descripcion": "Diálogo obligatorio del presente: la pinza está en la mesa y en el bolsillo",
     "tiempo": "presente",
     "turno_min": 10,
     "luz_min": 1,
@@ -1771,8 +1767,204 @@
       1,
       1
     ],
-    "nombre": "Tijera",
+    "nombre": "Pinza",
     "turno_max": null,
     "oculto": true
+  },
+  "MAN_N14": {
+    "sala": "MAN",
+    "letra": "N14",
+    "descripcion": "NORA: Ya arreglé el panel (tutorial de luz máxima)",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": false,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_B",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N14"
+      }
+    ],
+    "pos": [
+      8,
+      2,
+      4,
+      1
+    ],
+    "nombre": "Consola de NORA",
+    "turno_max": null,
+    "oculto": false
+  },
+  "MAN_N15": {
+    "sala": "MAN",
+    "letra": "N15",
+    "descripcion": "NORA: al empezar el T2 (tutorial de la sala común)",
+    "tiempo": "presente",
+    "turno_min": 2,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": null,
+    "condiciones": [],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_N15"
+      }
+    ],
+    "pos": [
+      8,
+      2,
+      4,
+      1
+    ],
+    "nombre": "Consola de NORA",
+    "turno_max": 2,
+    "oculto": false
+  },
+  "COM_T": {
+    "sala": "COM",
+    "letra": "T",
+    "descripcion": "T12: compara las dos pinzas y empieza el cierre del Alfa",
+    "tiempo": "presente",
+    "turno_min": 12,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_O",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_T"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_T"
+      },
+      {
+        "tipo": 3,
+        "param": "musica_cierre"
+      },
+      {
+        "tipo": 0,
+        "param": "cierre_alfa"
+      }
+    ],
+    "pos": [
+      10,
+      7,
+      1,
+      1
+    ],
+    "nombre": "Pinza",
+    "turno_max": null,
+    "oculto": true
+  },
+  "MAN_B": {
+    "sala": "MAN",
+    "letra": "B",
+    "descripcion": "Arreglo del panel con el destornillador y la pinza",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "COM_U",
+        "campo": "usado"
+      },
+      {
+        "objeto": "COM_O",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_MAN_B"
+      },
+      {
+        "tipo": 0,
+        "param": "arreglo_panel"
+      },
+      {
+        "tipo": 4,
+        "param": "A_MAN_B"
+      }
+    ],
+    "pos": [
+      9,
+      3,
+      2,
+      1
+    ],
+    "nombre": "Panel eléctrico",
+    "turno_max": null,
+    "oculto": false
+  },
+  "COM_U": {
+    "sala": "COM",
+    "letra": "U",
+    "descripcion": "Destornillador en el panel de herramientas",
+    "tiempo": "presente",
+    "turno_min": 1,
+    "luz_min": 1,
+    "costo": 0,
+    "forzada": true,
+    "texto_al_entrar": null,
+    "tipo_cond": "Y",
+    "condiciones": [
+      {
+        "objeto": "MAN_A",
+        "campo": "usado"
+      }
+    ],
+    "disparadores": [
+      {
+        "tipo": 1,
+        "param": "T_COM_U"
+      },
+      {
+        "tipo": 2,
+        "param": "destornillador"
+      },
+      {
+        "tipo": 4,
+        "param": "A_COM_U"
+      },
+      {
+        "tipo": 5,
+        "param": "COM_U"
+      }
+    ],
+    "pos": [
+      13,
+      1,
+      3,
+      1
+    ],
+    "nombre": "Destornillador",
+    "turno_max": null,
+    "oculto": false
   }
 }

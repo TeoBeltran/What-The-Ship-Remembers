@@ -1,6 +1,10 @@
 {
-  "tijera": {
-    "nombre": "Tijera",
-    "descripcion": "Una tijera con polvo."
+  "pinza": {
+    "nombre": "Pinza",
+    "descripcion": "Una pinza común, con un raspón en el mango."
+  },
+  "destornillador": {
+    "nombre": "Destornillador",
+    "descripcion": "Un destornillador de punta plana."
   }
 }

@@ -17,20 +17,23 @@ SALIDA = RAIZ / "what-the-ship-remembers" / "datos"
 
 TIEMPOS = {"pasado", "presente", "futuro", "anomalo"}
 CAMPOS_COND = {"Usado", "Activo"}
-# Cadena de la tijera: estos objetos y todo lo que los activa deben tener LuzM <= 2
-CADENA_TIJERA = ["COM_O"]
+# Cadena de la pinza y el panel: estos objetos y todo lo que los activa deben tener LuzM <= 2
+CADENA_PINZA = ["COM_O", "MAN_B"]
+# Salas que necesitan el arreglo del panel (evento arreglo_panel) para llegar a luz máxima
+SALAS_PANEL = ("MAN", "COM")
 # Objetos clave (⭐): deben poder usarse (o verse, si son forzados) dentro de los 12 turnos
-CLAVE = ["MAN_A", "MAN_N4", "MAN_N5", "COM_E", "COM_H", "COM_J", "COM_L", "COM_R", "COM_O", "COM_S",
+CLAVE = ["MAN_A", "MAN_B", "COM_U", "MAN_N4", "MAN_N5", "COM_E", "COM_H", "COM_J", "COM_L", "COM_R", "COM_O", "COM_S",
          "COM_Q", "SCO_D", "SCO_J", "SCO_O", "PTA_A"]
-# Orden de la tijera (21/10/2026): T6 presente "pensé que la dejé acá" → T7 futuro se agarra →
+# Orden de la pinza (21/10/2026): T6 presente "pensé que la dejé acá" → T7 futuro se agarra →
 # T9 pasado está otra vez (investigarla es opcional) → T10 presente: diálogo obligatorio del bolsillo
 # (solo si no se investigó en el pasado).
-ORDEN_TIJERA = ["COM_R", "COM_O", "COM_S"]
-# Interacciones opcionales que la simulación del recorrido mínimo NO hace (investigar la tijera del pasado
+ORDEN_PINZA = ["COM_R", "COM_O", "COM_S"]
+# Interacciones opcionales que la simulación del recorrido mínimo NO hace (investigar la pinza del pasado
 # cancela el diálogo obligatorio del presente).
 OPCIONALES_SIM = {"COM_M"}
 # Textos que usa el código directamente (no un objeto)
-TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI", "SIS_NORA_MENU"]
+TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI", "SIS_NORA_MENU",
+                  "T_CIERRE_PINZA", "T_CIERRE_GENERAL", "T_CIERRE_FIN"]  # cierre del Alfa (juego.gd, paso 9)
 # NORA_OTRA = NORA hablando con datos de otro tiempo (se ve/oye distinto, ver 01 sección 2.1)
 HABLANTES = ["PERSONAJE", "NORA", "NORA_OTRA"]
 
@@ -292,7 +295,7 @@ def main():
             if k not in usados[nombre]:
                 aviso(f"{nombre}: '{k}' no lo usa ningún objeto")
 
-    # ---------- luz de la cadena de la tijera ----------
+    # ---------- luz de la cadena de la pinza ----------
     def ancestros(oid, vistos):
         for c in objetos.get(oid, {}).get("condiciones", []):
             if c["objeto"] not in vistos:
@@ -300,12 +303,12 @@ def main():
                 ancestros(c["objeto"], vistos)
         return vistos
     cadena = set()
-    for oid in CADENA_TIJERA:
+    for oid in CADENA_PINZA:
         if oid in objetos:
             cadena |= {oid} | ancestros(oid, set())
     for oid in sorted(cadena):
         if (objetos[oid]["luz_min"] or 0) > 2:
-            err(f"cadena de la tijera: {oid} tiene luzM {objetos[oid]['luz_min']} (tiene que ser <= 2)")
+            err(f"cadena de la pinza: {oid} tiene luzM {objetos[oid]['luz_min']} (tiene que ser <= 2)")
 
     # ---------- luz posible ----------
     for oid, o in objetos.items():
@@ -339,7 +342,7 @@ def main():
 
     def luz_sala(s):
         v = salas[s]
-        return v["luz_max_alfa"] if (s != "COM" or arreglo) else v["luz_max_sin_arreglo"]
+        return v["luz_max_alfa"] if (s not in SALAS_PANEL or arreglo) else v["luz_max_sin_arreglo"]
 
     for t in range(1, n_turnos + 1):
         revisar(t)
@@ -362,7 +365,7 @@ def main():
                 for d in o["disparadores"]:
                     if d["tipo"] == 5:
                         est[d["param"]]["desdibujado"] = True
-                    elif d["tipo"] == 0 and d["param"] == "arreglo_com":
+                    elif d["tipo"] == 0 and d["param"] == "arreglo_panel":
                         arreglo = True
                     elif d["tipo"] == 0 and d["param"].startswith("desbloquear_"):
                         abiertas.add(d["param"].split("_", 1)[1])
@@ -379,11 +382,11 @@ def main():
             aviso(f"objeto {oid}: nunca llega a verse en el Alfa (tiempo {o['tiempo']}, condiciones o guion)")
         elif oid in primera_vista and o["disparadores"] and oid not in primer_uso and oid not in OPCIONALES_SIM:
             aviso(f"objeto {oid}: se ve pero nunca se puede usar")
-    # La tijera: cada paso en un turno posterior al anterior
-    pasos = [(oid, primer_uso.get(oid)) for oid in ORDEN_TIJERA]
+    # La pinza: cada paso en un turno posterior al anterior
+    pasos = [(oid, primer_uso.get(oid)) for oid in ORDEN_PINZA]
     for (a, ta), (b, tb) in zip(pasos, pasos[1:]):
         if ta and tb and tb <= ta:
-            err(f"tijera: {b} (T{tb}) tiene que pasar después de {a} (T{ta})")
+            err(f"pinza: {b} (T{tb}) tiene que pasar después de {a} (T{ta})")
 
     return reporte({"uso": primer_uso, "vista": primera_vista, "objetos": objetos,
                     "datos": (objetos, salas, guion, conexiones, textos, anotaciones, items, audios, eventos, config, muebles)})
@@ -394,7 +397,7 @@ def reporte(sim):
     print("VALIDACIÓN DE LA PLANILLA DEL ALFA")
     print("=" * 60)
     if sim:
-        cad = ["SCO_D", "SCO_J", "SCO_O", "MAN_N4", "MAN_A", "COM_E", "COM_H", "COM_L", "COM_R", "COM_O", "COM_M", "COM_S"]
+        cad = ["SCO_D", "SCO_J", "SCO_O", "MAN_N4", "MAN_A", "COM_U", "COM_E", "COM_H", "COM_L", "COM_R", "COM_O", "MAN_B", "COM_M", "COM_S"]
         print("\nRecorrido mínimo (simulación sin energía, en qué turno se puede usar/ver cada cosa):")
         for oid in cad:
             u = sim["uso"].get(oid)

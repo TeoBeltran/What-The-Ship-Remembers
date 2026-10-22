@@ -44,6 +44,7 @@ var sala_actual: String = SALA_INICIO
 var luz: Dictionary = {}              # sala -> nivel 0..3
 var desbloqueadas: Dictionary = {}    # sala -> true
 var arregladas: Dictionary = {}       # sala -> true (permite luz máxima)
+var energia_extra: int = 0            # energía por turno ganada con arreglos (panel eléctrico: +1)
 var obj: Dictionary = {}              # id -> {activo, usado, desdibujado}
 var visitadas: Dictionary = {}        # salas visitadas alguna vez
 var visitadas_turno: Dictionary = {}  # salas visitadas en el turno actual
@@ -101,6 +102,7 @@ func nueva_partida() -> void:
 	luz.clear()
 	desbloqueadas.clear()
 	arregladas.clear()
+	energia_extra = 0
 	for s in salas:
 		luz[s] = int(salas[s]["luz_inicial"])
 		if salas[s]["desbloqueada_inicio"]:
@@ -116,7 +118,7 @@ func nueva_partida() -> void:
 ## Empieza el turno siguiente: energía al máximo, en la sala de mando, marcas y visitas del turno vacías.
 func empezar_turno() -> void:
 	turno += 1
-	energia = cfg("energia_por_turno")
+	energia = energia_maxima()
 	visitadas_turno.clear()
 	marcas.clear()
 	sala_actual = SALA_INICIO
@@ -126,6 +128,11 @@ func empezar_turno() -> void:
 	sala_cambiada.emit(sala_actual)
 	revisar_activaciones()
 	procesar_forzadas()
+
+
+## Energía del traje al empezar cada turno (14 en el Alfa; 15 después de arreglar el panel).
+func energia_maxima() -> int:
+	return cfg("energia_por_turno") + energia_extra
 
 
 func es_ultimo_turno() -> bool:
@@ -279,8 +286,17 @@ func _ejecutar_disparador(tipo: int, param: String) -> void:
 ## Eventos especiales (disparador tipo 0): los resuelve el código.
 func _evento(id: String) -> void:
 	match id:
-		"arreglo_com":
+		"arreglo_panel":
+			# Panel eléctrico arreglado (destornillador + pinza): mando y comunicaciones pueden llegar a luz
+			# máxima (suben solas si alcanza la capacidad) y el traje gana energía por turno, también ahora.
+			arregladas["MAN"] = true
 			arregladas["COM"] = true
+			energia_extra = cfg("energia_por_arreglo")
+			energia += energia_extra
+			energia_cambiada.emit(energia)
+			for s in ["MAN", "COM"]:
+				if desbloqueadas.has(s) and int(luz[s]) < luz_maxima(s):
+					set_luz(s, luz_maxima(s))
 		_:
 			if id.begins_with("desbloquear_"):
 				desbloquear(id.trim_prefix("desbloquear_"))

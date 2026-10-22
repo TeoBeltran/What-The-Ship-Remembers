@@ -1,8 +1,11 @@
 {
-  "arreglo_com": {
-    "descripcion": "Comunicaciones pasa a poder tener luz máxima (3)."
+  "arreglo_panel": {
+    "descripcion": "Panel eléctrico arreglado: la sala de mando y comunicaciones pasan a poder tener luz máxima (3) y suben solas si alcanza la capacidad; el traje gana energía por turno (config energia_por_arreglo)."
   },
   "desbloquear_SCO": {
     "descripcion": "Desbloquea la sala común. Queda con luz 0."
+  },
+  "cierre_alfa": {
+    "descripcion": "T12: el personaje camina solo hasta la consola de NORA y empieza el cierre del Alfa (juego.gd)."
   }
 }

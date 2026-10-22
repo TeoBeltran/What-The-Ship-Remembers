@@ -24,7 +24,7 @@ const VOCES := {
 }
 const CAJA_ABAJO := 498.0  # la caja de diálogo crece hacia arriba desde acá
 const LETRAS_POR_SEGUNDO := 55.0  # texto letra por letra (E lo completa de una)
-const NOMBRE_AUDIO := {"estatica": "estática de radio", "chisporroteo": "chisporroteo eléctrico"}
+const NOMBRE_AUDIO := {"estatica": "estática de radio", "chisporroteo": "chisporroteo eléctrico", "musica_cierre": "música"}
 
 var estado: Label
 var depuracion: Label
@@ -545,7 +545,7 @@ func _crear_barra_energia() -> void:
 	var bateria: Texture2D = load("res://arte/ui/icono_bateria.png")
 	var seg: Texture2D = load("res://arte/ui/segmento_energia.png")
 	barra_energia.draw.connect(func():
-		var maximo := maxi(Estado.cfg("energia_por_turno"), 1)
+		var maximo := maxi(Estado.energia_maxima(), 1)
 		var poca := Estado.energia <= 3
 		var color := Color(0.95, 0.55, 0.35) if poca else Color(0.45, 0.85, 0.95)
 		barra_energia.draw_texture(bateria, Vector2(0, 1), color)

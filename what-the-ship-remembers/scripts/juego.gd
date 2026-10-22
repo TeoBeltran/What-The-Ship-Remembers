@@ -8,6 +8,9 @@ extends Node2D
 ## Paso 7: mapa manteniendo Tab (luz con la rueda o L, marcas Pa/Pr/Ft) y barra de energía.
 ## Paso 8: consola de NORA con menú de temas (conversaciones disponibles, descansar, nada por ahora)
 ##         y menú del personaje con Q (anotaciones, conversaciones con NORA, inventario).
+## Paso 9: cierre del Alfa. En el T12, COM_T (las dos pinzas) dispara el evento cierre_alfa: el personaje
+##         camina solo hasta la consola de NORA y salen los diálogos encadenados T_CIERRE_*. Si el T12 termina
+##         sin eso (descansar o sin energía), el cierre sale igual, ahí donde esté.
 ##
 ## Controles: E interactuar · Tab mapa · Q anotaciones · L luz · ruedita / I / O zoom · Esc menú
 ## Pantalla: F11 pantalla completa
@@ -25,6 +28,7 @@ var _pendiente = null  # objeto al que se va caminando para interactuar (click d
 var _cinematica := ""  # id de la interacción forzada hacia la que camina solo
 var _fin_turno := false  # durante el texto y el fundido a negro entre turnos
 var _alfa_terminado := false
+var _cierre := ""  # paso 9: "" · "esperar" (termina el diálogo de COM_T) · "caminar" (va solo a NORA) · "hablando"
 var _ultima_pos := Vector2.ZERO  # última posición dentro de la sala actual (para volver si no puede pasar)
 var _opciones_nora: Array = []  # lo que significa cada opción de la pregunta abierta: id de conversación, "descansar" o "nada"
 
@@ -50,8 +54,11 @@ func _ready() -> void:
 	ui.mapa.configurar(nave, personaje, NOMBRES)
 	Estado.luz_cambiada.connect(func(_s, _n): _actualizar_hud(); ui.refrescar_luz())
 	Estado.evento_especial.connect(func(id):
-		if id == "arreglo_com":
-			ui.aviso("Comunicaciones ya puede llegar a luz máxima"))
+		if id == "arreglo_panel":
+			ui.aviso("Mando y comunicaciones ya pueden llegar a luz máxima")
+			ui.aviso("Energía del traje: %d por turno" % Estado.energia_maxima())
+		elif id == "cierre_alfa":
+			_cierre = "esperar")
 	Estado.forzadas_automaticas = false  # las forzadas se hacen como cinemática (ver _physics_process)
 	Estado.nueva_partida()
 
@@ -86,6 +93,10 @@ func _physics_process(_delta: float) -> void:
 		if obj.rect_global().grow(ALCANCE + 4 * E).has_point(personaje.position):
 			_interactuar_con(obj)
 	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible or _fin_turno or _alfa_terminado:
+		return
+	# Cierre del Alfa (paso 9): cuando termina el diálogo de las pinzas, camina solo hasta NORA.
+	if _cierre != "":
+		_avanzar_cierre()
 		return
 	# Cinemática en curso: cuando llega (o se traba), recién ahí se dispara la interacción forzada.
 	if _cinematica != "":
@@ -154,15 +165,64 @@ func _terminar_turno(lineas: Array) -> void:
 		ui.mostrar_lineas(lineas)
 		await ui.dialogo_terminado
 	if Estado.es_ultimo_turno():
-		_alfa_terminado = true
-		await ui.fundido(1.0, "Fin del Alfa\n\n(el cierre del turno 12 llega en el paso 9)\nEsc para salir", 1.2).finished
-		_fin_turno = false
+		_jugar_cierre()
 		return
 	await ui.fundido(1.0, "Turno %d" % (Estado.turno + 1)).finished
 	await get_tree().create_timer(0.6).timeout
 	Estado.empezar_turno()
 	await ui.fundido(0.0, "Turno %d" % Estado.turno).finished
 	_fin_turno = false
+
+
+# ============================================================
+# Cierre del Alfa (paso 9)
+# ============================================================
+
+func _consola():
+	for n in nave.salas["MAN"].objetos_nodos:
+		if n.es_consola:
+			return n
+	return null
+
+
+func _avanzar_cierre() -> void:
+	match _cierre:
+		"esperar":
+			_cierre = "caminar"
+			_pendiente = null
+			personaje.cinematica = true
+			var c = _consola()
+			if c == null:
+				personaje.detener()
+			else:
+				personaje.seguir(_camino_a_objeto(c.rect_global()), c.rect_global(), ALCANCE - 3 * E)
+		"caminar":
+			if personaje.ruta.is_empty():
+				personaje.cinematica = false
+				personaje.detener()
+				_jugar_cierre()
+
+
+## Diálogos encadenados del cierre y fin del Alfa. Si ya sabe que hay dos pinzas, habla de eso;
+## si no (nunca volvió a comunicaciones), la versión general.
+func _jugar_cierre() -> void:
+	_cierre = "hablando"
+	_fin_turno = true
+	_pendiente = null
+	personaje.detener()
+	var sabe_dos := false
+	for id in ["COM_T", "COM_S", "COM_M"]:
+		if Estado.obj.has(id) and Estado.obj[id]["usado"]:
+			sabe_dos = true
+	if not (Estado.obj.has("COM_T") and Estado.obj["COM_T"]["usado"]):
+		ui.aviso_audio("musica_cierre")
+	var lineas: Array = []
+	lineas.append_array(Estado.textos.get("T_CIERRE_PINZA" if sabe_dos else "T_CIERRE_GENERAL", []))
+	lineas.append_array(Estado.textos.get("T_CIERRE_FIN", []))
+	ui.mostrar_lineas(lineas)
+	await ui.dialogo_terminado
+	_alfa_terminado = true
+	await ui.fundido(1.0, "Fin del Alfa\n\nGracias por jugar.\nEsc para salir", 2.0).finished
 
 
 # ============================================================
@@ -256,7 +316,7 @@ func _interactuar_con(obj) -> void:
 
 
 func _actualizar_indicacion() -> void:
-	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible or _fin_turno or _cinematica != "":
+	if ui.dialogo_activo() or ui.menu_abierto() or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible or _fin_turno or _cinematica != "" or _cierre != "":
 		ui.indicacion.text = ""
 		return
 	var obj = objeto_cercano()
@@ -293,7 +353,7 @@ func _objeto_en(punto: Vector2):
 func _actualizar_hud() -> void:
 	var sala: String = Estado.sala_actual
 	ui.estado.text = "Turno %d    Energía %d/%d    %s    Luz %s    Capacidad %d/%d" % [
-		Estado.turno, Estado.energia, Estado.cfg("energia_por_turno"), NOMBRES.get(sala, sala),
+		Estado.turno, Estado.energia, Estado.energia_maxima(), NOMBRES.get(sala, sala),
 		Estado.NOMBRES_LUZ[int(Estado.luz[sala])].to_lower(), Estado.capacidad_usada(), Estado.cfg("capacidad_luz")]
 	if depuracion:
 		ui.depuracion.text = "[DEPURACIÓN] Tiempo: %s · Luz: %d · Capacidad %d/%d · F2 abrir sala común · F3 energía · F4 turno · F5 luz" % [
@@ -371,7 +431,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q:
-		if not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno or _cinematica != ""):
+		if not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno or _cinematica != "" or _cierre != ""):
 			if ui.mapa.visible:
 				ui.mapa.cerrar()
 			personaje.detener()
@@ -383,7 +443,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
 		if ui.mapa.visible:
 			ui.mapa.cerrar()
-		elif not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno):
+		elif not (ui.dialogo_activo() or ui.pregunta_activa() or ui.luz_abierta() or _fin_turno or _cierre != ""):
 			if _cinematica == "":
 				personaje.detener()
 				_pendiente = null
@@ -424,7 +484,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			ui.avanzar_dialogo()
 		return
 	# Durante una cinemática o el cambio de turno no se controla al personaje.
-	if _cinematica != "" or _fin_turno:
+	if _cinematica != "" or _fin_turno or _cierre != "":
 		return
 	# Panel de luz abierto: ↑/↓ (W/S) sala, ←/→ (A/D) nivel, L cierra. El click lo manejan los cuadritos.
 	if ui.luz_abierta():
@@ -484,7 +544,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			Estado.desbloquear("SCO")
 			ui.mostrar_mensaje("[Depuración] Sala común desbloqueada.")
 		KEY_F3:
-			Estado.energia = Estado.cfg("energia_por_turno")
+			Estado.energia = Estado.energia_maxima()
 			Estado.energia_cambiada.emit(Estado.energia)
 			ui.mostrar_mensaje("[Depuración] Energía recargada.")
 		KEY_F4:

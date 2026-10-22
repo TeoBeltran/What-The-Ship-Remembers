@@ -1,7 +1,7 @@
 extends Control
 ## Paso 2: simulación por consola de los turnos 1 a 12 del Alfa con el núcleo de reglas (estado.gd).
 ## Sigue un recorrido posible (03 y 06) con energía y luz reales, y verifica que la taza,
-## la tijera y la nota aparezcan cuando corresponde. Resultado en pantalla y en la pestaña Salida.
+## la pinza, el destornillador y la nota aparezcan cuando corresponde. Resultado en pantalla y en la pestaña Salida.
 ## También se puede correr sin ventana: godot --headless --path . res://escenas/simulacion_alfa.tscn
 
 var e  # el núcleo de reglas
@@ -35,34 +35,36 @@ func _ready() -> void:
 # ------------------------------------------------------------
 
 func _recorrido() -> void:
-	# T1 · tutorial, todo en presente. NORA (N1 es forzada), arreglo del panel, comunicaciones.
+	# T1 · tutorial, todo en presente. NORA N1–N4 forzadas, el panel roto (objetivo) y el destornillador.
 	chequear(e.obj["MAN_N1"]["usado"] and e.obj["MAN_N2"]["usado"] and e.obj["MAN_N3"]["usado"] and e.obj["MAN_N4"]["usado"],
 		"T1: las conversaciones N1 a N4 con NORA son obligatorias y en cadena")
-	chequear(e.obj["MAN_A"]["activo"], "el panel MAN_A aparece después de hablar de la oscuridad (N4)")
-	usar("MAN_A")
-	chequear(e.luz_maxima("COM") == 3, "con el arreglo, comunicaciones puede llegar a luz máxima")
-	luz("COM", 3)
+	chequear(e.obj["MAN_A"]["usado"], "T1: después de N4 va solo al panel roto: «voy a necesitar herramientas»")
+	chequear(e.energia == 14 and e.energia_maxima() == 14, "el traje arranca con 14 de energía")
+	chequear(e.luz_maxima("MAN") == 2 and e.luz_maxima("COM") == 2, "sin el arreglo, mando y comunicaciones llegan a luz 2")
+	chequear(not e.set_luz("MAN", 3), "la sala de mando no puede pasar a luz máxima sin arreglar el panel")
 	ir("COM")
-	usar("COM_E"); usar("COM_H"); usar("COM_F")
+	chequear(e.inventario.has("destornillador"), "T1: al entrar a comunicaciones agarra solo el destornillador («me falta una pinza»)")
+	chequear(not e.obj["MAN_B"]["activo"], "con solo el destornillador todavía no se puede arreglar el panel")
+	usar("COM_E"); usar("COM_H")
 	chequear(not e.se_puede_usar("COM_G"), "sin energía suficiente no se puede interactuar (quedan %d)" % e.energia)
 	chequear(e.obj["COM_L"]["activo"], "radio + registro en el presente activan la nota del futuro (COM_L)")
 
 	# T2 · abrir la sala común y la sala de la puerta.
 	turno()
-	usar("MAN_N6"); usar("MAN_N12")
+	chequear(e.obj["MAN_N15"]["usado"], "T2: NORA explica cómo llegar a la sala común (forzada)")
+	usar("MAN_N12")
 	ir("COM")
 	chequear(e.motivo_no_movible("SCO") != "", "la sala común está bloqueada antes de abrirla")
 	usar("COM_Q")
 	chequear(e.desbloqueadas.has("SCO") and e.luz["SCO"] == 0, "la sala común se desbloquea y queda apagada")
 	ir("PTA")
-	usar("PTA_A"); usar("PTA_B")
+	usar("PTA_A")
 
 	# T3 · repartir la luz y entrar a la sala común.
 	turno()
 	usar("MAN_N5")
-	luz("COM", 2)
 	luz("SCO", 2)
-	chequear(e.capacidad_libre() == 0, "capacidad de luz completa: 10 de 10")
+	chequear(e.capacidad_libre() == 1, "capacidad de luz: 9 de 10 (mando en 2, comunicaciones 2, sala común 2, puerta 3)")
 	chequear(not e.set_luz("SCO", 3), "la sala común no puede pasar de luz media en el Alfa")
 	ir("COM"); ir("SCO")
 	usar("SCO_G"); usar("SCO_H"); usar("SCO_S")
@@ -89,66 +91,80 @@ func _recorrido() -> void:
 	turno()
 	usar("MAN_N13"); usar("MAN_N11")
 	ir("COM")
-	chequear(e.obj["COM_R"]["usado"], "T6: al entrar a comunicaciones (presente) sale solo «Pensé que había dejado la tijera acá»")
+	chequear(e.obj["COM_R"]["usado"], "T6: al entrar a comunicaciones (presente) sale solo «Juraría que acá había una pinza»")
 	usar("COM_G")
 	ir("SCO")
 	usar("SCO_O")
 	chequear(e.se_ve("SCO_R"), "la silla que levanté en el presente está en pie en el futuro (SCO_R)")
 
-	# T7 · comunicaciones en futuro: la nota y el panel oxidado.
+	# T7 · comunicaciones en futuro: la pinza. Al volver a la sala de mando, el arreglo del panel.
 	turno()
 	ir("COM")
 	chequear(e.se_ve("COM_P"), "la hoja que rompí en el presente está en el futuro (COM_P)")
-	chequear(e.inventario.has("tijera"), "T7 (primer futuro): la tijera está en la mesa y se guarda sola en el bolsillo")
-	chequear(e.obj["COM_O"]["desdibujado"], "la tijera del futuro ya no se dibuja")
+	chequear(e.inventario.has("pinza"), "T7 (primer futuro): la pinza está en la mesa y se guarda sola en el bolsillo")
+	chequear(e.obj["COM_O"]["desdibujado"], "la pinza del futuro ya no se dibuja")
+	chequear(e.obj["MAN_B"]["activo"] and not e.obj["MAN_B"]["usado"], "con las dos herramientas el arreglo espera a volver a la sala de mando")
 	usar("COM_L"); usar("COM_J")
 	ir("PTA")
 	usar("PTA_C")
-	chequear(e.energia == 2, "T7 es el turno más cargado: quedan 2 de 15 (doc 06, chequeos)")
+	var antes: int = e.energia
+	ir("COM"); ir("MAN")
+	chequear(e.obj["MAN_B"]["usado"], "T7: al volver a la sala de mando arregla solo el panel (cinemática)")
+	chequear(e.luz_maxima("MAN") == 3 and e.luz_maxima("COM") == 3, "con el arreglo, mando y comunicaciones pueden llegar a luz máxima")
+	chequear(e.luz["MAN"] == 3, "la sala de mando sube sola a luz máxima (alcanza la capacidad)")
+	chequear(e.energia == antes + 1 and e.energia_maxima() == 15, "el arreglo suma 1 de energía ahora y el traje pasa a 15 por turno")
 
-	# T8 · comunicaciones otra vez en futuro: la tijera ya no está.
+	# T8 · comunicaciones otra vez en futuro: la pinza ya no está.
 	turno()
-	usar("MAN_N8")
+	chequear(e.energia == 15, "T8: el turno arranca con 15 de energía")
+	usar("MAN_N8"); usar("MAN_N14")
 	ir("COM")
-	chequear(e.tiempo_de("COM") == "futuro" and not e.se_ve("COM_O"), "T8 (futuro otra vez): la tijera ya no está porque la agarré")
+	chequear(e.tiempo_de("COM") == "futuro" and not e.se_ve("COM_O"), "T8 (futuro otra vez): la pinza ya no está porque la agarré")
 	ir("SCO")
 	usar("SCO_K")
 
-	# T9 · comunicaciones en pasado: la tijera está otra vez. Investigarla es opcional (acá NO se investiga).
+	# T9 · comunicaciones en pasado: la pinza está otra vez. Investigarla es opcional (acá NO se investiga).
 	turno()
+	luz("SCO", 0)
+	luz("COM", 3)
 	ir("COM")
-	chequear(e.se_ve("COM_M") and not e.obj["COM_M"]["usado"], "T9 (pasado): la tijera está en la mesa y no sale ningún diálogo solo")
-	usar("COM_B")
+	chequear(e.se_ve("COM_M") and not e.obj["COM_M"]["usado"], "T9 (pasado): la pinza está en la mesa y no sale ningún diálogo solo")
+	chequear(e.se_ve("COM_D"), "con luz máxima en comunicaciones ya se ve la lista de turnos del pasado")
+	usar("COM_D"); usar("COM_B")
 
-	# T10 · comunicaciones en presente: la tijera en la mesa y en el bolsillo.
+	# T10 · comunicaciones en presente: la pinza en la mesa y en el bolsillo.
 	turno()
+	usar("MAN_N9")
 	ir("COM")
-	chequear(e.obj["COM_S"]["usado"] and e.se_ve("COM_N") and e.inventario.has("tijera"),
-		"T10 (presente): como no la investigó en el pasado, sale solo «acá está la tijera… pero la tengo en el bolsillo»")
-	chequear(not e.se_puede_usar("COM_N"), "la tijera del presente queda a la vista pero no se puede usar")
+	chequear(e.obj["COM_S"]["usado"] and e.se_ve("COM_N") and e.inventario.has("pinza"),
+		"T10 (presente): como no la investigó en el pasado, sale solo «acá está la pinza… pero la tengo en el bolsillo»")
+	chequear(not e.se_puede_usar("COM_N"), "la pinza del presente queda a la vista pero no se puede usar")
+	usar("COM_F")
 	ir("PTA")
 	usar("PTA_D"); usar("PTA_E")
 	chequear(e.costo_mover("COM") == 0, "volver de la sala de la puerta a comunicaciones no cuesta energía")
 
-	# T11 · comunicaciones en futuro: la tijera sigue sin estar.
+	# T11 · comunicaciones en futuro: la pinza sigue sin estar.
 	turno()
+	usar("MAN_N6")
 	ir("COM")
-	chequear(not e.se_ve("COM_O"), "T11 (futuro): la tijera no vuelve a aparecer en el futuro")
+	chequear(not e.se_ve("COM_O"), "T11 (futuro): la pinza no vuelve a aparecer en el futuro")
 	chequear(e.costo_mover("MAN") == 0, "volver de comunicaciones a mando no cuesta energía")
 
-	# T12 · la paradoja.
+	# T12 · la paradoja y el cierre.
 	turno()
 	ir("COM")
-	chequear(e.se_ve("COM_N") and e.inventario.has("tijera"), "PARADOJA: una tijera en la mesa y otra en el bolsillo")
+	chequear(e.obj["COM_T"]["usado"] and e.se_ve("COM_N") and e.inventario.has("pinza"),
+		"PARADOJA: compara la pinza de la mesa con la del bolsillo (COM_T) y empieza el cierre")
 	_log("")
-	_log(">>> Acá va el cierre del Alfa (cinemática y diálogos, paso 9).")
-	_rama_tijera_en_el_pasado()
+	_log(">>> Acá el juego hace el cierre del Alfa (camina solo hasta NORA, diálogos T_CIERRE_*).")
+	_rama_pinza_en_el_pasado()
 
 
-## Otra partida: si en el T9 se investiga la tijera del pasado, en el T10 no sale el diálogo obligatorio.
-func _rama_tijera_en_el_pasado() -> void:
+## Otra partida: si en el T9 se investiga la pinza del pasado, en el T10 no sale el diálogo obligatorio.
+func _rama_pinza_en_el_pasado() -> void:
 	_log("")
-	_log("=== RAMA ALTERNATIVA: investigar la tijera en el pasado (T9) ===")
+	_log("=== RAMA ALTERNATIVA: investigar la pinza en el pasado (T9) ===")
 	var principal = e
 	e = preload("res://scripts/estado.gd").new()
 	add_child(e)
@@ -156,15 +172,21 @@ func _rama_tijera_en_el_pasado() -> void:
 	while e.turno < 7:
 		e.empezar_turno()
 	ir("COM")
-	chequear(e.inventario.has("tijera"), "T7: la agarro en el futuro")
+	chequear(e.inventario.has("pinza") and not e.inventario.has("destornillador"),
+		"T7: agarra la pinza en el futuro (en esta partida nunca entró a comunicaciones en presente)")
+	ir("MAN")
+	chequear(not e.obj["MAN_B"]["usado"], "sin el destornillador no se arregla el panel")
 	e.empezar_turno(); e.empezar_turno()  # T9
 	ir("COM")
 	usar("COM_M")
-	chequear(e.se_ve("COM_M") and not e.se_puede_usar("COM_M") and e.inventario.count("tijera") == 1,
+	chequear(e.se_ve("COM_M") and not e.se_puede_usar("COM_M") and e.inventario.count("pinza") == 1,
 		"T9: la investiga (confusión), no se la lleva y queda a la vista sin poder usarse")
 	e.empezar_turno()  # T10
 	ir("COM")
-	chequear(e.se_ve("COM_N") and not e.obj["COM_S"]["usado"], "T10: la tijera está en la mesa pero NO sale el diálogo obligatorio")
+	chequear(e.se_ve("COM_N") and not e.obj["COM_S"]["usado"], "T10: la pinza está en la mesa pero NO sale el diálogo obligatorio")
+	chequear(e.inventario.has("destornillador"), "T10: el destornillador sigue esperando en comunicaciones (presente)")
+	ir("MAN")
+	chequear(e.obj["MAN_B"]["usado"] and e.energia_maxima() == 15, "con las dos herramientas, al volver a mando arregla el panel")
 	e.queue_free()
 	e = principal
 
@@ -218,7 +240,7 @@ func _log(texto: String) -> void:
 func _resumen() -> void:
 	_log("")
 	if fallas.is_empty():
-		_log("SIMULACIÓN OK: T1–T12 sin fallas. La taza, la nota y la tijera aparecen cuando corresponde (y la rama alternativa de la tijera).")
+		_log("SIMULACIÓN OK: T1–T12 sin fallas. La taza, la nota, el destornillador, la pinza y el arreglo del panel aparecen cuando corresponde (y la rama alternativa de la pinza).")
 	else:
 		_log("SIMULACIÓN CON %d FALLAS:" % fallas.size())
 		for f in fallas:
