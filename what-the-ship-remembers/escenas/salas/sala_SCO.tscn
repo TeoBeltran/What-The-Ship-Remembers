@@ -9,4 +9,4 @@ ancho = 22
 alto = 12
 piso = 6
 pared = 3
-puertas_trabadas = Array[int]([10])
+salida_trabada_derecha = true

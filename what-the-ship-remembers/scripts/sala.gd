@@ -17,6 +17,9 @@ const E := Medidas.ESCALA  # detalles chicos pensados a 16 px
 @export_range(0, 23) var pared: int = 3    ## Frente de la pared de arriba (arte/tiles/paredes.png)
 ## Puertas trabadas en la pared de arriba: columna (en tiles, PAR) de la mitad izquierda de cada puerta doble.
 @export var puertas_trabadas: Array[int] = []
+## Salida trabada a la derecha (hacia el resto de la nave, que en el Alfa no existe): un recoveco
+## abierto hacia la sala con una puerta doble de frente que nunca abre. Como la mitad de un pasillo de costado.
+@export var salida_trabada_derecha := false
 
 # Manchas semitransparentes: se ve el piso del tileset debajo.
 const COLOR_MANCHA := Color(0.12, 0.12, 0.13, 0.35)

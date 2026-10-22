@@ -16,6 +16,8 @@ extends Node2D
 ##                separados por un tabique de 2 tiles
 ##     fila 9     pared de abajo
 ##   Así, vayas para donde vayas, siempre entrás por una puerta que se ve de frente.
+## Salida trabada a la derecha (sala.salida_trabada_derecha): la mitad izquierda de un pasillo de costado,
+##   el recoveco (filas 7-8) y la puerta doble de frente (filas 5-6), que nunca abre.
 ## Pasillo hacia arriba (sala A arriba, sala B abajo, centradas): 2 tiles de ancho; una puerta en el
 ##   frente de B y otra en el frente propio del pasillo, justo debajo de la pared de A.
 
@@ -52,6 +54,9 @@ func _ready() -> void:
 	for c in salas:
 		_armar_sala(salas[c])
 	_armar_pasillos()
+	for c in salas:
+		if salas[c].salida_trabada_derecha:
+			_salida_trabada(salas[c])
 	_crear_colision()
 	for c in salas:
 		var sala = salas[c]
@@ -170,6 +175,27 @@ func _pasillo_costado(izq, der) -> void:
 	_crear_puerta(Vector2i(xa + 5, y0 + 5), id, PARED_PASILLO, p)
 
 
+## Recoveco abierto hacia la sala, a la derecha, con una puerta trabada de frente (sala común en el Alfa:
+## según el mapa, la sala común sigue hacia la derecha, al resto de la nave).
+func _salida_trabada(s) -> void:
+	var xa: int = s.pos_tiles.x + s.ancho   # columna de la pared derecha de la sala
+	var y0: int = s.pos_tiles.y
+	var p := _nuevo_pasillo(s.codigo, s.codigo)
+	p["salida"] = true
+	var id: String = p["id"]
+	for y in [y0 + 7, y0 + 8]:
+		_piso_pasillo(p, Vector2i(xa, y))      # abertura en la pared de la sala
+		_piso_pasillo(p, Vector2i(xa + 1, y))
+		_piso_pasillo(p, Vector2i(xa + 2, y))
+	for x in [xa + 1, xa + 2, xa + 3]:
+		_poner(Vector2i(x, y0 + 3), "tapa", id)
+		_poner(Vector2i(x, y0 + 4), "tapa", id)
+		_poner(Vector2i(x, y0 + 9), "tapa", id)
+	for y in range(y0 + 5, y0 + 9):
+		_poner(Vector2i(xa + 3, y), "tapa", id)
+	_crear_puerta(Vector2i(xa + 1, y0 + 5), id, PARED_PASILLO, null)
+
+
 func _pasillo_arriba(arriba, abajo) -> void:
 	var c: int = abajo.pos_tiles.x + abajo.ancho / 2 - 1   # columna izquierda de la puerta doble
 	var y_pared: int = arriba.pos_tiles.y + arriba.alto     # pared de abajo de la sala de arriba
@@ -274,6 +300,8 @@ func _crear_colision() -> void:
 
 ## Del lado de la sala actual: ¿se puede ir a la otra punta del pasillo? "" = sí.
 func _motivo_cerrado(pasillo: Dictionary) -> String:
+	if pasillo.get("salida", false):
+		return ""  # el recoveco se pisa siempre; la puerta trabada es la que no deja pasar
 	var actual := Estado.sala_actual
 	if actual == pasillo["a"]:
 		return Estado.motivo_no_movible(pasillo["b"])
