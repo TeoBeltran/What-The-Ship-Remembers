@@ -81,6 +81,7 @@ func _empezar_turno() -> void:
 func _physics_process(_delta: float) -> void:
 	personaje.bloqueado = ui.dialogo_activo() or _fin_turno or ui.luz_abierta() or ui.mapa.visible or ui.menu_personaje.visible
 	# ¿Entró a otra sala? (en los pasillos no se cambia de sala)
+	nave.poner_vista(personaje.position)
 	var sala: String = nave.sala_en(personaje.position)
 	if sala != "" and sala != Estado.sala_actual:
 		if not Estado.mover_a(sala):
@@ -232,6 +233,7 @@ func _jugar_cierre() -> void:
 # ============================================================
 # Con temas nuevos: menú con un tema por conversación disponible + Descansar + Nada por ahora.
 # Sin temas: "No tengo nada nuevo para informarle. ¿Desea descansar?" (Sí / Todavía no).
+# En el turno 1 no se puede descansar: sin "Descansar" en el menú, y sin temas solo "No tengo nada nuevo".
 # Al terminar una conversación elegida, si quedan temas, el menú vuelve solo.
 
 func _linea_sistema(id: String, por_defecto: String) -> Dictionary:
@@ -239,8 +241,17 @@ func _linea_sistema(id: String, por_defecto: String) -> Dictionary:
 	return lineas[-1] if not lineas.is_empty() else {"hablante": "NORA", "texto": por_defecto}
 
 
+## En el turno 1 no se puede descansar (pedido del usuario): no aparece la opción.
+func _se_puede_descansar() -> bool:
+	return Estado.turno > 1
+
+
 func _hablar_con_nora() -> void:
 	var temas := Estado.conversaciones_disponibles()
+	if temas.is_empty() and not _se_puede_descansar():
+		_opciones_nora = []
+		ui.mostrar_lineas([_linea_sistema("SIS_NORA_SIN_DESCANSO", "No tengo nada nuevo para informarle.")])
+		return
 	if temas.is_empty():
 		_opciones_nora = ["descansar", "nada"]
 		ui.preguntar(_linea_sistema("SIS_DESCANSAR_PREGUNTA", "No tengo nada nuevo para informarle. ¿Desea descansar?"),
@@ -250,8 +261,11 @@ func _hablar_con_nora() -> void:
 	var textos: Array = []
 	for id in temas:
 		textos.append(Estado.tema_de(id))
-	_opciones_nora.append_array(["descansar", "nada"])
-	textos.append_array(["Descansar (terminar el turno)", "Nada por ahora"])
+	if _se_puede_descansar():
+		_opciones_nora.append("descansar")
+		textos.append("Descansar (terminar el turno)")
+	_opciones_nora.append("nada")
+	textos.append("Nada por ahora")
 	ui.preguntar(_linea_sistema("SIS_NORA_MENU", "¿En qué puedo ayudarle?"), textos, true)
 
 
@@ -272,6 +286,11 @@ func _on_respuesta(indice: int) -> void:
 
 func _process(_delta: float) -> void:
 	camara.position = personaje.position
+	# La oscuridad de la sala también oscurece al personaje (en los pasillos no hay oscuridad).
+	var oscuro := 0.0
+	if nave.salas.has(nave.vista):
+		oscuro = nave.salas[nave.vista].alfa_oscuridad_actual()
+	personaje.modulate = Color(1.0 - oscuro, 1.0 - oscuro, 1.0 - oscuro)
 	# El mapa se cierra solo si aparece un diálogo, el menú o el cambio de turno.
 	if ui.mapa.visible and (ui.dialogo_activo() or ui.menu_abierto() or _fin_turno or _alfa_terminado):
 		ui.mapa.cerrar()

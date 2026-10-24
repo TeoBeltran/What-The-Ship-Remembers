@@ -33,7 +33,7 @@ func es_personaje() -> bool:
 
 
 func _ready() -> void:
-	z_index = 5
+	z_index = 21  # por encima de la niebla (20): al cruzar una puerta, la cabeza no queda tapada
 	var forma := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	rect.size = TAMANO

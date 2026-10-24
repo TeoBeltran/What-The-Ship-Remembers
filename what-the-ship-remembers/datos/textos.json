@@ -789,6 +789,13 @@
       "texto": "¿En qué puedo ayudarle?"
     }
   ],
+  "SIS_NORA_SIN_DESCANSO": [
+    {
+      "orden": 1,
+      "hablante": "NORA",
+      "texto": "No tengo nada nuevo para informarle."
+    }
+  ],
   "T_COM_Y": [
     {
       "orden": 1,

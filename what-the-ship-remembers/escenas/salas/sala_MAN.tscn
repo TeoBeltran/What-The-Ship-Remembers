@@ -7,5 +7,3 @@ script = ExtResource("1")
 codigo = "MAN"
 ancho = 10
 alto = 6
-piso = 2
-pared = 9

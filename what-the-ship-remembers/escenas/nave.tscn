@@ -12,10 +12,10 @@ script = ExtResource("1")
 [node name="SalaMAN" parent="." instance=ExtResource("2")]
 
 [node name="SalaCOM" parent="." instance=ExtResource("3")]
-pos_tiles = Vector2i(18, 0)
+pos_tiles = Vector2i(20, 0)
 
 [node name="SalaSCO" parent="." instance=ExtResource("4")]
-pos_tiles = Vector2i(36, 0)
+pos_tiles = Vector2i(40, 0)
 
 [node name="SalaPTA" parent="." instance=ExtResource("5")]
-pos_tiles = Vector2i(20, -10)
+pos_tiles = Vector2i(21, -10)

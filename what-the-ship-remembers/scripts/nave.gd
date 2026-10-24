@@ -5,22 +5,30 @@ extends Node2D
 ## - los pasillos entre salas conectadas (datos/conexiones.json) y sus puertas (siempre puertas dobles
 ##   en una pared que se ve de frente: nunca puertas de costado);
 ## - la colisión, el dibujo del piso y las paredes, la niebla de los pasillos y la grilla de caminos.
+## Vista: se ve solo la zona donde está parado el personaje. Cada celda tiene una "zona": la sala, o el
+## pasillo. Lo que está del lado de una sala hasta su puerta (recoveco, abertura, la puerta misma) es de
+## esa sala; lo que queda entre las dos puertas es del pasillo. Parado en una sala, el interior de los
+## pasillos se ve negro; parado en un pasillo, las salas se ven negras.
 ## Moverse de sala se cobra al ENTRAR al piso de la otra sala (lo detecta el juego con sala_en()).
 ##
+## Las puertas miden 3x2 tiles (Medidas.PUERTA_TILES): marco a los costados (sólido) y el paso en el
+## tile del medio. Los pisos de adelante y de atrás de cada puerta llevan la franja amarilla.
+##
 ## Pasillo de costado (sala A a la izquierda, sala B a la derecha, misma altura), visto en tiles:
-##   entre la pared de A y la de B hay 6 columnas. Se arma desde abajo (b = fila de la pared de abajo
-##   de las salas), así entra en salas de 6 tiles de alto:
+##   entre la pared de A y la de B hay 8 columnas (puerta de 3, tabique de 2, puerta de 3).
+##   Se arma desde abajo (b = fila de la pared de abajo de las salas), así entra en salas de 6 de alto:
 ##     filas b-8, b-7  frente de pared (a la altura del frente de las salas si miden 6)
 ##     filas b-6, b-5  pasillo de arriba (une las dos puertas)
-##     filas b-4, b-3  pared de frente con una puerta doble de cada lado (en el medio, pared)
+##     filas b-4, b-3  pared de frente con una puerta de cada lado (en el medio, pared con el panel)
 ##     filas b-2, b-1  dos recovecos abiertos hacia su sala (la abertura en la pared es del pasillo)
 ##                     separados por un tabique de 2 tiles
 ##     fila b          pared de abajo
 ##   Así, vayas para donde vayas, siempre entrás por una puerta que se ve de frente.
 ## Salida trabada a la derecha (sala.salida_trabada_derecha): la mitad izquierda de un pasillo de costado,
-##   el recoveco y la puerta doble de frente, que nunca abre.
-## Pasillo hacia arriba (sala A arriba, sala B abajo, centradas): 2 tiles de ancho; una puerta en el
-##   frente de B y otra en el frente propio del pasillo, justo debajo de la pared de A.
+##   el recoveco y la puerta de frente, que nunca abre.
+## Pasillo hacia arriba (sala A arriba, sala B abajo): 3 tiles de ancho, en el medio de B (si B mide par,
+##   medio tile a la izquierda); tiene que caer entero dentro de A. Una puerta en el frente de B y otra en
+##   el frente propio del pasillo, justo debajo de la pared de A.
 
 signal aviso(texto: String)
 
@@ -29,9 +37,22 @@ const CELDA := Medidas.CELDA  # grilla de caminos (px)
 const E := Medidas.ESCALA
 const F := Medidas.FRENTE     # alto del frente de pared, en tiles
 
+const P := Medidas.PUERTA_TILES  # ancho de una puerta, en tiles
+
 ## Arte de los pasillos (números de arte_nave.gd).
-const PISO_PASILLO := 1
-const PARED_PASILLO := 3
+const PISO_PASILLO := ArteNave.PISO_REJILLA
+
+## Pared de arriba de los pasillos de costado (8 columnas): un diseño fijo por pasillo, no al azar.
+## Lisa a los costados y un tramo de cables con la pantalla en el medio. [pared, espejada].
+const _L := [ArteNave.PARED_LISA, false]
+const _A := [ArteNave.PARED_ABRAZADERA, false]
+const _A2 := [ArteNave.PARED_ABRAZADERA, true]   # abrazadera espejada: cierra el tramo a la derecha
+const _C := [ArteNave.PARED_CABLES, false]
+const _S := [ArteNave.PARED_PANTALLA, false]
+const PATRONES_PASILLO := [
+	[_L, _L, _A, _S, _C, _A2, _L, _L],
+	[_L, _L, _A, _C, _S, _A2, _L, _L],
+]
 
 const Puerta := preload("res://scripts/puerta.gd")
 
@@ -41,11 +62,20 @@ var puertas: Array = []
 var grilla := AStarGrid2D.new()
 
 ## Plano de la nave: Vector2i (tile) -> {tipo, dueno, ...}
-## tipo: "piso" | "tapa" (pared vista desde arriba) | "frente" (pared vista de frente) | "puerta"
+## tipo: "piso" | "tapa" (pared vista desde arriba) | "frente" (pared vista de frente)
+##       | "marco" (costado de una puerta: lo dibuja y lo choca la puerta) | "puerta" (el paso de una puerta)
 ## dueno: código de sala, o id del pasillo ("P0", "P1"...)
+## zona: qué se ve junto (ver arriba): código de sala, o id del pasillo para su interior
+## puerta_de: en las celdas de una puerta que da a un pasillo, el id del pasillo. Esas puertas se ven
+##   desde los dos lados: desde su sala y desde adentro del pasillo.
 var celdas: Dictionary = {}
 
 var _niebla_pasillos: Node2D
+var _puertas_tiles: Array = []  # esquina de arriba a la izquierda (tile) de cada puerta
+var _zona := ""                 # zona de las celdas que se están armando ("" = la del dueño)
+var _patron := 0                # próximo diseño de pared de pasillo
+## Zona donde está parado el personaje (sala o pasillo). La usa la niebla.
+var vista := ""
 
 
 func _ready() -> void:
@@ -58,14 +88,17 @@ func _ready() -> void:
 	for c in salas:
 		if salas[c].salida_trabada_derecha:
 			_salida_trabada(salas[c])
+	_marcar_umbrales()
 	_crear_colision()
 	for c in salas:
 		var sala = salas[c]
-		sala.poner_zonas(_rects_de(c).map(func(r): return Rect2(r.position - sala.position, r.size)))
+		var a_sala := func(r): return Rect2(r.position - sala.position, r.size)
+		sala.poner_zonas(_rects_de(c).map(a_sala), _rects_de(c, "", true).map(a_sala))
 	_niebla_pasillos = Node2D.new()
 	_niebla_pasillos.z_index = 20
 	add_child(_niebla_pasillos)
 	_niebla_pasillos.draw.connect(_dibujar_niebla_pasillos)
+	vista = Estado.sala_actual
 	for s in [Estado.energia_cambiada, Estado.sala_cambiada, Estado.sala_desbloqueada, Estado.turno_empezado]:
 		s.connect(func(_x): actualizar())
 	actualizar()
@@ -83,12 +116,34 @@ func centro_de(codigo: String) -> Vector2:
 	return salas[codigo].position + salas[codigo].centro()
 
 
+## Zona (sala o pasillo) de la celda donde está el punto, o "" si no hay nada.
+func zona_en(punto: Vector2) -> String:
+	var t := Vector2i((punto / T).floor())
+	return celdas[t]["zona"] if celdas.has(t) else ""
+
+
+## El juego avisa dónde está el personaje (sus pies): si cambió de zona, se rehace la niebla.
+func poner_vista(punto: Vector2) -> void:
+	var z := zona_en(punto)
+	if z == "" or z == vista:
+		return
+	vista = z
+	_niebla_pasillos.queue_redraw()
+	for c in salas:
+		salas[c].refrescar_niebla()
+
+
+## ¿El personaje está en el interior de un pasillo?
+func en_pasillo() -> bool:
+	return not salas.has(vista)
+
+
 # ============================================================
 # Plano
 # ============================================================
 
 func _poner(t: Vector2i, tipo: String, dueno: String, extra := {}) -> void:
-	var d := {"tipo": tipo, "dueno": dueno}
+	var d := {"tipo": tipo, "dueno": dueno, "zona": _zona if _zona != "" else dueno}
 	d.merge(extra, true)
 	celdas[t] = d
 
@@ -99,16 +154,16 @@ func _armar_sala(s) -> void:
 	var h: int = s.alto
 	for x in w:
 		for y in h:
-			_poner(o + Vector2i(x, y), "piso", s.codigo, {"material": s.piso, "u": x % 2, "v": y % 2})
-		for v in F:  # frente de arriba, alineado con las placas del piso
-			_poner(o + Vector2i(x, v - F), "frente", s.codigo, {"pared": s.pared, "u": x % 2, "v": v})
+			_poner(o + Vector2i(x, y), "piso", s.codigo, {"material": s.piso})
+		for v in F:  # frente de arriba
+			_poner(o + Vector2i(x, v - F), "frente", s.codigo, {"pared": ArteNave.PARED_LISA, "v": v})
 	for y in range(-F, h + 1):  # costados
 		_poner(o + Vector2i(-1, y), "tapa", s.codigo)
 		_poner(o + Vector2i(w, y), "tapa", s.codigo)
 	for x in range(-1, w + 1):  # abajo
 		_poner(o + Vector2i(x, h), "tapa", s.codigo)
 	for col in s.puertas_trabadas:
-		_crear_puerta(o + Vector2i(col, -F), s.codigo, s.pared, null)
+		_crear_puerta(o + Vector2i(col, -F), s.codigo, null, false)  # la maneja el objeto de la planilla
 
 
 func _armar_pasillos() -> void:
@@ -147,22 +202,27 @@ func _pasillo_costado(izq, der) -> void:
 	var xa: int = izq.pos_tiles.x + izq.ancho        # columna de la pared derecha de la sala izquierda
 	var xb: int = der.pos_tiles.x - 1                # columna de la pared izquierda de la sala derecha
 	var y0: int = izq.pos_tiles.y
-	if xb - xa != 7 or der.pos_tiles.y != y0 or izq.alto != der.alto or izq.alto < 6:
-		push_error("Pasillo %s-%s: las salas tienen que estar a la misma altura, medir lo mismo de alto (>= 6) y tener 6 tiles entre sus paredes" % [izq.codigo, der.codigo])
+	var cols := 2 * P + 2  # puerta, tabique de 2, puerta
+	if xb - xa != cols + 1 or der.pos_tiles.y != y0 or izq.alto != der.alto or izq.alto < 6:
+		push_error("Pasillo %s-%s: las salas tienen que estar a la misma altura, medir lo mismo de alto (>= 6) y tener %d tiles entre sus paredes" % [izq.codigo, der.codigo, cols])
 		return
 	var p := _nuevo_pasillo(izq.codigo, der.codigo)
 	var id: String = p["id"]
 	y0 = izq.pos_tiles.y + izq.alto - 9  # así b (pared de abajo) = y0 + 9
-	for i in 6:
+	var patron: Array = PATRONES_PASILLO[_patron % PATRONES_PASILLO.size()]
+	_patron += 1
+	for i in cols:
 		var x := xa + 1 + i
-		var u := i % 2
-		_poner(Vector2i(x, y0 + 1), "frente", id, {"pared": PARED_PASILLO, "u": u, "v": 0})
-		_poner(Vector2i(x, y0 + 2), "frente", id, {"pared": PARED_PASILLO, "u": u, "v": 1})
+		var pared: Array = patron[i] if i < patron.size() else _L
+		_zona = ""  # interior del pasillo: pared de arriba y pasillo de arriba
+		_poner(Vector2i(x, y0 + 1), "frente", id, {"pared": pared[0], "espejo": pared[1], "v": 0})
+		_poner(Vector2i(x, y0 + 2), "frente", id, {"pared": pared[0], "espejo": pared[1], "v": 1})
 		_piso_pasillo(p, Vector2i(x, y0 + 3))
 		_piso_pasillo(p, Vector2i(x, y0 + 4))
-		if i in [2, 3]:  # pared del medio, entre las dos puertas
-			_poner(Vector2i(x, y0 + 5), "frente", id, {"pared": PARED_PASILLO, "u": u, "v": 0})
-			_poner(Vector2i(x, y0 + 6), "frente", id, {"pared": PARED_PASILLO, "u": u, "v": 1})
+		_zona = izq.codigo if i <= P else der.codigo  # de la puerta para abajo: lado de cada sala
+		if i in [P, P + 1]:  # pared del medio, entre las dos puertas
+			_poner(Vector2i(x, y0 + 5), "frente", id, {"pared": ArteNave.PARED_LISA, "v": 0})
+			_poner(Vector2i(x, y0 + 6), "frente", id, {"pared": ArteNave.PARED_LISA, "v": 1})
 			_poner(Vector2i(x, y0 + 7), "tapa", id)  # tabique entre los recovecos
 			_poner(Vector2i(x, y0 + 8), "tapa", id)
 		else:
@@ -171,10 +231,15 @@ func _pasillo_costado(izq, der) -> void:
 		_poner(Vector2i(x, y0 + 9), "tapa", id)
 	# Aberturas en las paredes de las salas (son parte del pasillo).
 	for y in [y0 + 7, y0 + 8]:
+		_zona = izq.codigo
 		_piso_pasillo(p, Vector2i(xa, y))
+		_zona = der.codigo
 		_piso_pasillo(p, Vector2i(xb, y))
-	_crear_puerta(Vector2i(xa + 1, y0 + 5), id, PARED_PASILLO, p)
-	_crear_puerta(Vector2i(xa + 5, y0 + 5), id, PARED_PASILLO, p)
+	_zona = izq.codigo
+	_crear_puerta(Vector2i(xa + 1, y0 + 5), id, p)
+	_zona = der.codigo
+	_crear_puerta(Vector2i(xa + 1 + P + 2, y0 + 5), id, p)
+	_zona = ""
 
 
 ## Recoveco abierto hacia la sala, a la derecha, con una puerta trabada de frente (sala común en el Alfa:
@@ -185,47 +250,56 @@ func _salida_trabada(s) -> void:
 	var p := _nuevo_pasillo(s.codigo, s.codigo)
 	p["salida"] = true
 	var id: String = p["id"]
+	_zona = s.codigo  # se ve con la sala
 	for y in [y0 + 7, y0 + 8]:
-		_piso_pasillo(p, Vector2i(xa, y))      # abertura en la pared de la sala
-		_piso_pasillo(p, Vector2i(xa + 1, y))
-		_piso_pasillo(p, Vector2i(xa + 2, y))
-	for x in [xa + 1, xa + 2, xa + 3]:
+		for x in range(xa, xa + 1 + P):        # abertura en la pared de la sala + recoveco
+			_piso_pasillo(p, Vector2i(x, y))
+	for x in range(xa + 1, xa + 2 + P):
 		_poner(Vector2i(x, y0 + 3), "tapa", id)
 		_poner(Vector2i(x, y0 + 4), "tapa", id)
 		_poner(Vector2i(x, y0 + 9), "tapa", id)
 	for y in range(y0 + 5, y0 + 9):
-		_poner(Vector2i(xa + 3, y), "tapa", id)
-	_crear_puerta(Vector2i(xa + 1, y0 + 5), id, PARED_PASILLO, null)
+		_poner(Vector2i(xa + 1 + P, y), "tapa", id)
+	_crear_puerta(Vector2i(xa + 1, y0 + 5), id, null)
+	_zona = ""
 
 
 func _pasillo_arriba(arriba, abajo) -> void:
-	var c: int = abajo.pos_tiles.x + abajo.ancho / 2 - 1   # columna izquierda de la puerta doble
+	var c: int = abajo.pos_tiles.x + (abajo.ancho - P) / 2   # columna izquierda de la puerta
 	var y_pared: int = arriba.pos_tiles.y + arriba.alto     # pared de abajo de la sala de arriba
 	var y_frente_b: int = abajo.pos_tiles.y - F             # frente de la sala de abajo
-	if arriba.pos_tiles.x + arriba.ancho / 2 - 1 != c or y_frente_b - (y_pared + 1 + F) < 1:
-		push_error("Pasillo %s-%s: las salas tienen que estar centradas y con lugar para el pasillo" % [arriba.codigo, abajo.codigo])
+	if c < arriba.pos_tiles.x or c + P > arriba.pos_tiles.x + arriba.ancho or y_frente_b - (y_pared + 1 + F) < 1:
+		push_error("Pasillo %s-%s: la puerta (columnas %d a %d) tiene que caer dentro de la sala de arriba, y tiene que haber lugar para el pasillo" % [arriba.codigo, abajo.codigo, c, c + P - 1])
 		return
 	var p := _nuevo_pasillo(arriba.codigo, abajo.codigo)
 	var id: String = p["id"]
-	for x in [c, c + 1]:
+	for x in range(c, c + P):
+		_zona = arriba.codigo
 		_piso_pasillo(p, Vector2i(x, y_pared))  # abertura en la pared de la sala de arriba
+		_zona = ""
 		for y in range(y_pared + 1 + F, y_frente_b):
 			_piso_pasillo(p, Vector2i(x, y))
 	for y in range(y_pared + 1, y_frente_b):
+		_zona = arriba.codigo if y < y_pared + 1 + F else ""
 		_poner(Vector2i(c - 1, y), "tapa", id)
-		_poner(Vector2i(c + 2, y), "tapa", id)
-	_crear_puerta(Vector2i(c, y_pared + 1), id, PARED_PASILLO, p)
-	_crear_puerta(Vector2i(c, y_frente_b), id, abajo.pared, p)
+		_poner(Vector2i(c + P, y), "tapa", id)
+	_zona = arriba.codigo
+	_crear_puerta(Vector2i(c, y_pared + 1), id, p)
+	_zona = abajo.codigo
+	_crear_puerta(Vector2i(c, y_frente_b), id, p)
+	_zona = ""
 
 
-func _crear_puerta(t: Vector2i, dueno: String, pared: int, pasillo) -> void:
-	for dx in 2:
+func _crear_puerta(t: Vector2i, dueno: String, pasillo, avisar := true) -> void:
+	var extra := {"puerta_de": pasillo["id"]} if pasillo != null else {}
+	for dx in P:
 		for dy in F:
-			_poner(t + Vector2i(dx, dy), "puerta", dueno)
+			_poner(t + Vector2i(dx, dy), "puerta" if dx == P / 2 else "marco", dueno, extra)
+	_puertas_tiles.append(t)
 	var pu = Puerta.new()
 	pu.position = Vector2(t) * T
-	pu.pared = pared
 	pu.pasillo = pasillo
+	pu.avisar = avisar
 	pu.aviso.connect(func(txt): aviso.emit(txt))
 	add_child(pu)
 	puertas.append(pu)
@@ -233,11 +307,25 @@ func _crear_puerta(t: Vector2i, dueno: String, pared: int, pasillo) -> void:
 		pasillo["puertas"].append(pu)
 
 
-## Rectángulos (en px de la nave) de las celdas de un dueño, juntando tramos de cada fila.
-func _rects_de(dueno: String) -> Array:
+## Franja amarilla en el piso de adelante (franja arriba, tocando la puerta) y de atrás de cada puerta.
+func _marcar_umbrales() -> void:
+	for t in _puertas_tiles:
+		for dx in P:
+			var abajo: Vector2i = t + Vector2i(dx, F)
+			var arriba: Vector2i = t + Vector2i(dx, -1)
+			if celdas.has(abajo) and celdas[abajo]["tipo"] == "piso":
+				celdas[abajo]["material"] = ArteNave.PISO_FRANJA_ARRIBA
+			if celdas.has(arriba) and celdas[arriba]["tipo"] == "piso":
+				celdas[arriba]["material"] = ArteNave.PISO_FRANJA_ABAJO
+
+
+## Rectángulos (en px de la nave) de las celdas de una zona, juntando tramos de cada fila.
+## Sin las puertas que dan a un pasillo (esas tienen su propia niebla, ver _dibujar_niebla_pasillos).
+## todas = true: todas las celdas de la zona, puertas incluidas (para la oscuridad).
+func _rects_de(zona: String, puerta_de := "", todas := false) -> Array:
 	var por_fila := {}
 	for t in celdas:
-		if celdas[t]["dueno"] == dueno:
+		if celdas[t]["zona"] == zona and (todas or celdas[t].get("puerta_de", "") == puerta_de):
 			if not por_fila.has(t.y):
 				por_fila[t.y] = []
 			por_fila[t.y].append(t.x)
@@ -263,7 +351,7 @@ func _rects_de(dueno: String) -> Array:
 # ============================================================
 
 func _solida(t: Vector2i) -> bool:
-	return celdas.has(t) and celdas[t]["tipo"] in ["tapa", "frente"]
+	return celdas.has(t) and celdas[t]["tipo"] in ["tapa", "frente", "marco"]
 
 
 func _crear_colision() -> void:
@@ -271,7 +359,7 @@ func _crear_colision() -> void:
 	add_child(cuerpo)
 	var filas := {}
 	for t in celdas:
-		if _solida(t):
+		if _solida(t) and celdas[t]["tipo"] != "marco":  # el marco lo choca la puerta (ver puerta.gd)
 			if not filas.has(t.y):
 				filas[t.y] = []
 			filas[t.y].append(t.x)
@@ -331,21 +419,20 @@ func _transitable(t: Vector2i) -> bool:
 
 
 func _draw() -> void:
-	var pisos := ArteNave.tex_pisos()
-	var paredes := ArteNave.tex_paredes()
+	var tex := ArteNave.tex_nave()
 	for t in celdas:
 		var d: Dictionary = celdas[t]
 		var r := Rect2(Vector2(t) * T, Vector2(T, T))
 		match d["tipo"]:
 			"piso":
-				if salas.has(d["dueno"]):
-					draw_texture_rect_region(pisos, r, ArteNave.region_placa(d["material"], d["u"], d["v"]))
-				else:
-					draw_texture_rect_region(pisos, r, ArteNave.region_tile(d["material"]))
+				draw_texture_rect_region(tex, r, ArteNave.region_piso(d["material"]))
 			"frente":
-				draw_texture_rect_region(paredes, r, ArteNave.region_frente(d["pared"], d["u"], d["v"]))
-				if d["v"] == 0 and not _solida(t + Vector2i.UP):  # filo de arriba, contra el vacío o un piso
-					draw_rect(Rect2(r.position, Vector2(T, 3 * E)), ArteNave.COLOR_TAPA)
+				if d.get("espejo", false):
+					draw_set_transform(r.position + Vector2(T, 0), 0.0, Vector2(-1, 1))
+					draw_texture_rect_region(tex, Rect2(Vector2.ZERO, r.size), ArteNave.region_frente(d["pared"], d["v"]))
+					draw_set_transform(Vector2.ZERO)
+				else:
+					draw_texture_rect_region(tex, r, ArteNave.region_frente(d["pared"], d["v"]))
 			"tapa":
 				var lados := []
 				for dir in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
@@ -354,15 +441,20 @@ func _draw() -> void:
 				ArteNave.dibujar_tapa(self, r, lados)
 
 
+## El interior de un pasillo se ve solo estando adentro; desde cualquier otro lado, negro.
+## Sus puertas se ven desde su sala y desde adentro del pasillo; si no, como la sala de su lado.
 func _dibujar_niebla_pasillos() -> void:
 	for p in pasillos:
-		var a: String = p["a"]
-		var b: String = p["b"]
-		if Estado.sala_actual in [a, b]:
-			continue
-		var visto := Estado.visitadas.has(a) or Estado.visitadas.has(b)
-		for r in _rects_de(p["id"]):
-			_niebla_pasillos.draw_rect(r, Color(0, 0, 0, 0.6) if visto else Color.BLACK)
+		var id: String = p["id"]
+		if id != vista:
+			for r in _rects_de(id):
+				_niebla_pasillos.draw_rect(r, Color.BLACK)
+		for sala in [p["a"], p["b"]]:
+			if vista in [id, sala]:
+				continue
+			var color := Color.BLACK if en_pasillo() or not Estado.visitadas.has(sala) else Color(0, 0, 0, 0.6)
+			for r in _rects_de(sala, id):
+				_niebla_pasillos.draw_rect(r, color)
 
 
 # ============================================================
@@ -409,7 +501,10 @@ func _armar_grilla() -> void:
 			var id := Vector2i(x, y)
 			var ok := libre.has(id)
 			if ok:
-				for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+				# El paso de una puerta mide 1 tile: ahí no se achica a los costados (son el marco).
+				var t := Vector2i(floori(float(x) / sub), floori(float(y) / sub))
+				var dirs := [Vector2i.UP, Vector2i.DOWN] if celdas[t]["tipo"] == "puerta" else [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+				for dir in dirs:
 					if not libre.has(id + dir):
 						ok = false
 						break

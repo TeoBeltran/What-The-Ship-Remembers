@@ -27,8 +27,10 @@ const PARED := TILE
 ## Alto del frente de la pared de arriba, en tiles (se ve de frente, como en un RPG visto desde arriba).
 const FRENTE := 2
 
-## Ancho de una puerta: puerta doble, 2 tiles (dos sprites de 48x96 del archivo, el de la derecha espejado).
-const ANCHO_PUERTA := TILE * 2
+## Ancho de una puerta, en tiles: 3 (arte/tiles/nave_puertas.png, cuadros de 144x96 del archivo:
+## marco a los costados y la hoja que se abre en el tile del medio, el único por donde se pasa).
+const PUERTA_TILES := 3
+const ANCHO_PUERTA := TILE * PUERTA_TILES
 
 ## Celda de la grilla de caminos del click derecho (medio tile).
 const CELDA := TILE / 2

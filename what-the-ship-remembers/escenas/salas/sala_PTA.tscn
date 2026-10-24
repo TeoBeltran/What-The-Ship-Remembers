@@ -7,5 +7,4 @@ script = ExtResource("1")
 codigo = "PTA"
 ancho = 6
 alto = 4
-piso = 13
-pared = 8
+puertas_trabadas = Array[int]([1])

@@ -7,5 +7,3 @@ script = ExtResource("1")
 codigo = "COM"
 ancho = 10
 alto = 6
-piso = 5
-pared = 13

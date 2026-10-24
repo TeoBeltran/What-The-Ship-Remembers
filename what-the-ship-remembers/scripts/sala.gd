@@ -10,15 +10,15 @@ const TILE := Medidas.TILE
 const E := Medidas.ESCALA  # detalles chicos pensados a 16 px
 
 @export var codigo: String = "MAN"       ## Código de la sala en la planilla (MAN, COM, SCO, PTA)
-@export var ancho: int = 20              ## Piso en tiles. PAR, para que las placas del piso no queden cortadas
-@export var alto: int = 12               ## Piso en tiles. PAR
+@export var ancho: int = 20              ## Piso en tiles
+@export var alto: int = 12               ## Piso en tiles
 @export var pos_tiles: Vector2i = Vector2i.ZERO  ## Esquina de arriba a la izquierda del piso, en tiles de la nave
-@export_range(0, 15) var piso: int = 0     ## Material del piso (arte/tiles/pisos.png, ver arte_nave.gd)
-@export_range(0, 23) var pared: int = 3    ## Frente de la pared de arriba (arte/tiles/paredes.png)
-## Puertas trabadas en la pared de arriba: columna (en tiles, PAR) de la mitad izquierda de cada puerta doble.
+@export_range(0, 3) var piso: int = 0      ## Tile de piso (arte/tiles/nave_paredes.png: 0 liso, 1 rejilla; ver arte_nave.gd)
+## Puertas trabadas en la pared de arriba: columna (en tiles) del costado izquierdo de cada puerta (3 de ancho).
+## Nunca se abren ni se animan, y no avisan nada: las investiga el objeto de la planilla que va delante.
 @export var puertas_trabadas: Array[int] = []
 ## Salida trabada a la derecha (hacia el resto de la nave, que en el Alfa no existe): un recoveco
-## abierto hacia la sala con una puerta doble de frente que nunca abre. Como la mitad de un pasillo de costado.
+## abierto hacia la sala con una puerta de frente que nunca abre. Como la mitad de un pasillo de costado.
 @export var salida_trabada_derecha := false
 
 # Manchas semitransparentes: se ve el piso del tileset debajo.
@@ -31,6 +31,8 @@ const COLOR_MUEBLE := Color(0.31, 0.3, 0.29)  # muebles: iguales en todos los ti
 var manchas: Array = []  # [Rect2, Color]
 ## Zonas de la sala (piso y sus paredes, sin los pasillos), en coordenadas de la sala. Las arma la nave.
 var zonas: Array = []
+## Lo mismo pero con las puertas de la sala (las tapa la oscuridad, no la niebla).
+var zonas_oscuridad: Array = []
 
 
 func tamano() -> Vector2:
@@ -48,8 +50,6 @@ func rect_global() -> Rect2:
 
 
 func _ready() -> void:
-	if ancho % 2 or alto % 2:
-		push_warning("Sala %s: ancho y alto tienen que ser pares (placas de piso de 2x2 tiles)" % codigo)
 	position = Vector2(pos_tiles * TILE)
 	_crear_muebles()
 	_crear_objetos()
@@ -61,8 +61,9 @@ func _ready() -> void:
 
 
 ## La nave avisa qué zonas son de la sala (cuando ya armó los pasillos).
-func poner_zonas(lista: Array) -> void:
+func poner_zonas(lista: Array, con_puertas: Array = []) -> void:
 	zonas = lista
+	zonas_oscuridad = con_puertas if not con_puertas.is_empty() else lista
 	_oscuridad.queue_redraw()
 	_niebla.queue_redraw()
 
@@ -128,25 +129,32 @@ func _crear_objetos() -> void:
 
 
 # ---------------- oscuridad (luz, paso 6) ----------------
-# 0 apagada: no se ve nada · 1 baja: bastante oscura · 2 media: tenue · 3 máxima: nada.
+# 0 apagada: muy oscura, pero no negra · 1 baja: bastante oscura · 2 media: tenue · 3 máxima: nada.
 # La luz es de la sala, no del tiempo: no cambia al cambiar de turno.
+# Tapa TODO lo de la sala (piso, paredes, muebles, objetos y sus puertas); al personaje lo oscurece
+# el juego con el mismo valor mientras está en la sala (juego.gd, alfa_oscuridad_actual).
 
-const OSCURIDAD := [1.0, 0.72, 0.4, 0.0]
+const OSCURIDAD := [0.86, 0.72, 0.4, 0.0]
 
 var _oscuridad: Node2D
 var _tween_luz: Tween
 
 func _crear_oscuridad() -> void:
 	_oscuridad = Node2D.new()
-	_oscuridad.z_index = 3  # objetos 2 · oscuridad 3 · puertas 4 · personaje 5 · niebla 20
+	_oscuridad.z_index = 3  # puertas 1 · objetos 2 · oscuridad 3 · niebla 20 · personaje 21
 	add_child(_oscuridad)
 	_oscuridad.draw.connect(func():
-		for r in zonas:
+		for r in zonas_oscuridad:
 			_oscuridad.draw_rect(r, Color.BLACK))
 	_oscuridad.modulate.a = _alfa_oscuridad()
 	Estado.luz_cambiada.connect(func(s, _n): if s == codigo: _animar_oscuridad())
 	Estado.sala_desbloqueada.connect(func(s): if s == codigo: _animar_oscuridad())
 	Estado.turno_empezado.connect(func(_t): _oscuridad.modulate.a = _alfa_oscuridad())
+
+
+## Cuánto oscurece ahora (con el fundido en curso): el juego oscurece al personaje con esto.
+func alfa_oscuridad_actual() -> float:
+	return _oscuridad.modulate.a
 
 
 func _alfa_oscuridad() -> float:
@@ -162,7 +170,8 @@ func _animar_oscuridad() -> void:
 
 
 # ---------------- niebla ----------------
-# Sala actual: se ve normal. Visitada alguna vez: se ve con niebla. Nunca visitada: no se ve.
+# Donde está parado el personaje (nave.vista): se ve normal. Si está dentro de un pasillo, todas las
+# salas se ven negras. Si está en otra sala: visitada alguna vez, con niebla; nunca visitada, negra.
 
 var _niebla: Node2D
 
@@ -171,11 +180,19 @@ func _crear_niebla() -> void:
 	_niebla.z_index = 20
 	add_child(_niebla)
 	_niebla.draw.connect(func():
-		if codigo == Estado.sala_actual:
+		var nave = get_parent()
+		var vista: String = nave.vista if "vista" in nave and nave.vista != "" else Estado.sala_actual
+		if codigo == vista:
 			return
 		var color := Color(0, 0, 0, 0.6) if Estado.visitadas.has(codigo) else Color.BLACK
+		if nave.has_method("en_pasillo") and nave.en_pasillo():
+			color = Color.BLACK
 		for r in zonas:
 			_niebla.draw_rect(r, color))
+
+
+func refrescar_niebla() -> void:
+	_niebla.queue_redraw()
 
 
 func actualizar_tiempo() -> void:

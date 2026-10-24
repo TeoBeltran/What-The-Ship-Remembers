@@ -33,12 +33,16 @@ ORDEN_PINZA = ["COM_R", "COM_O", "COM_S"]
 OPCIONALES_SIM = {"COM_M"}
 # Textos que usa el código directamente (no un objeto)
 TEXTOS_SISTEMA = ["SIS_SIN_ENERGIA", "SIS_DESCANSAR_PREGUNTA", "SIS_DESCANSAR_SI", "SIS_NORA_MENU",
+                  "SIS_NORA_SIN_DESCANSO",  # turno 1: no se puede descansar
                   "T_CIERRE_PINZA", "T_CIERRE_GENERAL", "T_CIERRE_FIN"]  # cierre del Alfa (juego.gd, paso 9)
 # NORA_OTRA = NORA hablando con datos de otro tiempo (se ve/oye distinto, ver 01 sección 2.1)
 HABLANTES = ["PERSONAJE", "NORA", "NORA_OTRA"]
 # Hojas de arte para los sprites (tamaño en píxeles) y opciones que se pueden escribir después del nombre
 HOJAS_ARTE = {"cosas": (1056, 576), "cosas2": (480, 1104), "pantallas": (480, 576), "puerta": (48, 384)}
 OPCIONES_SPRITE = {"girado", "espejo", "repetir", "doble", "pared"}
+# Objetos que van a propósito fuera del piso de su sala (en tiles de la sala): COM_Q es el monitor con
+# botones de la puerta hacia la sala común (costado derecho de la puerta, del lado de comunicaciones).
+FUERA_DEL_PISO = {"COM_Q": [13, 2, 1, 2]}
 
 errores, avisos = [], []
 def err(m): errores.append(m)
@@ -289,7 +293,11 @@ def main():
         if w < 1 or h < 1:
             err(f"{quien}: ancho y alto tienen que ser al menos 1")
         tam = TAM_SALAS.get(o["sala"])
-        if tam and (x < 0 or y < 0 or x + w > tam[0] or y + h > tam[1]):
+        clave = quien.split(" ", 1)[1]
+        if tam and clave in FUERA_DEL_PISO:
+            if [x, y, w, h] != FUERA_DEL_PISO[clave]:
+                err(f"{quien}: va fuera del piso, en {FUERA_DEL_PISO[clave]} (ver FUERA_DEL_PISO); si se mueve la puerta, cambiarlo ahí también")
+        elif tam and (x < 0 or y < 0 or x + w > tam[0] or y + h > tam[1]):
             err(f"{quien}: la posición ({x},{y},{w}x{h}) se sale de la sala {o['sala']} ({tam[0]}x{tam[1]} tiles)")
 
     # ---------- referencias ----------

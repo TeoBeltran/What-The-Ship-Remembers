@@ -1,27 +1,43 @@
 class_name ArteNave
-## Pisos, paredes y puertas del tileset (arte/tiles). Los archivos están en una grilla de 48 px
+## Pisos, paredes y puertas de la nave (arte/tiles). Los archivos están en una grilla de 48 px
 ## (Medidas.TILE_ARTE); las regiones de acá son en píxeles del archivo y se dibujan en tiles del mundo
 ## (Medidas.TILE = 48 x Medidas.ARTE).
 ##
-## pisos.png (384x576): 16 materiales en 4 columnas x 4 grupos. Cada material ocupa 96x144:
-##   arriba dos tiles sueltos de 48x48 y abajo una placa de 96x96.
-##   Las salas usan la placa (por eso miden un número PAR de tiles: nunca queda una placa cortada).
-##   Los pasillos usan el tile suelto de 48 (sirve para cualquier medida).
-##   Número de material: columna + 4 * grupo (0 arriba a la izquierda ... 15 abajo a la derecha).
-## paredes.png (768x288): 24 frentes de pared de 96x96 (2x2 tiles), 8 por fila.
-##   Número: columna + 8 * fila (0 arriba a la izquierda ... 23 abajo a la derecha).
-## puerta.png (48x384): 4 cuadros de 48x96 (cerrada → abierta). La hoja de la puerta mide 72 px;
-##   los 24 px de arriba son transparentes y ahí se ve la pared que va debajo.
+## nave_paredes.png (384x576, grilla de 8x12 tiles; lo que no está pintado no se usa):
+##   pisos de 1x1, arriba a la izquierda:
+##     0 liso (col 1, fila 1)            1 rejilla (col 2, fila 1)
+##     2 franja amarilla arriba (col 1, fila 2)   3 franja amarilla abajo (col 2, fila 2)
+##   paredes (frente) de 1 tile de ancho x 2 de alto, en las filas 3 y 4:
+##     0 lisa (col 1)                     1 cables con abrazadera (col 2)
+##     2 pantalla con cables (col 3)      3 cables solos (col 4)
+##   Casi todo es pared lisa. Los cables y la pantalla solo van en los pasillos, con un diseño fijo
+##   (nave.gd, PATRONES_PASILLO). La abrazadera espejada cierra un tramo de cables del lado derecho.
+## nave_puertas.png (144x288): 3 cuadros de 3x2 tiles (144x96), de arriba a abajo:
+##   cerrada, a medio abrir, abierta. Incluye la pared de los costados (el marco).
+##   El vano (lo que en el original estaba pintado de blanco) es transparente: debajo se pinta oscuro.
 
-const RUTA_PISOS := "res://arte/tiles/pisos.png"
-const RUTA_PAREDES := "res://arte/tiles/paredes.png"
-const RUTA_PUERTA := "res://arte/tiles/puerta.png"
+const RUTA_NAVE := "res://arte/tiles/nave_paredes.png"
+const RUTA_PUERTAS := "res://arte/tiles/nave_puertas.png"
 
 const T := Medidas.TILE_ARTE  # en el archivo
-const BLOQUE := T * 2  # 96 px del archivo: placa de piso y frente de pared
-const CANT_PISOS := 16
-const CANT_PAREDES := 24
-const CUADROS_PUERTA := 4
+
+const PISO_LISO := 0
+const PISO_REJILLA := 1
+const PISO_FRANJA_ARRIBA := 2  # delante de una puerta (la franja toca la puerta)
+const PISO_FRANJA_ABAJO := 3   # detrás de una puerta
+const CANT_PISOS := 4
+
+const PARED_LISA := 0
+const PARED_ABRAZADERA := 1
+const PARED_PANTALLA := 2
+const PARED_CABLES := 3
+const CANT_PAREDES := 4
+
+const CUADROS_PUERTA := 3
+## Vano de la puerta abierta, en píxeles del archivo dentro de un cuadro (x desde, x hasta, y desde).
+const VANO_X0 := 44
+const VANO_X1 := 100
+const VANO_Y0 := 16
 
 const COLOR_TAPA := Color(0.11, 0.12, 0.13)        # pared vista desde arriba (costados y abajo)
 const COLOR_TAPA_BORDE := Color(0.3, 0.33, 0.35)   # filo de la tapa, del lado del piso
@@ -36,45 +52,29 @@ static func _tex(ruta: String) -> Texture2D:
 	return _cache[ruta]
 
 
-static func tex_pisos() -> Texture2D:
-	return _tex(RUTA_PISOS)
+static func tex_nave() -> Texture2D:
+	return _tex(RUTA_NAVE)
 
 
-static func tex_paredes() -> Texture2D:
-	return _tex(RUTA_PAREDES)
+static func tex_puertas() -> Texture2D:
+	return _tex(RUTA_PUERTAS)
 
 
-static func tex_puerta() -> Texture2D:
-	return _tex(RUTA_PUERTA)
-
-
-## Parte (u, v) de la placa de 96x96 del material n (u, v = 0 o 1).
-static func region_placa(n: int, u: int, v: int) -> Rect2:
+## Tile de piso n (0..3).
+static func region_piso(n: int) -> Rect2:
 	n = clampi(n, 0, CANT_PISOS - 1)
-	return Rect2((n % 4) * BLOQUE + u * T, (n / 4) * (BLOQUE + T) + T + v * T, T, T)
+	return Rect2((n % 2) * T, (n / 2) * T, T, T)
 
 
-## Tile suelto de 48x48 del material n.
-static func region_tile(n: int) -> Rect2:
-	n = clampi(n, 0, CANT_PISOS - 1)
-	return Rect2((n % 4) * BLOQUE, (n / 4) * (BLOQUE + T), T, T)
+## Mitad v (0 arriba, 1 abajo) de la pared k (0..3).
+static func region_frente(k: int, v: int) -> Rect2:
+	k = clampi(k, 0, CANT_PAREDES - 1)
+	return Rect2(k * T, (2 + v) * T, T, T)
 
 
-## Bloque de pared n (96x96).
-static func region_pared(n: int) -> Rect2:
-	n = clampi(n, 0, CANT_PAREDES - 1)
-	return Rect2((n % 8) * BLOQUE, (n / 8) * BLOQUE, BLOQUE, BLOQUE)
-
-
-## Parte (u, v) del bloque de pared n.
-static func region_frente(n: int, u: int, v: int) -> Rect2:
-	var r := region_pared(n)
-	return Rect2(r.position + Vector2(u, v) * T, Vector2(T, T))
-
-
-## Cuadro k de la puerta (0 cerrada ... 3 abierta).
+## Cuadro k de la puerta (0 cerrada, 1 a medio abrir, 2 abierta): 3x2 tiles.
 static func region_puerta(k: int) -> Rect2:
-	return Rect2(0, clampi(k, 0, CUADROS_PUERTA - 1) * BLOQUE, T, BLOQUE)
+	return Rect2(0, clampi(k, 0, CUADROS_PUERTA - 1) * 2 * T, 3 * T, 2 * T)
 
 
 ## Tapa de pared: oscura, con un filo claro en cada lado que da a un piso.

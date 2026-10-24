@@ -7,6 +7,4 @@ script = ExtResource("1")
 codigo = "SCO"
 ancho = 12
 alto = 6
-piso = 6
-pared = 3
 salida_trabada_derecha = true
